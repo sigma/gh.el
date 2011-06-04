@@ -26,6 +26,7 @@
 
 ;;; Code:
 
+(require 'cl)
 (require 'json)
 (require 'gh-auth)
 
@@ -59,16 +60,9 @@
    (data :initarg :data :initform "" :type string)))
 
 (defclass gh-api-response ()
-  ((data :initarg :data :initform nil))
-  "Base class for API responses")
-
-(defclass gh-api-sync-response (gh-api-response)
-  ()
-  "Synchronous response")
-
-(defclass gh-api-async-response (gh-api-response)
-  ()
-  "Asynchronous response")
+  ((data :initarg :data :initform nil)
+   (callbacks :initarg :callbacks :initform nil))
+  "Class for API responses")
 
 (defun gh-api-json-decode (repr)
   (if (or (null repr) (string= repr ""))
@@ -80,7 +74,7 @@
   (json-encode-list json))
 
 (defmethod gh-api-response-init ((resp gh-api-response)
-                                 buffer transform)
+                                 buffer &optional transform)
   (declare (special url-http-end-of-headers))
   (with-current-buffer buffer
     (goto-char (1+ url-http-end-of-headers))
@@ -89,10 +83,22 @@
                            (funcall transform (gh-api-json-decode raw))
                          raw))))
   (kill-buffer buffer)
+  (gh-api-response-run-callbacks resp)
   resp)
 
 (defun gh-api-set-response (status resp transform)
-  (gh-api-response-init resp (current-buffer)))
+  (gh-api-response-init resp (current-buffer) transform))
+
+(defmethod gh-api-response-run-callbacks ((resp gh-api-response))
+  (let ((data (oref resp :data)))
+    (when data
+      (dolist (cb (copy-list (oref resp :callbacks)))
+        (funcall cb data)
+        (object-remove-from-list resp :callbacks cb)))))
+
+(defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
+  (object-add-to-list resp :callbacks callback t)
+  (gh-api-response-run-callbacks resp))
 
 (defmethod gh-api-authenticated-request 
   ((api gh-api) transformer method resource &optional data)
@@ -108,13 +114,14 @@
           (url-request-extra-headers (oref req :headers))
           (url (oref req :url))) 
       (if (oref api :sync)
-          (let ((resp (gh-api-sync-response "sync")))
+          (let ((resp (gh-api-response "sync")))
             (gh-api-response-init resp
                                   (url-retrieve-synchronously url)
                                   transformer)
-            (oref resp :data))
-        (let ((resp (gh-api-async-response "async")))
-          (url-retrieve url 'gh-api-set-response (list resp transformer)))))))
+            resp)
+        (let ((resp (gh-api-response "async")))
+          (url-retrieve url 'gh-api-set-response (list resp transformer))
+          resp)))))
 
 (provide 'gh-api)
 ;;; gh-api.el ends here
