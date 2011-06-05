@@ -30,6 +30,7 @@
 (require 'json)
 (require 'gh-auth)
 
+;;;###autoload
 (defclass gh-api ()
   ((sync :initarg :sync :initform t)
    (base :initarg :base :type string)
@@ -48,6 +49,7 @@
   (unless eieio-skip-typecheck
     (gh-password-authenticator "pwd-auth")))
 
+;;;###autoload
 (defclass gh-api-v3 (gh-api)
   ((base :initarg :base :initform "https://api.github.com")
    (auth :initarg :auth :initform (gh-api-get-password-authenticator)))

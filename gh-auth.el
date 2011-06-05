@@ -51,10 +51,12 @@
         (gh-set-config "password" pass))
       pass)))
 
+;;;###autoload
 (defclass gh-authenticator ()
   ((username :initarg :username :initform (gh-auth-get-username)))
   "Abstract authenticator")
 
+;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
   ((password :initarg :password :initform (gh-auth-get-password)))
   "Password-based authenticator")
@@ -71,6 +73,7 @@
                                               (oref auth :password) 'utf-8))))))
   req)
 
+;;;###autoload
 (defclass gh-oauth-authenticator (gh-authenticator)
   ((token :initarg :token))
   "Oauth-based authenticator")

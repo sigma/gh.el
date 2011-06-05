@@ -30,10 +30,12 @@
 (require 'gh-auth)
 (require 'gh-common)
 
+;;;###autoload
 (defclass gh-gist-api (gh-api-v3)
   ()
   "Gist API")
 
+;;;###autoload
 (defclass gh-gist-gist ()
   ((date :initarg :date)
    (push-url :initarg :push-url)
