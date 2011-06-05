@@ -1,8 +1,8 @@
 ;;; gh.el --- main entry point for gh.el library
 
-;; Copyright (C) 2011  Free Software Foundation, Inc.
+;; Copyright (C) 2011  Yann Hodique
 
-;; Author: Yann Hodique <yhodique@vmware.com>
+;; Author: Yann Hodique <yhodique@gmail.com>
 ;; Keywords: 
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -26,10 +26,7 @@
 
 ;;; Code:
 
-;;; Run the following to update autoloads
-;;; (let ((generated-autoload-file (concat (file-name-directory buffer-file-name) "gh-autoloads.el"))) (update-directory-autoloads "."))
-
-(require 'gh-autoloads)
+(require 'gh-gist)
 
 (provide 'gh)
 ;;; gh.el ends here
