@@ -62,7 +62,7 @@ elpa:
 	rm -fR $(ELPA)/$(SNAPDIR)
 	rm -f $(ELPA)/$(PKGNAME)-$(VERSION).tar
 	mkdir -p $(ELPA)/$(SNAPDIR) && chmod 0755 $(ELPA)/$(SNAPDIR)
-	cp $(SOURCE) $(ELPA)/$(SNAPDIR)
+	cp $(SOURCE) $(MISC) $(ELPA)/$(SNAPDIR)
 	sed -r -e "s/%VERSION%/$(VERSION)/g" < $(PKGDEF) \
 		> $(ELPA)/$(SNAPDIR)/$(PKGDEF)
 	(cd $(ELPA) && tar cf $(PKGNAME)-$(VERSION).tar $(SNAPDIR))
