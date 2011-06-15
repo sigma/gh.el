@@ -30,36 +30,54 @@
 
 (defvar gh-auth-username nil)
 (defvar gh-auth-password nil)
+(defvar gh-auth-oauth-token nil)
 
 (defun gh-auth-get-username ()
-  ;; hack to skip initialization at class def time
-  (unless eieio-skip-typecheck
-    (let ((user (or gh-auth-username (gh-config "user"))))
-      (when (not user)
-        (setq user (read-string "GitHub username: "))
-        (setq gh-auth-username user)
-        (gh-set-config "user" user))
-      user)))
+  (let ((user (or gh-auth-username 
+                  (setq gh-auth-username (gh-config "user")))))
+    (when (not user)
+      (setq user (read-string "GitHub username: "))
+      (setq gh-auth-username user)
+      (gh-set-config "user" user))
+    user))
 
 (defun gh-auth-get-password ()
-  ;; hack to skip initialization at class def time
-  (unless eieio-skip-typecheck
-    (let ((pass (or gh-auth-password (gh-config "password"))))
-      (when (not pass)
-        (setq pass (read-passwd "GitHub password: "))
-        (setq gh-auth-password pass)
-        (gh-set-config "password" pass))
-      pass)))
+  (let ((pass (or gh-auth-password 
+                  (setq gh-auth-password (gh-config "password")))))
+    (when (not pass)
+      (setq pass (read-passwd "GitHub password: "))
+      (setq gh-auth-password pass)
+      (gh-set-config "password" pass))
+    pass))
+
+(defun gh-auth-get-oauth-token ()
+  (let ((token (or gh-auth-oauth-token 
+                   (setq gh-auth-oauth-token (gh-config "token")))))
+    (when (not token)
+      (setq token (read-string "GitHub OAuth token: "))
+      (setq gh-auth-oauth-token token)
+      (gh-set-config "token" token))
+    token))
 
 ;;;###autoload
 (defclass gh-authenticator ()
-  ((username :initarg :username :initform (gh-auth-get-username)))
+  ((username :initarg :username))
   "Abstract authenticator")
+
+(defmethod constructor :static ((auth gh-authenticator) newname &rest args)
+  (let ((obj (call-next-method)))
+    (oset obj :username (gh-auth-get-username))
+    obj))
 
 ;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
-  ((password :initarg :password :initform (gh-auth-get-password)))
+  ((password :initarg :password))
   "Password-based authenticator")
+
+(defmethod constructor :static ((auth gh-password-authenticator) newname &rest args)
+  (let ((obj (call-next-method)))
+    (oset obj :password (gh-auth-get-password))
+    obj))
 
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req))
 
@@ -77,6 +95,11 @@
 (defclass gh-oauth-authenticator (gh-authenticator)
   ((token :initarg :token))
   "Oauth-based authenticator")
+
+(defmethod constructor :static ((auth gh-oauth-authenticator) newname &rest args)
+  (let ((obj (call-next-method)))
+    (oset obj :token (gh-auth-get-oauth-token))
+    obj))
 
 (defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
   (object-add-to-list req :headers 

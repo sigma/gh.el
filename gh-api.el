@@ -44,16 +44,16 @@
 (defmethod gh-api-get-username ((api gh-api))
   (oref (oref api :auth) :username))
 
-(defun gh-api-get-password-authenticator ()
-  ;; hack to skip initialization at class def time
-  (unless eieio-skip-typecheck
-    (gh-password-authenticator "pwd-auth")))
-
 ;;;###autoload
 (defclass gh-api-v3 (gh-api)
   ((base :initarg :base :initform "https://api.github.com")
-   (auth :initarg :auth :initform (gh-api-get-password-authenticator)))
+   (auth :initarg :auth))
   "Github API v3")
+
+(defmethod constructor :static ((api gh-api-v3) newname &rest args)
+  (let ((obj (call-next-method)))
+    (oset obj :auth (gh-password-authenticator "auth"))
+    obj))
 
 (defclass gh-api-request ()
   ((method :initarg :method :type string)
