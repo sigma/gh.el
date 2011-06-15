@@ -28,5 +28,9 @@
 
 (require 'gh-gist)
 
+(defgroup gh nil
+  "Github support library."
+  :group 'applications)
+
 (provide 'gh)
 ;;; gh.el ends here

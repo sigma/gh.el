@@ -30,6 +30,10 @@
 (require 'json)
 (require 'gh-auth)
 
+(defgroup gh-api nil
+  "Github API."
+  :group 'gh)
+
 ;;;###autoload
 (defclass gh-api ()
   ((sync :initarg :sync :initform t)
@@ -50,9 +54,15 @@
    (auth :initarg :auth))
   "Github API v3")
 
+(defcustom gh-api-v3-authenticator 'gh-oauth-authenticator
+  "Authenticator for Github API v3"
+  :type '(choice (const :tag "Password" gh-password-authenticator)
+                 (const :tag "OAuth" gh-oauth-authenticator))
+  :group 'gh-api)
+
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
   (let ((obj (call-next-method)))
-    (oset obj :auth (gh-password-authenticator "auth"))
+    (oset obj :auth (funcall gh-api-v3-authenticator "auth"))
     obj))
 
 (defclass gh-api-request ()

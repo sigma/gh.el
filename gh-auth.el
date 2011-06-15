@@ -28,6 +28,10 @@
 (require 'eieio)
 (require 'gh-common)
 
+(defgroup gh-auth nil
+  "Github authentication."
+  :group 'gh)
+
 (defvar gh-auth-username nil)
 (defvar gh-auth-password nil)
 (defvar gh-auth-oauth-token nil)
