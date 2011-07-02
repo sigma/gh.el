@@ -75,7 +75,7 @@
 
 ;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
-  ((password :initarg :password))
+  ((password :initarg :password :protection :private))
   "Password-based authenticator")
 
 (defmethod constructor :static ((auth gh-password-authenticator) newname &rest args)
@@ -97,7 +97,7 @@
 
 ;;;###autoload
 (defclass gh-oauth-authenticator (gh-authenticator)
-  ((token :initarg :token))
+  ((token :initarg :token :protection :private))
   "Oauth-based authenticator")
 
 (defmethod constructor :static ((auth gh-oauth-authenticator) newname &rest args)
