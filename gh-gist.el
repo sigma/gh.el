@@ -42,8 +42,8 @@
    (push-url :initarg :push-url)
    (pull-url :initarg :pull-url)
    (comments :initarg :comments)
-   (files :initarg :files :type list)
-   (user :initarg :user :type gh-user)
+   (files :initarg :files :type list :initform nil)
+   (user :initarg :user :initform nil)
    (public :initarg :public)
    (description :initarg :description)
    (id :initarg :id :type string)
@@ -59,35 +59,47 @@
 (defun gh-gist-read-list (gists)
   (mapcar 'gh-gist-read gists))
 
-(defun gh-gist-file-read (file)
-  (let ((label (car file))
-        (file (cdr file)))
-    (gh-gist-gist-file label
-                       :filename (gh-read file 'filename)
-                       :size (gh-read file 'size)
-                       :url (gh-read file 'raw_url)
-                       :content (gh-read file 'content))))
+(defun gh-gist-file-read (file &optional into)
+  (let* ((label (car file))
+         (file (cdr file))
+         (target (or into (gh-gist-gist-file label))))
+    (with-slots (filename size url content)
+        target
+      (setq
+       filename (gh-read file 'filename)
+       size (gh-read file 'size)
+       url (gh-read file 'raw_url)
+       content (gh-read file 'content)))
+    target))
 
 (defun gh-gist-files-read (files)
   (mapcar 'gh-gist-file-read files))
 
-(defun gh-gist-read (gist)
-  (gh-gist-gist "gist" 
-                :date (gh-read gist 'created_at)
-                :push-url (gh-read gist 'git_push_url)
-                :pull-url (gh-read gist 'git_pull_url)
-                :comments (gh-read gist 'comments)
-                :files (gh-gist-files-read (gh-read gist 'files))
-                ;; :user (gh-user-read (gh-read gist 'user))
-                :public (gh-read gist 'public)
-                :description (gh-read gist 'description)
-                :id (gh-read gist 'id)
-                :url (gh-read gist 'url)))
+(defun gh-gist-read (gist &optional into)
+  (let ((target (or into (gh-gist-gist "gist"))))
+    (with-slots (date push-url pull-url comments files user
+                      public description id url)
+        target
+      (setq date (gh-read gist 'created_at)
+            push-url (gh-read gist 'git_push_url)
+            pull-url (gh-read gist 'git_pull_url)
+            comments (gh-read gist 'comments)
+            files (gh-gist-files-read (gh-read gist 'files))
+            user (gh-user-read (gh-read gist 'user) (oref target :user))
+            public (gh-read gist 'public)
+            description (gh-read gist 'description)
+            id (gh-read gist 'id)
+            url (gh-read gist 'url)))
+    target))
 
 (defmethod gh-gist-gist-to-obj ((gist gh-gist-gist))
   `(("description" . ,(oref gist :description))
     ("public" . ,(oref gist :public))
     ("files" . ,(mapcar 'gh-gist-gist-file-to-obj (oref gist :files)))))
+
+(defmethod gh-gist-gist-has-files ((gist gh-gist-gist))
+  (not (memq nil (mapcar (lambda (f)
+                           (oref f :content)) (oref gist :files)))))
 
 (defmethod gh-gist-gist-file-to-obj ((file gh-gist-gist-file))
   `(,(oref file :filename) . (("content" . ,(oref file :content)))))
@@ -106,10 +118,15 @@
    api 'gh-gist-read-list "GET" "/gists/starred"))
 
 (defmethod gh-gist-get ((api gh-gist-api) gist-or-id)
-  (let ((id (if (stringp gist-or-id) gist-or-id
-              (oref gist-or-id :id))))
+  (let (id transformer)
+    (if (stringp gist-or-id) 
+        (setq id gist-or-id
+              transformer 'gh-gist-read)
+      (setq id (oref gist-or-id :id)
+            transformer (lambda (g)
+                          (gh-gist-read g gist-or-id))))
     (gh-api-authenticated-request
-     api 'gh-gist-read "GET" (format "/gists/%s" id))))
+     api transformer "GET" (format "/gists/%s" id))))
 
 (defmethod gh-gist-new ((api gh-gist-api) gist)
   (gh-api-authenticated-request
