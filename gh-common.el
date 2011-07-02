@@ -29,10 +29,21 @@
 (require 'eieio)
 
 (defclass gh-user ()
-  ()
+  ((login :initarg :login)
+   (id :initarg :id)
+   (gravatar-url :initarg :gravatar-url)
+   (url :initarg :url))
   "Github user object")
 
-(defun gh-user-read (user))
+(defun gh-user-read (user &optional into)
+  (let ((target (or into (gh-user "user"))))
+    (with-slots (login id gravatar-url url)
+        target
+      (setq login (gh-read user 'login)
+            id (gh-read user 'id)
+            gravatar-url (gh-read user 'gravatar_url)
+            url (gh-read user 'url)))
+    target))
 
 (defun gh-read (obj field)
   (cdr (assoc field obj)))
