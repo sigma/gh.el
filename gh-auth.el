@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011  Yann Hodique
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 (require 'eieio)
@@ -37,7 +37,7 @@
 (defvar gh-auth-oauth-token nil)
 
 (defun gh-auth-get-username ()
-  (let ((user (or gh-auth-username 
+  (let ((user (or gh-auth-username
                   (setq gh-auth-username (gh-config "user")))))
     (when (not user)
       (setq user (read-string "GitHub username: "))
@@ -46,7 +46,7 @@
     user))
 
 (defun gh-auth-get-password ()
-  (let ((pass (or gh-auth-password 
+  (let ((pass (or gh-auth-password
                   (setq gh-auth-password (gh-config "password")))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
@@ -55,7 +55,7 @@
     pass))
 
 (defun gh-auth-get-oauth-token ()
-  (let ((token (or gh-auth-oauth-token 
+  (let ((token (or gh-auth-oauth-token
                    (setq gh-auth-oauth-token (gh-config "token")))))
     (when (not token)
       (setq token (read-string "GitHub OAuth token: "))
@@ -86,12 +86,12 @@
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req))
 
 (defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
-  (object-add-to-list req :headers 
-                      (cons "Authorization" 
+  (object-add-to-list req :headers
+                      (cons "Authorization"
                             (concat "Basic "
                                     (base64-encode-string
-                                     (format "%s:%s" (oref auth :username) 
-                                             (encode-coding-string 
+                                     (format "%s:%s" (oref auth :username)
+                                             (encode-coding-string
                                               (oref auth :password) 'utf-8))))))
   req)
 
@@ -106,9 +106,9 @@
     obj))
 
 (defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
-  (object-add-to-list req :headers 
-                      (cons "Authorization" 
-                            (format "token %s" (oref auth :token))))  
+  (object-add-to-list req :headers
+                      (cons "Authorization"
+                            (format "token %s" (oref auth :token))))
   req)
 
 (provide 'gh-auth)

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011  Yann Hodique
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 
@@ -112,19 +112,19 @@
   (object-add-to-list resp :callbacks callback t)
   (gh-api-response-run-callbacks resp))
 
-(defmethod gh-api-authenticated-request 
+(defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data)
   (let ((req (gh-auth-modify-request (oref api :auth)
-              (gh-api-request "request" 
+              (gh-api-request "request"
                               :method method
-                              :url (concat (oref api :base) 
+                              :url (concat (oref api :base)
                                            (gh-api-expand-resource api resource))
                               :headers nil
                               :data (or (gh-api-json-encode data) "")))))
     (let ((url-request-method (oref req :method))
           (url-request-data (oref req :data))
           (url-request-extra-headers (oref req :headers))
-          (url (oref req :url))) 
+          (url (oref req :url)))
       (if (oref api :sync)
           (let ((resp (gh-api-response "sync")))
             (gh-api-response-init resp

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011  Yann Hodique
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 
@@ -151,7 +151,7 @@
                      state title body created-at updated-at
                      closed-at merged-at merged mergeable
                      merged-by comments commits additions
-                     deletions changed-files head base) 
+                     deletions changed-files head base)
         target
       (setq url (gh-read req 'url)
             html-url (gh-read req 'html_url)
@@ -193,13 +193,13 @@
 
 (defmethod gh-pulls-new ((api gh-pulls-api) user repo req)
   (gh-api-authenticated-request
-   api 'gh-pulls-request-read "POST" (format "/repos/%s/%s/pulls" 
+   api 'gh-pulls-request-read "POST" (format "/repos/%s/%s/pulls"
                                              user repo)
    (gh-pulls-req-to-new req)))
 
 (defmethod gh-pulls-update ((api gh-pulls-api) user repo id req)
   (gh-api-authenticated-request
-   api 'gh-pulls-request-read "PATCH" (format "/repos/%s/%s/pulls/%s" 
+   api 'gh-pulls-request-read "PATCH" (format "/repos/%s/%s/pulls/%s"
                                               user repo id)
    (gh-pulls-req-to-update req)))
 

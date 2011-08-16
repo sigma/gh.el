@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011  Yann Hodique
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 
@@ -105,21 +105,21 @@
   `(,(oref file :filename) . (("content" . ,(oref file :content)))))
 
 (defmethod gh-gist-list ((api gh-gist-api) &optional username)
-  (gh-api-authenticated-request 
+  (gh-api-authenticated-request
    api 'gh-gist-read-list "GET"
    (format "/users/%s/gists" (or username (gh-api-get-username api)))))
 
 (defmethod gh-gist-list-public ((api gh-gist-api))
-  (gh-api-authenticated-request 
+  (gh-api-authenticated-request
    api 'gh-gist-read-list "GET" "/gists/public"))
 
 (defmethod gh-gist-list-starred ((api gh-gist-api))
-  (gh-api-authenticated-request 
+  (gh-api-authenticated-request
    api 'gh-gist-read-list "GET" "/gists/starred"))
 
 (defmethod gh-gist-get ((api gh-gist-api) gist-or-id)
   (let (id transformer)
-    (if (stringp gist-or-id) 
+    (if (stringp gist-or-id)
         (setq id gist-or-id
               transformer 'gh-gist-read)
       (setq id (oref gist-or-id :id)
@@ -130,13 +130,13 @@
 
 (defmethod gh-gist-new ((api gh-gist-api) gist)
   (gh-api-authenticated-request
-   api 'gh-gist-read "POST" (format "/users/%s/gists" 
+   api 'gh-gist-read "POST" (format "/users/%s/gists"
                                     (gh-api-get-username api))
    (gh-gist-gist-to-obj gist)))
 
 (defmethod gh-gist-edit ((api gh-gist-api) gist)
   (gh-api-authenticated-request
-   api 'gh-gist-read "PATCH" (format "/users/%s/gists" 
+   api 'gh-gist-read "PATCH" (format "/users/%s/gists"
                                      (gh-api-get-username api))
    (gh-gist-gist-to-obj gist)))
 
@@ -144,7 +144,7 @@
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api 'ignore (if star "POST" "DELETE") 
+     api 'ignore (if star "POST" "DELETE")
      (format "/gists/%s/star" id))))
 
 (defmethod gh-gist-get-star ((api gh-gist-api) gist-or-id)
