@@ -65,22 +65,24 @@
 
 ;;;###autoload
 (defclass gh-authenticator ()
-  ((username :initarg :username))
+  ((username :initarg :username :initform nil))
   "Abstract authenticator")
 
 (defmethod constructor :static ((auth gh-authenticator) newname &rest args)
   (let ((obj (call-next-method)))
-    (oset obj :username (gh-auth-get-username))
+    (or (oref obj :username)
+        (oset obj :username (gh-auth-get-username)))
     obj))
 
 ;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
-  ((password :initarg :password :protection :private))
+  ((password :initarg :password :protection :private :initform nil))
   "Password-based authenticator")
 
 (defmethod constructor :static ((auth gh-password-authenticator) newname &rest args)
   (let ((obj (call-next-method)))
-    (oset obj :password (gh-auth-get-password))
+    (or (oref obj :password)
+        (oset obj :password (gh-auth-get-password)))
     obj))
 
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req))
@@ -97,12 +99,13 @@
 
 ;;;###autoload
 (defclass gh-oauth-authenticator (gh-authenticator)
-  ((token :initarg :token :protection :private))
+  ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")
 
 (defmethod constructor :static ((auth gh-oauth-authenticator) newname &rest args)
   (let ((obj (call-next-method)))
-    (oset obj :token (gh-auth-get-oauth-token))
+    (or (oref obj :token)
+        (oset obj :token (gh-auth-get-oauth-token)))
     obj))
 
 (defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)

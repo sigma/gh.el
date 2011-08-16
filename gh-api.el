@@ -38,7 +38,8 @@
 (defclass gh-api ()
   ((sync :initarg :sync :initform t)
    (base :initarg :base :type string)
-   (auth :initarg :auth))
+   (auth :initarg :auth :initform nil)
+   (data-format :initarg :data-format))
   "Github API")
 
 (defmethod gh-api-expand-resource ((api gh-api)
@@ -51,7 +52,7 @@
 ;;;###autoload
 (defclass gh-api-v3 (gh-api)
   ((base :initarg :base :initform "https://api.github.com")
-   (auth :initarg :auth))
+   (data-format :initarg :data-format :initform :json))
   "Github API v3")
 
 (defcustom gh-api-v3-authenticator 'gh-oauth-authenticator
@@ -62,7 +63,8 @@
 
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
   (let ((obj (call-next-method)))
-    (oset obj :auth (funcall gh-api-v3-authenticator "auth"))
+    (or (oref obj :auth)
+        (oset obj :auth (funcall gh-api-v3-authenticator "auth")))
     obj))
 
 (defclass gh-api-request ()
@@ -84,6 +86,13 @@
 
 (defun gh-api-json-encode (json)
   (json-encode-list json))
+
+(defun gh-api-form-encode (form)
+  (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
+             form "&"))
+
+(defun gh-api-params-encode (form)
+  (concat "?" (gh-api-form-encode form)))
 
 (defmethod gh-api-response-init ((resp gh-api-response)
                                  buffer &optional transform)
@@ -113,14 +122,24 @@
   (gh-api-response-run-callbacks resp))
 
 (defmethod gh-api-authenticated-request
-  ((api gh-api) transformer method resource &optional data)
-  (let ((req (gh-auth-modify-request (oref api :auth)
+  ((api gh-api) transformer method resource &optional data format)
+  (let ((format (or format (oref api :data-format)))
+        (req (gh-auth-modify-request (oref api :auth)
               (gh-api-request "request"
                               :method method
                               :url (concat (oref api :base)
-                                           (gh-api-expand-resource api resource))
-                              :headers nil
-                              :data (or (gh-api-json-encode data) "")))))
+                                           (gh-api-expand-resource
+                                            api resource)
+                                           (if (eq format :params)
+                                               (gh-api-params-encode data)
+                                             ""))
+                              :headers (if (eq format :form)
+                                           '(("Content-Type" . "application/x-www-form-urlencoded")))
+                              :data (or (and (eq format :json)
+                                             (gh-api-json-encode data))
+                                        (and (eq format :form)
+                                             (gh-api-form-encode data))
+                                        "")))))
     (let ((url-request-method (oref req :method))
           (url-request-data (oref req :data))
           (url-request-extra-headers (oref req :headers))
