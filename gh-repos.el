@@ -120,6 +120,24 @@
    api 'gh-repos-repo-read "GET" (format "/repos/%s/%s"
                                          (or user (gh-api-get-username api))
                                          repo)))
+(defmethod gh-repos-repo-update ((api gh-repos-api) repo
+                              &optional org issues wiki downloads)
+  (gh-api-authenticated-request
+   api 'gh-repos-repo-read "PATCH" (if org (format "/orgs/%s/repos" org)
+                                     "/user/repos")
+   (gh-repos-repo-to-obj repo issues wiki downloads)))
+
+(defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api 'gh-user-read-list "GET" (format "/repos/%s/%s/contributors"
+                                        (oref (oref repo :owner) :login)
+                                        (oref repo :name))))
+
+(defmethod gh-repos-repo-teams ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api 'gh-user-read-list "GET" (format "/repos/%s/%s/teams"
+                                        (oref (oref repo :owner) :login)
+                                        (oref repo :name))))
 
 (provide 'gh-repos)
 ;;; gh-repos.el ends here

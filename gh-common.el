@@ -45,6 +45,9 @@
             url (gh-read user 'url)))
     target))
 
+(defun gh-user-read-list (users)
+  (mapcar 'gh-user-read users))
+
 (defun gh-read (obj field)
   (cdr (assoc field obj)))
 
