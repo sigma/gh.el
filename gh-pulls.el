@@ -31,32 +31,12 @@
 (require 'gh-auth)
 (require 'gh-common)
 
+(require 'gh-repos)
+
 ;;;###autoload
 (defclass gh-pulls-api (gh-api-v3)
   ()
   "Git pull requests API")
-
-;;;###autoload
-(defclass gh-pulls-repo ()
-  ((url :initarg :url)
-   (html-url :initarg :html-url)
-   (clone-url :initarg :clone-url)
-   (git-url :initarg :git-url)
-   (ssh-url :initarg :ssh-url)
-   (svn-url :initarg :svn-url)
-   (owner :initarg :owner :initform nil)
-   (name :initarg :name)
-   (description :initarg :description)
-   (homepage :initarg :homepage)
-   (language :initarg :language)
-   (private :initarg :private)
-   (fork :initarg :fork)
-   (forks :initarg :forks)
-   (watchers :initarg :watchers)
-   (size :initarg :size)
-   (open-issues :initarg :open-issues)
-   (pushed-at :initarg :pushed-at)
-   (created-at :initarg :created-at)))
 
 ;;;###autoload
 (defclass gh-pulls-ref ()
@@ -106,34 +86,6 @@
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
 
-(defun gh-pulls-repo-read (repo &optional into)
-  (let ((target (or into (gh-pulls-repo "repo"))))
-    (with-slots (url html-url clone-url git-url ssh-url svn-url
-                     owner name description homepage language
-                     private fork forks watchers size open-issues
-                     pushed-at created-at)
-        target
-      (setq url (gh-read repo 'url)
-            html-url (gh-read repo 'html_url)
-            clone-url (gh-read repo 'clone_url)
-            git-url (gh-read repo 'git_url)
-            ssh-url (gh-read repo 'ssh_url)
-            svn-url (gh-read repo 'svn_url)
-            owner (gh-user-read (gh-read repo 'user) (oref target :owner))
-            name (gh-read repo 'name)
-            description (gh-read repo 'description)
-            homepage (gh-read repo 'homepage)
-            language (gh-read repo 'language)
-            private (gh-read repo 'private)
-            fork (gh-read repo 'fork)
-            forks (gh-read repo 'forks)
-            watchers (gh-read repo 'watchers)
-            size (gh-read repo 'size)
-            open-issues (gh-read repo 'open_issues)
-            pushed-at (gh-read repo 'pushed_at)
-            created-at (gh-read repo 'created_at)))
-    target))
-
 (defun gh-pulls-ref-read (reference &optional into)
   (let ((target (or into (gh-pulls-ref "ref"))))
     (with-slots (label ref sha user repo)
@@ -142,7 +94,8 @@
             ref (gh-read reference 'ref)
             sha (gh-read reference 'sha)
             user (gh-user-read (gh-read reference 'user) (oref target :user))
-            repo (gh-pulls-repo-read (gh-read reference 'repo) (oref target :repo))))
+            repo (gh-repos-repo-read (gh-read reference 'repo)
+                                     (oref target :repo))))
     target))
 
 (defun gh-pulls-request-read (req &optional into)
