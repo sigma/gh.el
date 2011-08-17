@@ -123,23 +123,24 @@
 
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data format)
-  (let ((format (or format (oref api :data-format)))
-        (req (gh-auth-modify-request (oref api :auth)
-              (gh-api-request "request"
-                              :method method
-                              :url (concat (oref api :base)
-                                           (gh-api-expand-resource
-                                            api resource)
-                                           (if (eq format :params)
-                                               (gh-api-params-encode data)
-                                             ""))
-                              :headers (if (eq format :form)
-                                           '(("Content-Type" . "application/x-www-form-urlencoded")))
-                              :data (or (and (eq format :json)
-                                             (gh-api-json-encode data))
-                                        (and (eq format :form)
-                                             (gh-api-form-encode data))
-                                        "")))))
+  (let* ((fmt (or format (oref api :data-format)))
+         (req (gh-auth-modify-request
+               (oref api :auth)
+               (gh-api-request "request"
+                               :method method
+                               :url (concat (oref api :base)
+                                            (gh-api-expand-resource
+                                             api resource)
+                                            (if (eq fmt :params)
+                                                (gh-api-params-encode data)
+                                              ""))
+                               :headers (if (eq fmt :form)
+                                            '(("Content-Type" . "application/x-www-form-urlencoded")))
+                               :data (or (and (eq fmt :json)
+                                              (gh-api-json-encode data))
+                                         (and (eq fmt :form)
+                                              (gh-api-form-encode data))
+                                         "")))))
     (let ((url-request-method (oref req :method))
           (url-request-data (oref req :data))
           (url-request-extra-headers (oref req :headers))
