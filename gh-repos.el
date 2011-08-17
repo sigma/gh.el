@@ -70,7 +70,7 @@
             git-url (gh-read repo 'git_url)
             ssh-url (gh-read repo 'ssh_url)
             svn-url (gh-read repo 'svn_url)
-            owner (gh-user-read (gh-read repo 'user) (oref target :owner))
+            owner (gh-user-read (gh-read repo 'owner) (oref target :owner))
             name (gh-read repo 'name)
             description (gh-read repo 'description)
             homepage (gh-read repo 'homepage)
