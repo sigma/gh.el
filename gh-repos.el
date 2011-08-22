@@ -36,7 +36,16 @@
   ()
   "Repos API")
 
-(defclass gh-repos-repo ()
+;;;###autoload
+(defclass gh-repos-repo-stub ()
+  ((name :initarg :name)
+   (description :initarg :description :initform nil)
+   (homepage :initarg :homepage :initform nil)
+   (private :initarg :private :initform nil))
+  "Class for user-created repository objects")
+
+;;;###autoload
+(defclass gh-repos-repo (gh-repos-repo-stub)
   ((url :initarg :url)
    (html-url :initarg :html-url)
    (clone-url :initarg :clone-url)
@@ -44,18 +53,15 @@
    (ssh-url :initarg :ssh-url)
    (svn-url :initarg :svn-url)
    (owner :initarg :owner :initform nil)
-   (name :initarg :name)
-   (description :initarg :description :initform nil)
-   (homepage :initarg :homepage :initform nil)
    (language :initarg :language)
-   (private :initarg :private :initform nil)
    (fork :initarg :fork)
    (forks :initarg :forks)
    (watchers :initarg :watchers)
    (size :initarg :size)
    (open-issues :initarg :open-issues)
    (pushed-at :initarg :pushed-at)
-   (created-at :initarg :created-at)))
+   (created-at :initarg :created-at))
+  "Class for GitHub repositories")
 
 (defun gh-repos-repo-read (repo &optional into)
   (let ((target (or into (gh-repos-repo "repo"))))
@@ -98,7 +104,7 @@
    api 'gh-repos-read-list "GET"
    (format "/orgs/%s/repos" org)))
 
-(defmethod gh-repos-repo-to-obj ((repo gh-repos-repo)
+(defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
                                  &rest caps)
   (let ((has_issues (plist-member caps :issues))
         (has_wiki (plist-member caps :wiki))
@@ -114,25 +120,25 @@
       ,@(when has_downloads
           (list (cons "has_downloads" (plist-get caps :downloads)))))))
 
-(defmethod gh-repos-repo-new ((api gh-repos-api) repo
+(defmethod gh-repos-repo-new ((api gh-repos-api) repo-stub
                               &optional org &rest caps)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "POST" (if org (format "/orgs/%s/repos" org)
                                     "/user/repos")
-   (apply 'gh-repos-repo-to-obj repo caps)))
+   (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
-(defmethod gh-repos-repo-get ((api gh-repos-api) repo &optional user)
+(defmethod gh-repos-repo-get ((api gh-repos-api) repo-id &optional user)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "GET" (format "/repos/%s/%s"
                                          (or user (gh-api-get-username api))
-                                         repo)))
+                                         repo-id)))
 
-(defmethod gh-repos-repo-update ((api gh-repos-api) repo
+(defmethod gh-repos-repo-update ((api gh-repos-api) repo-stub
                                  &optional org &rest caps)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "PATCH" (if org (format "/orgs/%s/repos" org)
                                      "/user/repos")
-   (apply 'gh-repos-repo-to-obj repo caps)))
+   (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
   (gh-api-authenticated-request

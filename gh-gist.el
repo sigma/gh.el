@@ -37,15 +37,19 @@
   "Gist API")
 
 ;;;###autoload
-(defclass gh-gist-gist ()
+(defclass gh-gist-gist-stub ()
+  ((files :initarg :files :type list :initform nil)
+   (public :initarg :public)
+   (description :initarg :description))
+  "Class for user-created gist objects")
+
+;;;###autoload
+(defclass gh-gist-gist (gh-gist-gist-stub)
   ((date :initarg :date)
    (push-url :initarg :push-url)
    (pull-url :initarg :pull-url)
    (comments :initarg :comments)
-   (files :initarg :files :type list :initform nil)
    (user :initarg :user :initform nil)
-   (public :initarg :public)
-   (description :initarg :description)
    (id :initarg :id :type string)
    (url :initarg :url :type string))
   "Gist object")
@@ -92,12 +96,12 @@
             url (gh-read gist 'url)))
     target))
 
-(defmethod gh-gist-gist-to-obj ((gist gh-gist-gist))
+(defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
   `(("description" . ,(oref gist :description))
     ("public" . ,(oref gist :public))
     ("files" . ,(mapcar 'gh-gist-gist-file-to-obj (oref gist :files)))))
 
-(defmethod gh-gist-gist-has-files ((gist gh-gist-gist))
+(defmethod gh-gist-gist-has-files ((gist gh-gist-gist-stub))
   (not (memq nil (mapcar (lambda (f)
                            (oref f :content)) (oref gist :files)))))
 
@@ -128,17 +132,17 @@
     (gh-api-authenticated-request
      api transformer "GET" (format "/gists/%s" id))))
 
-(defmethod gh-gist-new ((api gh-gist-api) gist)
+(defmethod gh-gist-new ((api gh-gist-api) gist-stub)
   (gh-api-authenticated-request
    api 'gh-gist-read "POST" (format "/users/%s/gists"
                                     (gh-api-get-username api))
-   (gh-gist-gist-to-obj gist)))
+   (gh-gist-gist-to-obj gist-stub)))
 
-(defmethod gh-gist-edit ((api gh-gist-api) gist)
+(defmethod gh-gist-edit ((api gh-gist-api) gist-stub)
   (gh-api-authenticated-request
    api 'gh-gist-read "PATCH" (format "/users/%s/gists"
                                      (gh-api-get-username api))
-   (gh-gist-gist-to-obj gist)))
+   (gh-gist-gist-to-obj gist-stub)))
 
 (defmethod gh-gist-set-star ((api gh-gist-api) gist-or-id star)
   (let ((id (if (stringp gist-or-id) gist-or-id
