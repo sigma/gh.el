@@ -134,10 +134,11 @@
                                          repo-id)))
 
 (defmethod gh-repos-repo-update ((api gh-repos-api) repo-stub
-                                 &optional org &rest caps)
+                                 &optional user &rest caps)
   (gh-api-authenticated-request
-   api 'gh-repos-repo-read "PATCH" (if org (format "/orgs/%s/repos" org)
-                                     "/user/repos")
+   api 'gh-repos-repo-read "PATCH" (format "/repos/%s/%s"
+					   (or user (gh-api-get-username api))
+					   (oref repo-stub :name))
    (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
