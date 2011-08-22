@@ -122,8 +122,8 @@
   (gh-api-response-run-callbacks resp))
 
 (defmethod gh-api-authenticated-request
-  ((api gh-api) transformer method resource &optional data format)
-  (let* ((fmt (or format (oref api :data-format)))
+  ((api gh-api) transformer method resource &optional data params)
+  (let* ((fmt (oref api :data-format))
          (req (gh-auth-modify-request
                (oref api :auth)
                (gh-api-request "request"
@@ -131,8 +131,8 @@
                                :url (concat (oref api :base)
                                             (gh-api-expand-resource
                                              api resource)
-                                            (if (eq fmt :params)
-                                                (gh-api-params-encode data)
+                                            (if params
+                                                (gh-api-params-encode params)
                                               ""))
                                :headers (if (eq fmt :form)
                                             '(("Content-Type" . "application/x-www-form-urlencoded")))
