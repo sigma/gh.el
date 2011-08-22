@@ -99,33 +99,40 @@
    (format "/orgs/%s/repos" org)))
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo)
-                                 &optional issues wiki downloads)
-  `(("name" . ,(oref repo :name))
-    ("homepage" . ,(oref repo :homepage))
-    ("description" . ,(oref repo :description))
-    ("public" . ,(not (oref repo :private)))
-    ("has_issues" . ,issues)
-    ("has_wiki" . ,wiki)
-    ("has_downloads" . ,downloads)))
+                                 &rest caps)
+  (let ((has_issues (plist-member caps :issues))
+        (has_wiki (plist-member caps :wiki))
+        (has_downloads (plist-member caps :downloads)))
+    `(("name" . ,(oref repo :name))
+      ("homepage" . ,(oref repo :homepage))
+      ("description" . ,(oref repo :description))
+      ("public" . ,(not (oref repo :private)))
+      ,@(when has_issues
+          (list (cons "has_issues" (plist-get caps :issues))))
+      ,@(when has_wiki
+          (list (cons "has_wiki" (plist-get caps :wiki))))
+      ,@(when has_downloads
+          (list (cons "has_downloads" (plist-get caps :downloads)))))))
 
 (defmethod gh-repos-repo-new ((api gh-repos-api) repo
-                              &optional org issues wiki downloads)
+                              &optional org &rest caps)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "POST" (if org (format "/orgs/%s/repos" org)
                                     "/user/repos")
-   (gh-repos-repo-to-obj repo issues wiki downloads)))
+   (apply 'gh-repos-repo-to-obj repo caps)))
 
 (defmethod gh-repos-repo-get ((api gh-repos-api) repo &optional user)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "GET" (format "/repos/%s/%s"
                                          (or user (gh-api-get-username api))
                                          repo)))
+
 (defmethod gh-repos-repo-update ((api gh-repos-api) repo
-                              &optional org issues wiki downloads)
+                                 &optional org &rest caps)
   (gh-api-authenticated-request
    api 'gh-repos-repo-read "PATCH" (if org (format "/orgs/%s/repos" org)
                                      "/user/repos")
-   (gh-repos-repo-to-obj repo issues wiki downloads)))
+   (apply 'gh-repos-repo-to-obj repo caps)))
 
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
   (gh-api-authenticated-request
