@@ -58,7 +58,7 @@
    (created-at :initarg :created-at)))
 
 (defun gh-repos-repo-read (repo &optional into)
-  (let ((target (or into (gh-repo "repo"))))
+  (let ((target (or into (gh-repos-repo "repo"))))
     (with-slots (url html-url clone-url git-url ssh-url svn-url
                      owner name description homepage language
                      private fork forks watchers size open-issues
