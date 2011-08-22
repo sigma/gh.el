@@ -140,11 +140,48 @@
                                         (oref (oref repo :owner) :login)
                                         (oref repo :name))))
 
+
+
+;;; TODO: generate some useful objects with the return values
+
+(defmethod gh-repos-repo-languages ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "GET" (format "/repos/%s/%s/languages"
+                         (oref (oref repo :owner) :login)
+                         (oref repo :name))))
+
 (defmethod gh-repos-repo-teams ((api gh-repos-api) repo)
   (gh-api-authenticated-request
-   api 'gh-user-read-list "GET" (format "/repos/%s/%s/teams"
-                                        (oref (oref repo :owner) :login)
-                                        (oref repo :name))))
+   api nil "GET" (format "/repos/%s/%s/teams"
+                         (oref (oref repo :owner) :login)
+                         (oref repo :name))))
+
+(defmethod gh-repos-repo-tags ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "GET" (format "/repos/%s/%s/tags"
+                         (oref (oref repo :owner) :login)
+                         (oref repo :name))))
+
+(defmethod gh-repos-repo-branches ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "GET" (format "/repos/%s/%s/branches"
+                         (oref (oref repo :owner) :login)
+                         (oref repo :name))))
+
+;;; Forks sub-API
+
+(defmethod gh-repos-forks-list ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api 'gh-repos-read-list "GET" (format "/repos/%s/%s/forks"
+                                         (oref (oref repo :owner) :login)
+                                         (oref repo :name))))
+
+(defmethod gh-repos-fork ((api gh-repos-api) repo &optional org)
+  (gh-api-authenticated-request
+   api 'gh-repos-repo-read "POST" (format "/repos/%s/%s/forks"
+                                          (oref (oref repo :owner) :login)
+                                          (oref repo :name))
+   nil (when org `(("org" . ,org)))))
 
 (provide 'gh-repos)
 ;;; gh-repos.el ends here
