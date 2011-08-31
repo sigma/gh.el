@@ -1,0 +1,44 @@
+\input texinfo.tex
+@setfilename gh.info
+@settitle gh.el User Manual
+@documentencoding utf-8
+
+@dircategory Emacs
+@direntry
+* gh.el: (gh).        Using GitHub from Emacs.
+@end direntry
+
+@copying
+Copyright @copyright{} 2011 Yann Hodique.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.
+@end quotation
+@end copying
+
+@node Top
+@top gh.el User Manual
+
+gh.el is a low-level client library to interact with
+@uref{http://developer.github.com/,GitHub API}. Main features include:
+
+@itemize @bullet
+@item synchronous and asynchronous modes
+@item flexible authentication
+@item allows for multiple parallel sessions
+@end itemize
+
+@menu
+* Basics::
+@end menu
+
+@node Basics
+@chapter Basics
+
+gh.el is built on top of @xref{Top, Eieio, , eieio, Eieio}.  The scope
+of this client library is to provide plumbing primitives that will
+allow full use of the GitHub API.

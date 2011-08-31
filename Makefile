@@ -7,7 +7,7 @@ AUTODEF   = $(PKGNAME)-auto.el
 SPECIAL   = $(AUTODEF)
 ALLSOURCE = $(wildcard *.el)
 
-SOURCE  = $(filter-out $(SPECIAL) $(PKGDEF), $(ALLSOURCE))
+SOURCE  = $(filter-out $(SPECIAL), $(ALLSOURCE))
 TARGET  = $(patsubst %.el,%.elc,$(SPECIAL) $(SOURCE))
 MISC    = README
 
@@ -17,12 +17,14 @@ SITEFLAG = --no-site-file
 PREFIX   = /usr/local
 ELISPDIR = $(PREFIX)/share/emacs/site-lisp/$(PKGNAME)
 
+TEXI2HTML = makeinfo --html --number-sections
+
 # Location of Emacs Lisp Package Archive entries
 ELPA=../../elpa
 
-all: lisp
+all: lisp docs
 
-lisp: $(TARGET) 
+lisp: $(TARGET)
 
 autoloads: $(AUTODEF)
 
@@ -39,10 +41,10 @@ $(AUTODEF): $(PKGNAME)-auto.in $(SOURCE)
 		-f batch-byte-compile $<
 
 clean:
-	-rm -f *~ $(TARGET)
+	rm -f *~ $(TARGET) $(PKGNAME).info $(PKGNAME).html
 
-realclean: clean
-	-rm -f $(SPECIAL)
+realclean: clean docsclean
+	rm -f $(SPECIAL)
 
 install-bin: lisp
 	install -d $(ELISPDIR)
@@ -51,7 +53,7 @@ install-bin: lisp
 install: install-bin
 
 distclean: clean
-	-rm -Rf ../$(SNAPDIR)
+	rm -Rf ../$(SNAPDIR)
 
 release: autoloads distclean
 	mkdir ../$(SNAPDIR) && chmod 0755 ../$(SNAPDIR)
@@ -66,3 +68,13 @@ elpa:
 	sed -r -e "s/%VERSION%/$(VERSION)/g" < $(PKGDEF) \
 		> $(ELPA)/$(SNAPDIR)/$(PKGDEF)
 	(cd $(ELPA) && tar cf $(PKGNAME)-$(VERSION).tar $(SNAPDIR))
+
+info: doc/$(PKGNAME).info
+
+html: doc/$(PKGNAME).texi
+	$(TEXI2HTML) --no-split -o doc/$(PKGNAME).html doc/$(PKGNAME).texi
+
+docs: info html
+
+docsclean:
+	rm -f doc/$(PKGNAME).info doc/$(PKGNAME).html
