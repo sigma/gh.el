@@ -138,11 +138,11 @@
                                     (gh-api-get-username api))
    (gh-gist-gist-to-obj gist-stub)))
 
-(defmethod gh-gist-edit ((api gh-gist-api) gist-stub)
+(defmethod gh-gist-edit ((api gh-gist-api) gist)
   (gh-api-authenticated-request
-   api 'gh-gist-read "PATCH" (format "/users/%s/gists"
-                                     (gh-api-get-username api))
-   (gh-gist-gist-to-obj gist-stub)))
+   api 'gh-gist-read "PATCH" (format "/gists/%s"
+                                     (oref gist :id))
+   (gh-gist-gist-to-obj gist)))
 
 (defmethod gh-gist-set-star ((api gh-gist-api) gist-or-id star)
   (let ((id (if (stringp gist-or-id) gist-or-id
