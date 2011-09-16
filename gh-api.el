@@ -132,7 +132,7 @@
                                             (gh-api-expand-resource
                                              api resource)
                                             (if params
-                                                (gh-api-params-encode params)
+                                                (gh-api-params-encode data)
                                               ""))
                                :headers (if (eq fmt :form)
                                             '(("Content-Type" . "application/x-www-form-urlencoded")))
