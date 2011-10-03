@@ -141,7 +141,7 @@
 
 (defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
-   api 'gh-pulls-requests-read "GET"
+   api 'gh-pulls-request-read "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
 (defmethod gh-pulls-new ((api gh-pulls-api) user repo req)
