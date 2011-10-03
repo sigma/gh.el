@@ -46,8 +46,7 @@
    (user :initarg :user :initform nil)
    (repo :initarg :repo :initform nil)))
 
-;;;###autoload
-(defclass gh-pulls-request ()
+(defclass gh-pulls-request-stub ()
   ((url :initarg :url)
    (html-url :initarg :html-url)
    (diff-url :initarg :diff-url)
@@ -60,8 +59,11 @@
    (created-at :initarg :created-at)
    (updated-at :initarg :updated-at)
    (closed-at :initarg :closed-at)
-   (merged-at :initarg :merged-at)
-   (merged :initarg :merged)
+   (merged-at :initarg :merged-at)))
+
+;;;###autoload
+(defclass gh-pulls-request (gh-pulls-request-stub)
+  ((merged :initarg :merged)
    (mergeable :initarg :mergeable)
    (merged-by :initarg :merged-by)
    (comments :initarg :comments)
