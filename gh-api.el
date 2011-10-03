@@ -50,6 +50,23 @@
   (oref (oref api :auth) :username))
 
 ;;;###autoload
+(defclass gh-api-v2 (gh-api)
+  ((base :initarg :base :initform "https://github.com/api/v2/json")
+   (data-format :initarg :data-format :initform :json)))
+
+(defcustom gh-api-v2-authenticator 'gh-oauth-authenticator
+  "Authenticator for Github API v2"
+  :type '(choice (const :tag "Password" gh-password-authenticator)
+                 (const :tag "OAuth" gh-oauth-authenticator))
+  :group 'gh-api)
+
+(defmethod constructor :static ((api gh-api-v2) newname &rest args)
+  (let ((obj (call-next-method)))
+    (or (oref obj :auth)
+        (oset obj :auth (funcall gh-api-v2-authenticator "auth")))
+    obj))
+
+;;;###autoload
 (defclass gh-api-v3 (gh-api)
   ((base :initarg :base :initform "https://api.github.com")
    (data-format :initarg :data-format :initform :json))
