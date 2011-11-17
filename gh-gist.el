@@ -46,12 +46,16 @@
 ;;;###autoload
 (defclass gh-gist-gist (gh-gist-gist-stub)
   ((date :initarg :date)
+   (update :initarg :update)
    (push-url :initarg :push-url)
    (pull-url :initarg :pull-url)
+   (html-url :initarg :html-url)
    (comments :initarg :comments)
    (user :initarg :user :initform nil)
    (id :initarg :id :type string)
-   (url :initarg :url :type string))
+   (url :initarg :url :type string)
+   (history :initarg :history :initform nil)
+   (forks :initarg :forks :initform nil))
   "Gist object")
 
 (defclass gh-gist-gist-file ()
@@ -81,19 +85,23 @@
 
 (defun gh-gist-read (gist &optional into)
   (let ((target (or into (gh-gist-gist "gist"))))
-    (with-slots (date push-url pull-url comments files user
-                      public description id url)
+    (with-slots (date update push-url pull-url html-url comments files user
+                      public description id url history forks)
         target
       (setq date (gh-read gist 'created_at)
+            update (gh-read gist 'updated_at)
             push-url (gh-read gist 'git_push_url)
             pull-url (gh-read gist 'git_pull_url)
+            html-url (gh-read gist 'html_url)
             comments (gh-read gist 'comments)
             files (gh-gist-files-read (gh-read gist 'files))
             user (gh-user-read (gh-read gist 'user) (oref target :user))
             public (gh-read gist 'public)
             description (gh-read gist 'description)
             id (gh-read gist 'id)
-            url (gh-read gist 'url)))
+            url (gh-read gist 'url)
+            history (gh-read gist 'history)
+            forks (gh-read gist 'forks)))
     target))
 
 (defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
