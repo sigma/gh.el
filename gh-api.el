@@ -26,7 +26,9 @@
 
 ;;; Code:
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
+
 (require 'json)
 (require 'gh-auth)
 
@@ -128,11 +130,17 @@
   (gh-api-response-init resp (current-buffer) transform))
 
 (defmethod gh-api-response-run-callbacks ((resp gh-api-response))
-  (let ((data (oref resp :data)))
-    (when data
-      (dolist (cb (copy-list (oref resp :callbacks)))
-        (funcall cb data)
-        (object-remove-from-list resp :callbacks cb)))))
+  (flet ((gh-api-copy-list (list)
+                           (if (consp list)
+                               (let ((res nil))
+                                 (while (consp list) (push (pop list) res))
+                                 (prog1 (nreverse res) (setcdr res list)))
+                             (car list))))
+    (let ((data (oref resp :data)))
+      (when data
+        (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
+          (funcall cb data)
+          (object-remove-from-list resp :callbacks cb))))))
 
 (defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
   (object-add-to-list resp :callbacks callback t)

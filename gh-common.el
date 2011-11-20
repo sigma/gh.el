@@ -26,6 +26,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (require 'eieio)
 
 (defclass gh-user ()
