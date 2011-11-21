@@ -76,9 +76,10 @@
 (oset-default 'pcache-entry :ttl pcache-default-ttl)
 
 (defmethod pcache-entry-valid-p ((entry pcache-entry))
-  (let ((time (float-time (current-time))))
-    (< time (+ (oref entry :ttl)
-               (oref entry :timestamp)))))
+  (let ((ttl (oref entry :ttl)))
+    (or (null ttl))
+    (let ((time (float-time (current-time))))
+      (< time (+ ttl (oref entry :timestamp))))))
 
 (defmethod pcache-get ((cache pcache-repository) key &optional default)
   (let* ((time (float-time (current-time)))
