@@ -28,7 +28,11 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl))
+  (progn
+    (when (< emacs-major-version 24)
+      ;; byte-compilation of eieio code is broken in emacs 23.x
+      (put 'defmethod 'byte-hunk-handler nil))
+    (require 'cl)))
 
 (require 'eieio)
 (require 'eieio-base)
