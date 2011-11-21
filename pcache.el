@@ -66,15 +66,11 @@
           (puthash newname obj *pcache-repositories*)
           obj))))
 
-(defconst pcache-default-ttl 600)
-
 (defclass pcache-entry ()
   ((timestamp :initarg :timestamp
               :initform (float-time (current-time)))
    (ttl :initarg :ttl)
    (value :initarg :value :initform nil)))
-
-(oset-default 'pcache-entry :ttl pcache-default-ttl)
 
 (defmethod pcache-entry-valid-p ((entry pcache-entry))
   (let ((ttl (oref entry :ttl)))
