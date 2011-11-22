@@ -73,14 +73,14 @@
 (defclass pcache-entry ()
   ((timestamp :initarg :timestamp
               :initform (float-time (current-time)))
-   (ttl :initarg :ttl)
+   (ttl :initarg :ttl :initform nil)
    (value :initarg :value :initform nil)))
 
 (defmethod pcache-entry-valid-p ((entry pcache-entry))
   (let ((ttl (oref entry :ttl)))
-    (or (null ttl))
-    (let ((time (float-time (current-time))))
-      (< time (+ ttl (oref entry :timestamp))))))
+    (or (null ttl)
+        (let ((time (float-time (current-time))))
+          (< time (+ ttl (oref entry :timestamp)))))))
 
 (defmethod pcache-get ((cache pcache-repository) key &optional default)
   (let* ((time (float-time (current-time)))
@@ -136,6 +136,12 @@
                    (pcache-save v t)
                  (error nil)))
            *pcache-repositories*))
+
+(defun pcache-destroy-repository (name)
+  (remhash name *pcache-repositories*)
+  (let ((fname (concat pcache-directory name)))
+    (when (file-exists-p fname)
+      (delete-file fname))))
 
 (add-hook 'kill-emacs-hook 'pcache-kill-emacs-hook)
 
