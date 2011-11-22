@@ -66,7 +66,10 @@
                     (obj (eieio-persistent-read path)))
                (puthash newname obj *pcache-repositories*)
                obj))
-        (let ((obj (call-next-method)))
+        (let ((obj (call-next-method))
+              (dir (file-name-directory path)))
+          (unless (file-exists-p dir)
+            (make-directory dir t))
           (oset obj :file path)
           (puthash newname obj *pcache-repositories*)
           obj))))
@@ -108,7 +111,8 @@
 
 (defmethod pcache-invalidate ((cache pcache-repository) key)
   (let ((table (oref cache :entries)))
-    (remhash key table)))
+    (remhash key table)
+    (pcache-save cache)))
 
 (defmethod pcache-clear ((cache pcache-repository))
   (oset cache :entries (make-hash-table))
