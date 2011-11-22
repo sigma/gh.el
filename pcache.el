@@ -32,7 +32,7 @@
   (progn
     (when (< emacs-major-version 24)
       ;; byte-compilation of eieio code is broken in emacs 23.x
-      (put 'defmethod 'byte-hunk-handler nil))
+      (setq byte-compile-verbose nil))
     (require 'cl)))
 
 (require 'eieio)
