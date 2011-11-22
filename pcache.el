@@ -4,7 +4,7 @@
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords:
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((eieio "1.4"))
 
 ;; This file is free software; you can redistribute it and/or modify
