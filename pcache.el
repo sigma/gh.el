@@ -29,11 +29,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (progn
-    (when (< emacs-major-version 24)
-      ;; byte-compilation of eieio code is broken in emacs 23.x
-      (setq byte-compile-verbose nil))
-    (require 'cl)))
+  (require 'cl))
 
 (require 'eieio)
 (require 'eieio-base)
