@@ -34,7 +34,7 @@
 
 (defclass gh-cache (pcache-repository)
   ((entries :initarg :entries :initform (make-hash-table :test 'equal))
-   (safe-methods :allocation :class :initform ("GET" "HEAD"))
+   (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
    (invalidation-chain :allocation :class :initform nil)))
 
 (defmethod pcache-invalidate :after ((cache gh-cache) key)
