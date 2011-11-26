@@ -36,9 +36,14 @@
 
 (require 'gh-repos)
 
+(defclass gh-pulls-cache (gh-cache)
+  ((invalidation-chain :allocation :class
+                       :initform '(("^/repos/.*/.*/pulls$" . "\\0")
+                                   ("^/repos/.*/.*/pulls/.*$" . "\\0")))))
+
 ;;;###autoload
 (defclass gh-pulls-api (gh-api-v3)
-  ()
+  ((cache-cls :initform gh-pulls-cache :allocation :class))
   "Git pull requests API")
 
 ;;;###autoload
