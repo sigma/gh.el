@@ -38,11 +38,17 @@
    (invalidation-chain :allocation :class :initform nil)))
 
 (defmethod pcache-invalidate :after ((cache gh-cache) key)
-  (dolist (next (oref cache invalidation-chain))
-    (let ((nextkey
-           (replace-regexp-in-string (car next) (cdr next) key)))
-      (when (not (equal key nextkey))
-        (pcache-invalidate cache nextkey)))))
+  (let ((resource (car key)))
+    (pcache-map cache #'(lambda (k v)
+                          (when (equal (car k) resource)
+                            (pcache-invalidate cache k))))
+    (dolist (next (oref cache invalidation-chain))
+      (let ((nextresource
+             (replace-regexp-in-string (car next) (cdr next) resource)))
+        (when (not (equal nextresource resource))
+          (pcache-map cache #'(lambda (k v)
+                                (when (equal (car k) nextresource)
+                                  (pcache-invalidate cache k)))))))))
 
 (provide 'gh-cache)
 ;;; gh-cache.el ends here
