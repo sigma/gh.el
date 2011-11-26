@@ -31,6 +31,7 @@
 
 (require 'json)
 (require 'gh-auth)
+(require 'gh-cache)
 
 (defgroup gh-api nil
   "Github API."
@@ -39,10 +40,21 @@
 ;;;###autoload
 (defclass gh-api ()
   ((sync :initarg :sync :initform t)
+   (cache :initarg :cache :initform nil)
    (base :initarg :base :type string)
    (auth :initarg :auth :initform nil)
-   (data-format :initarg :data-format))
+   (data-format :initarg :data-format)
+   (cache-cls :initform gh-cache :allocation :class))
   "Github API")
+
+(defmethod constructor :static ((api gh-api) newname &rest args)
+  (let* ((obj (call-next-method))
+         (cache (oref obj :cache)))
+    (unless (and (eieio-object-p cache)
+                 (object-of-class-p cache 'gh-cache))
+      (oset obj :cache (funcall (oref obj cache-cls)
+                                (format "gh/%s" (symbol-name api)))))
+    obj))
 
 (defmethod gh-api-expand-resource ((api gh-api)
                                    resource)
@@ -139,7 +151,9 @@
     (let ((data (oref resp :data)))
       (when data
         (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
-          (funcall cb data)
+          (if (symbolp cb)
+              (funcall cb data)
+            (apply (car cb) data (cdr cb)))
           (object-remove-from-list resp :callbacks cb))))))
 
 (defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
@@ -149,6 +163,9 @@
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
   (let* ((fmt (oref api :data-format))
+         (headers (when (eq fmt :form)
+                    '(("Content-Type" . "application/x-www-form-urlencoded"))))
+         (cache (oref api :cache))
          (req (gh-auth-modify-request
                (oref api :auth)
                (gh-api-request "request"
@@ -159,26 +176,49 @@
                                             (if params
                                                 (gh-api-params-encode params)
                                               ""))
-                               :headers (if (eq fmt :form)
-                                            '(("Content-Type" . "application/x-www-form-urlencoded")))
+                               :headers headers
                                :data (or (and (eq fmt :json)
                                               (gh-api-json-encode data))
                                          (and (eq fmt :form)
                                               (gh-api-form-encode data))
-                                         "")))))
-    (let ((url-request-method (oref req :method))
-          (url-request-data (oref req :data))
-          (url-request-extra-headers (oref req :headers))
-          (url (oref req :url)))
-      (if (oref api :sync)
-          (let ((resp (gh-api-response "sync")))
-            (gh-api-response-init resp
-                                  (url-retrieve-synchronously url)
-                                  transformer)
-            resp)
-        (let ((resp (gh-api-response "async")))
-          (url-retrieve url 'gh-api-set-response (list resp transformer))
-          resp)))))
+                                         ""))))
+         (key (and cache
+                   (member method (oref cache safe-methods))
+                   (list (format "%s@%s"
+                                 (oref (oref api :auth) :username)
+                                 resource)
+                         method
+                         transformer)))
+         (value (and key (pcache-get cache key))))
+    (cond (value
+           (gh-api-response "cached" :data value))
+          (key
+           (let ((resp (gh-api-run-request api req transformer)))
+             (gh-api-add-response-callback
+              resp (list #'(lambda (value cache key)
+                             (pcache-put cache key value))
+                         cache key))
+             resp))
+          (cache
+           (pcache-invalidate cache key)
+           (gh-api-run-request api req transformer))
+          (t
+           (gh-api-run-request api req transformer)))))
+
+(defmethod gh-api-run-request ((api gh-api) req transformer)
+  (let ((url-request-method (oref req :method))
+        (url-request-data (oref req :data))
+        (url-request-extra-headers (oref req :headers))
+        (url (oref req :url)))
+    (if (oref api :sync)
+        (let ((resp (gh-api-response "sync")))
+          (gh-api-response-init resp
+                                (url-retrieve-synchronously url)
+                                transformer)
+          resp)
+      (let ((resp (gh-api-response "async")))
+        (url-retrieve url 'gh-api-set-response (list resp transformer))
+        resp))))
 
 (provide 'gh-api)
 ;;; gh-api.el ends here
