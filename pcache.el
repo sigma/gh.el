@@ -153,6 +153,10 @@
       (oset cache :timestamp time)
       (eieio-persistent-save cache))))
 
+(defmethod pcache-map ((cache pcache-repository) func)
+  (let ((table (oref cache :entries)))
+    (maphash func table)))
+
 (defun pcache-kill-emacs-hook ()
   (maphash #'(lambda (k v)
                (condition-case nil
