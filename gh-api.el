@@ -190,19 +190,19 @@
                          method
                          transformer)))
          (value (and key (pcache-get cache key))))
-    (cond (value
+    (cond (value ;; got value from cache
            (gh-api-response "cached" :data value))
-          (key
+          (key ;; no value, but cache exists and method is safe
            (let ((resp (gh-api-run-request api req transformer)))
              (gh-api-add-response-callback
               resp (list #'(lambda (value cache key)
                              (pcache-put cache key value))
                          cache key))
              resp))
-          (cache
+          (cache ;; unsafe method, cache exists
            (pcache-invalidate cache key)
            (gh-api-run-request api req transformer))
-          (t
+          (t ;; no cache involved
            (gh-api-run-request api req transformer)))))
 
 (defmethod gh-api-run-request ((api gh-api) req transformer)
