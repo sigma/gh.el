@@ -39,7 +39,8 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(BUILDDIR)/html/* $(BUILDDIR)/html/.buildinfo
+	find $(BUILDDIR) -mindepth 1 -maxdepth 1 -type d ! -iname 'html' | xargs -I {} rm -rf {}
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
