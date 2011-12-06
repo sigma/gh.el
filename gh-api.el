@@ -54,7 +54,9 @@
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
       (oset obj :cache (funcall (oref obj cache-cls)
-                                (format "gh/%s" (symbol-name api)))))
+                                (format "gh/%s/%s"
+                                        (symbol-name api)
+                                        (oref (oref obj :auth) :username)))))
     obj))
 
 (defmethod gh-api-expand-resource ((api gh-api)
@@ -169,9 +171,7 @@
          (cache (oref api :cache))
          (key (and cache
                    (member method (oref cache safe-methods))
-                   (list (format "%s@%s"
-                                 (oref (oref api :auth) :username)
-                                 resource)
+                   (list resource
                          method
                          transformer)))
          (value (and key (pcache-get cache key)))
