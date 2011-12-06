@@ -167,22 +167,6 @@
          (headers (when (eq fmt :form)
                     '(("Content-Type" . "application/x-www-form-urlencoded"))))
          (cache (oref api :cache))
-         (req (gh-auth-modify-request
-               (oref api :auth)
-               (gh-api-request "request"
-                               :method method
-                               :url (concat (oref api :base)
-                                            (gh-api-expand-resource
-                                             api resource)
-                                            (if params
-                                                (gh-api-params-encode params)
-                                              ""))
-                               :headers headers
-                               :data (or (and (eq fmt :json)
-                                              (gh-api-json-encode data))
-                                         (and (eq fmt :form)
-                                              (gh-api-form-encode data))
-                                         ""))))
          (key (and cache
                    (member method (oref cache safe-methods))
                    (list (format "%s@%s"
@@ -190,7 +174,25 @@
                                  resource)
                          method
                          transformer)))
-         (value (and key (pcache-get cache key))))
+         (value (and key (pcache-get cache key)))
+         (req
+          (and (not value) ;; we'll need the req only if value's not in cache
+               (gh-auth-modify-request
+                (oref api :auth)
+                (gh-api-request "request"
+                                :method method
+                                :url (concat (oref api :base)
+                                             (gh-api-expand-resource
+                                              api resource)
+                                             (if params
+                                                 (gh-api-params-encode params)
+                                               ""))
+                                :headers headers
+                                :data (or (and (eq fmt :json)
+                                               (gh-api-json-encode data))
+                                          (and (eq fmt :form)
+                                               (gh-api-form-encode data))
+                                          ""))))))
     (cond (value ;; got value from cache
            (gh-api-response "cached" :data value))
           (key ;; no value, but cache exists and method is safe
