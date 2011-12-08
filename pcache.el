@@ -134,7 +134,14 @@
     (pcache-save cache)))
 
 (defmethod pcache-clear ((cache pcache-repository))
-  (oset cache :entries (make-hash-table))
+  (let* ((entries (oref cache :entries))
+         (test (hash-table-test entries))
+         (resize (hash-table-rehash-size entries))
+         (threshold (hash-table-rehash-threshold entries))
+         (weakness (hash-table-weakness entries)))
+    (oset cache :entries (make-hash-table :test test :rehash-size resize
+                                          :rehash-threshold threshold
+                                          :weakness weakness)))
   (pcache-save cache))
 
 (defmethod pcache-purge-invalid ((cache pcache-repository))
