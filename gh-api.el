@@ -155,7 +155,7 @@
     (let ((data (oref resp :data)))
       (when data
         (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
-          (if (symbolp cb)
+          (if (or (functionp cb) (symbolp cb))
               (funcall cb data)
             (apply (car cb) data (cdr cb)))
           (object-remove-from-list resp :callbacks cb))))))
