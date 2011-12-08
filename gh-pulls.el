@@ -43,18 +43,12 @@
 
 ;;;###autoload
 (defclass gh-pulls-api (gh-api-v3)
-  ((cache-cls :initform gh-pulls-cache :allocation :class))
+  ((cache-cls :allocation :class :initform gh-pulls-cache)
+
+   (req-cls :allocation :class :initform gh-pulls-request))
   "Git pull requests API")
 
-;;;###autoload
-(defclass gh-pulls-ref ()
-  ((label :initarg :label)
-   (ref :initarg :ref :initform nil)
-   (sha :initarg :sha :initform nil)
-   (user :initarg :user :initform nil)
-   (repo :initarg :repo :initform nil)))
-
-(defclass gh-pulls-request-stub ()
+(defclass gh-pulls-request-stub (gh-object)
   ((url :initarg :url)
    (html-url :initarg :html-url)
    (diff-url :initarg :diff-url)
@@ -69,6 +63,26 @@
    (closed-at :initarg :closed-at)
    (merged-at :initarg :merged-at)))
 
+(defmethod gh-object-read-into ((stub gh-pulls-request-stub) data)
+  (call-next-method)
+  (with-slots (url html-url diff-url patch-url issue-url number
+                   state title body created-at updated-at
+                   closed-at merged-at)
+      stub
+    (setq url (gh-read data 'url)
+          html-url (gh-read data 'html_url)
+          diff-url (gh-read data 'diff_url)
+          patch-url (gh-read data 'patch_url)
+          issue-url (gh-read data 'issue_url)
+          number (gh-read data 'number)
+          state (gh-read data 'state)
+          title (gh-read data 'title)
+          body (gh-read data 'body)
+          created-at (gh-read data 'created_at)
+          updated-at (gh-read data 'updated_at)
+          closed-at (gh-read data 'closed_at)
+          merged-at (gh-read data 'merged_at))))
+
 ;;;###autoload
 (defclass gh-pulls-request (gh-pulls-request-stub)
   ((merged :initarg :merged)
@@ -80,8 +94,31 @@
    (deletions :initarg :deletions)
    (changed-files :initarg :changed-files)
    (head :initarg :head :initform nil)
-   (base :initarg :base :initform nil))
+   (base :initarg :base :initform nil)
+
+   (ref-cls :allocation :class :initform gh-repos-ref))
   "Git pull requests API")
+
+(defmethod gh-object-read-into ((req gh-pulls-request) data)
+  (call-next-method)
+  (with-slots (merged mergeable
+                      merged-by comments commits additions
+                      deletions changed-files head base)
+      req
+    (setq merged (gh-read data 'merged)
+          mergeable (gh-read data 'mergeable)
+          merged-by (gh-read data 'merged_by)
+          comments (gh-read data 'comments)
+          commits (gh-read data 'commits)
+          additions (gh-read data 'additions)
+          deletions (gh-read data 'deletions)
+          changed-files (gh-read data 'changed_files)
+          head (gh-object-read (or (oref req :head)
+                                    (oref req ref-cls))
+                                (gh-read data 'head))
+          base (gh-object-read (or (oref req :base)
+                                    (oref req ref-cls))
+                                (gh-read data 'base)))))
 
 (defmethod gh-pulls-req-to-new ((req gh-pulls-request))
   (let ((head (oref req :head))
@@ -96,74 +133,26 @@
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
 
-(defun gh-pulls-ref-read (reference &optional into)
-  (let ((target (or into (gh-pulls-ref "ref"))))
-    (with-slots (label ref sha user repo)
-        target
-      (setq label (gh-read reference 'label)
-            ref (gh-read reference 'ref)
-            sha (gh-read reference 'sha)
-            user (gh-user-read (gh-read reference 'user) (oref target :user))
-            repo (gh-repos-repo-read (gh-read reference 'repo)
-                                     (oref target :repo))))
-    target))
-
-(defun gh-pulls-request-read (req &optional into)
-  (let ((target (or into (gh-pulls-request "request"))))
-    (with-slots (url html-url diff-url patch-url issue-url number
-                     state title body created-at updated-at
-                     closed-at merged-at merged mergeable
-                     merged-by comments commits additions
-                     deletions changed-files head base)
-        target
-      (setq url (gh-read req 'url)
-            html-url (gh-read req 'html_url)
-            diff-url (gh-read req 'diff_url)
-            patch-url (gh-read req 'patch_url)
-            issue-url (gh-read req 'issue_url)
-            number (gh-read req 'number)
-            state (gh-read req 'state)
-            title (gh-read req 'title)
-            body (gh-read req 'body)
-            created-at (gh-read req 'created_at)
-            updated-at (gh-read req 'updated_at)
-            closed-at (gh-read req 'closed_at)
-            merged-at (gh-read req 'merged_at)
-            merged (gh-read req 'merged)
-            mergeable (gh-read req 'mergeable)
-            merged-by (gh-read req 'merged_by)
-            comments (gh-read req 'comments)
-            commits (gh-read req 'commits)
-            additions (gh-read req 'additions)
-            deletions (gh-read req 'deletions)
-            changed-files (gh-read req 'changed_files)
-            head (gh-pulls-ref-read (gh-read req 'head) (oref target :head))
-            base (gh-pulls-ref-read (gh-read req 'base) (oref target :base))))
-    target))
-
-(defun gh-pulls-requests-read (reqs)
-  (mapcar 'gh-pulls-request-read reqs))
-
 (defmethod gh-pulls-list ((api gh-pulls-api) user repo)
   (gh-api-authenticated-request
-   api 'gh-pulls-requests-read "GET"
+   api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
 
 (defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
-   api 'gh-pulls-request-read "GET"
+   api (gh-object-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
 (defmethod gh-pulls-new ((api gh-pulls-api) user repo req)
   (gh-api-authenticated-request
-   api 'gh-pulls-request-read "POST" (format "/repos/%s/%s/pulls"
-                                             user repo)
+   api (gh-object-reader (oref api req-cls)) "POST"
+   (format "/repos/%s/%s/pulls" user repo)
    (gh-pulls-req-to-new req)))
 
 (defmethod gh-pulls-update ((api gh-pulls-api) user repo id req)
   (gh-api-authenticated-request
-   api 'gh-pulls-request-read "PATCH" (format "/repos/%s/%s/pulls/%s"
-                                              user repo id)
+   api (gh-object-reader (oref api req-cls)) "PATCH"
+   (format "/repos/%s/%s/pulls/%s" user repo id)
    (gh-pulls-req-to-update req)))
 
 (provide 'gh-pulls)

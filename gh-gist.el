@@ -36,15 +36,26 @@
 
 ;;;###autoload
 (defclass gh-gist-api (gh-api-v3)
-  ()
+  ((gist-cls :allocation :class :initform gh-gist-gist))
   "Gist API")
 
 ;;;###autoload
-(defclass gh-gist-gist-stub ()
+(defclass gh-gist-gist-stub (gh-object)
   ((files :initarg :files :type list :initform nil)
    (public :initarg :public)
-   (description :initarg :description))
+   (description :initarg :description)
+
+   (file-cls :allocation :class :initform gh-gist-gist-file))
   "Class for user-created gist objects")
+
+(defmethod gh-object-read-into ((stub gh-gist-gist-stub) data)
+  (call-next-method)
+  (with-slots (files public description)
+      stub
+    (setq files (gh-object-list-read (oref stub file-cls)
+                                     (gh-read data 'files))
+          public (gh-read data 'public)
+          description (gh-read data 'description))))
 
 ;;;###autoload
 (defclass gh-gist-gist (gh-gist-gist-stub)
@@ -58,54 +69,45 @@
    (id :initarg :id :type string)
    (url :initarg :url :type string)
    (history :initarg :history :initform nil)
-   (forks :initarg :forks :initform nil))
+   (forks :initarg :forks :initform nil)
+
+   (user-cls :allocation :class :initform gh-user))
   "Gist object")
 
-(defclass gh-gist-gist-file ()
+(defmethod gh-object-read-into ((gist gh-gist-gist) data)
+  (call-next-method)
+  (with-slots (date update push-url pull-url html-url comments user
+                    id url history forks)
+      gist
+    (setq date (gh-read data 'created_at)
+          update (gh-read data 'updated_at)
+          push-url (gh-read data 'git_push_url)
+          pull-url (gh-read data 'git_pull_url)
+          html-url (gh-read data 'html_url)
+          comments (gh-read data 'comments)
+          user (gh-object-read (or (oref gist :user)
+                                    (oref gist user-cls))
+                                (gh-read data 'user))
+          id (gh-read data 'id)
+          url (gh-read data 'url)
+          history (gh-read data 'history)
+          forks (gh-read data 'forks))))
+
+(defclass gh-gist-gist-file (gh-object)
   ((filename :initarg :filename)
    (size :initarg :size)
    (url :initarg :url)
    (content :initarg :content)))
 
-(defun gh-gist-read-list (gists)
-  (mapcar 'gh-gist-read gists))
-
-(defun gh-gist-file-read (file &optional into)
-  (let* ((label (car file))
-         (file (cdr file))
-         (target (or into (gh-gist-gist-file label))))
-    (with-slots (filename size url content)
-        target
-      (setq
-       filename (gh-read file 'filename)
-       size (gh-read file 'size)
-       url (gh-read file 'raw_url)
-       content (gh-read file 'content)))
-    target))
-
-(defun gh-gist-files-read (files)
-  (mapcar 'gh-gist-file-read files))
-
-(defun gh-gist-read (gist &optional into)
-  (let ((target (or into (gh-gist-gist "gist"))))
-    (with-slots (date update push-url pull-url html-url comments files user
-                      public description id url history forks)
-        target
-      (setq date (gh-read gist 'created_at)
-            update (gh-read gist 'updated_at)
-            push-url (gh-read gist 'git_push_url)
-            pull-url (gh-read gist 'git_pull_url)
-            html-url (gh-read gist 'html_url)
-            comments (gh-read gist 'comments)
-            files (gh-gist-files-read (gh-read gist 'files))
-            user (gh-user-read (gh-read gist 'user) (oref target :user))
-            public (gh-read gist 'public)
-            description (gh-read gist 'description)
-            id (gh-read gist 'id)
-            url (gh-read gist 'url)
-            history (gh-read gist 'history)
-            forks (gh-read gist 'forks)))
-    target))
+(defmethod gh-object-read-into ((file gh-gist-gist-file) data)
+  (call-next-method)
+  (with-slots (filename size url content)
+      file
+    (setq
+     filename (gh-read data 'filename)
+     size (gh-read data 'size)
+     url (gh-read data 'raw_url)
+     content (gh-read data 'content))))
 
 (defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
   `(("description" . ,(oref gist :description))
@@ -121,38 +123,39 @@
 
 (defmethod gh-gist-list ((api gh-gist-api) &optional username)
   (gh-api-authenticated-request
-   api 'gh-gist-read-list "GET"
+   api (gh-object-list-reader (oref api gist-cls)) "GET"
    (format "/users/%s/gists" (or username (gh-api-get-username api)))))
 
 (defmethod gh-gist-list-public ((api gh-gist-api))
   (gh-api-authenticated-request
-   api 'gh-gist-read-list "GET" "/gists/public"))
+   api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/public"))
 
 (defmethod gh-gist-list-starred ((api gh-gist-api))
   (gh-api-authenticated-request
-   api 'gh-gist-read-list "GET" "/gists/starred"))
+   api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/starred"))
 
 (defmethod gh-gist-get ((api gh-gist-api) gist-or-id)
   (let (id transformer)
     (if (stringp gist-or-id)
         (setq id gist-or-id
-              transformer 'gh-gist-read)
+              transformer (gh-object-reader (oref api gist-cls)))
       (setq id (oref gist-or-id :id)
-            transformer (lambda (g)
-                          (gh-gist-read g gist-or-id))))
+            transformer (gh-object-reader gist-or-id)))
     (gh-api-authenticated-request
      api transformer "GET" (format "/gists/%s" id))))
 
 (defmethod gh-gist-new ((api gh-gist-api) gist-stub)
   (gh-api-authenticated-request
-   api 'gh-gist-read "POST" (format "/users/%s/gists"
-                                    (gh-api-get-username api))
+   api (gh-object-reader (oref api gist-cls)) "POST"
+   (format "/users/%s/gists"
+           (gh-api-get-username api))
    (gh-gist-gist-to-obj gist-stub)))
 
 (defmethod gh-gist-edit ((api gh-gist-api) gist)
   (gh-api-authenticated-request
-   api 'gh-gist-read "PATCH" (format "/gists/%s"
-                                     (oref gist :id))
+   api (gh-object-reader (oref api gist-cls)) "PATCH"
+   (format "/gists/%s"
+           (oref gist :id))
    (gh-gist-gist-to-obj gist)))
 
 (defmethod gh-gist-set-star ((api gh-gist-api) gist-or-id star)
@@ -172,7 +175,8 @@
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api 'gh-gist-read "POST" (format "/gists/%s/fork" id))))
+     api (gh-object-reader (oref api gist-cls)) "POST"
+     (format "/gists/%s/fork" id))))
 
 (defmethod gh-gist-delete ((api gh-gist-api) gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id

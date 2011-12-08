@@ -31,25 +31,41 @@
 
 (require 'eieio)
 
-(defclass gh-user ()
+(defclass gh-object ()
+  ())
+
+(defmethod gh-object-read :static ((obj gh-object) data)
+  (let ((target (if (object-p obj) obj
+                  (make-instance obj))))
+    (gh-object-read-into target data)
+    target))
+
+(defmethod gh-object-reader :static ((obj gh-object))
+  (apply-partially 'gh-object-read obj))
+
+(defmethod gh-object-list-read :static ((obj gh-object) data)
+  (mapcar (gh-object-reader obj) data))
+
+(defmethod gh-object-list-reader :static ((obj gh-object))
+  (apply-partially 'gh-object-list-read obj))
+
+(defmethod gh-object-read-into ((obj gh-object) data))
+
+(defclass gh-user (gh-object)
   ((login :initarg :login)
    (id :initarg :id)
    (gravatar-url :initarg :gravatar-url)
    (url :initarg :url))
   "Github user object")
 
-(defun gh-user-read (user &optional into)
-  (let ((target (or into (gh-user "user"))))
-    (with-slots (login id gravatar-url url)
-        target
-      (setq login (gh-read user 'login)
-            id (gh-read user 'id)
-            gravatar-url (gh-read user 'gravatar_url)
-            url (gh-read user 'url)))
-    target))
-
-(defun gh-user-read-list (users)
-  (mapcar 'gh-user-read users))
+(defmethod gh-object-read-into ((user gh-user) data)
+  (call-next-method)
+  (with-slots (login id gravatar-url url)
+      user
+    (setq login (gh-read data 'login)
+          id (gh-read data 'id)
+          gravatar-url (gh-read data 'gravatar_url)
+          url (gh-read data 'url))))
 
 (defun gh-read (obj field)
   (cdr (assoc field obj)))
