@@ -174,7 +174,7 @@
                    (member method (oref cache safe-methods))
                    (list resource
                          method
-                         transformer)))
+                         (sha1 (format "%s" transformer)))))
          (value (and key (pcache-get cache key)))
          (req
           (and (not value) ;; we'll need the req only if value's not in cache
