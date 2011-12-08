@@ -37,10 +37,6 @@
    (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
    (invalidation-chain :allocation :class :initform nil)))
 
-(defmethod pcache-clear ((cache gh-cache))
-  (oset cache :entries (make-hash-table :test 'equal))
-  (pcache-save cache))
-
 (defmethod pcache-invalidate :after ((cache gh-cache) key)
   (let ((resource (car key)))
     (pcache-map cache #'(lambda (k v)
