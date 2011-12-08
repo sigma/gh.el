@@ -48,16 +48,19 @@
   "Github API")
 
 (defmethod constructor :static ((api gh-api) newname &rest args)
-  (let* ((obj (call-next-method))
-         (cache (oref obj :cache)))
+  (call-next-method))
+
+(defmethod gh-api-set-default-auth ((api gh-api) auth)
+  (let ((auth (or (oref api :auth) auth))
+        (cache (oref api :cache)))
+    (oset api :auth auth)
     (unless (or (null cache)
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
-      (oset obj :cache (funcall (oref obj cache-cls)
+      (oset api :cache (funcall (oref api cache-cls)
                                 (format "gh/%s/%s"
-                                        (symbol-name api)
-                                        (oref (oref obj :auth) :username)))))
-    obj))
+                                        (symbol-name (object-class api))
+                                        (gh-api-get-username api)))))))
 
 (defmethod gh-api-expand-resource ((api gh-api)
                                    resource)
@@ -79,8 +82,7 @@
 
 (defmethod constructor :static ((api gh-api-v2) newname &rest args)
   (let ((obj (call-next-method)))
-    (or (oref obj :auth)
-        (oset obj :auth (funcall gh-api-v2-authenticator "auth")))
+    (gh-api-set-default-auth obj (funcall gh-api-v2-authenticator "auth"))
     obj))
 
 ;;;###autoload
@@ -97,8 +99,7 @@
 
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
   (let ((obj (call-next-method)))
-    (or (oref obj :auth)
-        (oset obj :auth (funcall gh-api-v3-authenticator "auth")))
+    (gh-api-set-default-auth obj (funcall gh-api-v3-authenticator "auth"))
     obj))
 
 (defclass gh-api-request ()
