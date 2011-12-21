@@ -137,10 +137,11 @@
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
                                  &rest caps)
-  (let ((has_issues (plist-member caps :issues))
+  (let ((name (plist-get caps :name))
+	(has_issues (plist-member caps :issues))
         (has_wiki (plist-member caps :wiki))
         (has_downloads (plist-member caps :downloads)))
-    `(("name" . ,(oref repo :name))
+    `(("name" . ,(or name (oref repo :name)))
       ("homepage" . ,(oref repo :homepage))
       ("description" . ,(oref repo :description))
       ("public" . ,(not (oref repo :private)))
