@@ -89,6 +89,7 @@
    (mergeable :initarg :mergeable)
    (merged-by :initarg :merged-by)
    (comments :initarg :comments)
+   (user :initarg :user :initform nil)
    (commits :initarg :commits)
    (additions :initarg :additions)
    (deletions :initarg :deletions)
@@ -96,28 +97,32 @@
    (head :initarg :head :initform nil)
    (base :initarg :base :initform nil)
 
-   (ref-cls :allocation :class :initform gh-repos-ref))
+   (ref-cls :allocation :class :initform gh-repos-ref)
+   (user-cls :allocation :class :initform gh-user))
   "Git pull requests API")
 
 (defmethod gh-object-read-into ((req gh-pulls-request) data)
   (call-next-method)
   (with-slots (merged mergeable
-                      merged-by comments commits additions
+                      merged-by comments user commits additions
                       deletions changed-files head base)
       req
     (setq merged (gh-read data 'merged)
           mergeable (gh-read data 'mergeable)
           merged-by (gh-read data 'merged_by)
           comments (gh-read data 'comments)
+          user (gh-object-read (or (oref req :user)
+                                   (oref req user-cls))
+                               (gh-read data 'user))
           commits (gh-read data 'commits)
           additions (gh-read data 'additions)
           deletions (gh-read data 'deletions)
           changed-files (gh-read data 'changed_files)
           head (gh-object-read (or (oref req :head)
-                                    (oref req ref-cls))
+                                   (oref req ref-cls))
                                 (gh-read data 'head))
           base (gh-object-read (or (oref req :base)
-                                    (oref req ref-cls))
+                                   (oref req ref-cls))
                                 (gh-read data 'base)))))
 
 (defmethod gh-pulls-req-to-new ((req gh-pulls-request))
