@@ -42,9 +42,9 @@
 ;;;###autoload
 (defclass gh-repos-repo-stub (gh-object)
   ((name :initarg :name)
-   (description :initarg :description :initform nil)
-   (homepage :initarg :homepage :initform nil)
-   (private :initarg :private :initform nil))
+   (description :initarg :description)
+   (homepage :initarg :homepage)
+   (private :initarg :private))
   "Class for user-created repository objects")
 
 (defmethod gh-object-read-into ((stub gh-repos-repo-stub) data)
@@ -137,13 +137,17 @@
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
                                  &rest caps)
-  (let ((has_issues (plist-member caps :issues))
+  (let ((name (plist-get caps :name))
+	(has_issues (plist-member caps :issues))
         (has_wiki (plist-member caps :wiki))
         (has_downloads (plist-member caps :downloads)))
-    `(("name" . ,(oref repo :name))
-      ("homepage" . ,(oref repo :homepage))
-      ("description" . ,(oref repo :description))
-      ("public" . ,(not (oref repo :private)))
+    `(("name" . ,(or name (oref repo :name)))
+      ,@(when (slot-boundp repo :homepage)
+	  (list (cons "homepage" (oref repo :homepage))))
+      ,@(when (slot-boundp repo :description)
+	  (list (cons "description" (oref repo :description))))
+      ,@(when (slot-boundp repo :private)
+	  (list (cons "public" (not (oref repo :private)))))
       ,@(when has_issues
           (list (cons "has_issues" (plist-get caps :issues))))
       ,@(when has_wiki
