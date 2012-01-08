@@ -164,12 +164,11 @@
                                  (prog1 (nreverse res) (setcdr res list)))
                              (car list))))
     (let ((data (oref resp :data)))
-      (when data
-        (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
-          (if (or (functionp cb) (symbolp cb))
-              (funcall cb data)
-            (apply (car cb) data (cdr cb)))
-          (object-remove-from-list resp :callbacks cb))))))
+      (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
+        (if (or (functionp cb) (symbolp cb))
+            (funcall cb data)
+          (apply (car cb) data (cdr cb)))
+        (object-remove-from-list resp :callbacks cb)))))
 
 (defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
   (object-add-to-list resp :callbacks callback t)
