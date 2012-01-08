@@ -44,6 +44,7 @@
    (base :initarg :base :type string)
    (auth :initarg :auth :initform nil)
    (data-format :initarg :data-format)
+   (num-retries :initarg :num-retries :initform 0)
    (cache-cls :initform gh-cache :allocation :class))
   "Github API")
 
@@ -132,18 +133,28 @@
 (defmethod gh-api-response-init ((resp gh-api-response)
                                  buffer &optional transform)
   (declare (special url-http-end-of-headers))
-  (with-current-buffer buffer
-    (goto-char (1+ url-http-end-of-headers))
-    (oset resp :data (let ((raw (buffer-substring (point) (point-max))))
-                       (if transform
-                           (funcall transform (gh-api-json-decode raw))
-                         raw))))
-  (kill-buffer buffer)
+  (unwind-protect
+      (with-current-buffer buffer
+        (goto-char (1+ url-http-end-of-headers))
+        (oset resp :data (let ((raw (buffer-substring (point) (point-max))))
+                           (if transform
+                               (funcall transform (gh-api-json-decode raw))
+                             raw))))
+    (kill-buffer buffer))
   (gh-api-response-run-callbacks resp)
   resp)
 
-(defun gh-api-set-response (status resp transform)
-  (gh-api-response-init resp (current-buffer) transform))
+(defun gh-api-set-response (status retry-data)
+  (destructuring-bind (api req transform resp num) retry-data
+    (condition-case err
+        (gh-api-response-init resp (current-buffer) transform)
+      (error
+       (if (or (null num) (zerop num))
+           (signal (car err) (cdr err))
+         (message "[gh-api] retrying request %s %s"
+                  (oref req :method) (oref req :url))
+         (let ((num (1- num)))
+           (gh-api-run-request api req transform resp num)))))))
 
 (defmethod gh-api-response-run-callbacks ((resp gh-api-response))
   (flet ((gh-api-copy-list (list)
@@ -209,19 +220,22 @@
           (t ;; no cache involved
            (gh-api-run-request api req transformer)))))
 
-(defmethod gh-api-run-request ((api gh-api) req transformer)
+(defmethod gh-api-run-request ((api gh-api) req transformer &optional resp num)
   (let ((url-request-method (oref req :method))
         (url-request-data (oref req :data))
         (url-request-extra-headers (oref req :headers))
         (url (oref req :url)))
     (if (oref api :sync)
-        (let ((resp (gh-api-response "sync")))
-          (gh-api-response-init resp
-                                (url-retrieve-synchronously url)
-                                transformer)
+        (let* ((resp (or resp (gh-api-response "sync")))
+               (retry-data (list api req transformer resp
+                                 (or num (oref api :num-retries)))))
+          (with-current-buffer (url-retrieve-synchronously url)
+            (gh-api-set-response nil retry-data))
           resp)
-      (let ((resp (gh-api-response "async")))
-        (url-retrieve url 'gh-api-set-response (list resp transformer))
+      (let* ((resp (or resp (gh-api-response "async")))
+             (retry-data (list api req transformer resp
+                               (or num (oref api :num-retries)))))
+        (url-retrieve url 'gh-api-set-response (list retry-data))
         resp))))
 
 (provide 'gh-api)
