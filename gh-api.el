@@ -185,9 +185,11 @@
                    (list resource
                          method
                          (sha1 (format "%s" transformer)))))
-         (value (and key (pcache-get cache key)))
+         (has-value (and key (pcache-has cache key)))
+         (value (and has-value (pcache-get cache key)))
          (req
-          (and (not value) ;; we'll need the req only if value's not in cache
+          (and (not has-value) ;; we'll need the req only if value's not
+                               ;; already in cache
                (gh-auth-modify-request
                 (oref api :auth)
                 (gh-api-request "request"
@@ -204,7 +206,7 @@
                                           (and (eq fmt :form)
                                                (gh-api-form-encode data))
                                           ""))))))
-    (cond (value ;; got value from cache
+    (cond (has-value ;; got value from cache
            (gh-api-response "cached" :data value))
           (key ;; no value, but cache exists and method is safe
            (let ((resp (gh-api-run-request api req transformer)))
