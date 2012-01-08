@@ -106,8 +106,7 @@
           (< time (+ ttl (oref entry :timestamp)))))))
 
 (defmethod pcache-get ((cache pcache-repository) key &optional default)
-  (let* ((time (float-time (current-time)))
-         (table (oref cache :entries))
+  (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (if entry
         (if (pcache-entry-valid-p entry)
@@ -115,6 +114,14 @@
           (remhash key table)
           default)
       default)))
+
+(defmethod pcache-has ((cache pcache-repository) key)
+  (let* ((default (make-symbol ":nil"))
+         (table (oref cache :entries))
+         (entry (gethash key table default)))
+    (if (eq entry default) nil
+      (if (pcache-entry-valid-p entry)
+          t nil))))
 
 (defmethod pcache-put ((cache pcache-repository) key value &optional ttl)
   (let ((table (oref cache :entries))
