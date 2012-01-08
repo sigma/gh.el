@@ -4,15 +4,16 @@ SNAPDIR = $(PKGNAME)-$(VERSION)
 
 PKGDEF    = $(PKGNAME)-pkg.el
 AUTODEF   = $(PKGNAME)-auto.el
-SPECIAL   = $(AUTODEF)
+SPECIAL   = $(PKGDEF) $(AUTODEF)
 ALLSOURCE = $(wildcard *.el)
 
 SOURCE  = $(filter-out $(SPECIAL), $(ALLSOURCE))
-TARGET  = $(patsubst %.el,%.elc,$(SPECIAL) $(SOURCE))
+TARGET  = $(patsubst %.el,%.elc, $(SOURCE))
 MISC    = README
 
 EMACS    = emacs
 SITEFLAG = --no-site-file
+EFLAGS   =
 
 PREFIX   = /usr/local
 ELISPDIR = $(PREFIX)/share/emacs/site-lisp/$(PKGNAME)
@@ -37,14 +38,14 @@ $(AUTODEF): $(PKGNAME)-auto.in $(SOURCE)
 		$(shell pwd | sed -e 's|^/cygdrive/\([a-z]\)|\1:|')/$(AUTODEF) .
 
 %.elc: %.el
-	@$(EMACS) -q $(SITEFLAG) -batch -L . \
+	@$(EMACS) -q $(SITEFLAG) $(EFLAGS) -batch -L . \
 		-f batch-byte-compile $<
 
 clean:
 	rm -f *~ $(TARGET) $(PKGNAME).info $(PKGNAME).html
 
 realclean: clean docsclean
-	rm -f $(SPECIAL)
+	rm -f $(AUTODEF)
 
 install-bin: lisp
 	install -d $(ELISPDIR)
@@ -60,19 +61,21 @@ release: autoloads distclean
 	cp $(SPECIAL) $(SOURCE) ../$(SNAPDIR)
 	(cd .. && tar cjf $(PKGNAME)-$(VERSION).tar.bz2 $(SNAPDIR)/*)
 
-elpa:
+elpa: info
 	rm -fR $(ELPA)/$(SNAPDIR)
 	rm -f $(ELPA)/$(PKGNAME)-$(VERSION).tar
 	mkdir -p $(ELPA)/$(SNAPDIR) && chmod 0755 $(ELPA)/$(SNAPDIR)
 	cp $(SOURCE) $(MISC) $(ELPA)/$(SNAPDIR)
+	cp docs/build/texinfo/$(PKGNAME).info $(ELPA)/$(SNAPDIR)
 	sed -r -e "s/%VERSION%/$(VERSION)/g" < $(PKGDEF) \
 		> $(ELPA)/$(SNAPDIR)/$(PKGDEF)
 	(cd $(ELPA) && tar cf $(PKGNAME)-$(VERSION).tar $(SNAPDIR))
 
-info: doc/$(PKGNAME).info
+info:
+	$(MAKE) -C docs info
 
-html: doc/$(PKGNAME).texi
-	$(TEXI2HTML) --no-split -o doc/$(PKGNAME).html doc/$(PKGNAME).texi
+html:
+	$(MAKE) -C docs html
 
 docs: info html
 
