@@ -175,6 +175,16 @@
            (oref repo-stub :name))
    (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
+(defmethod gh-repos-repo-rename ((api gh-repos-api) repo-stub new-name
+                                 &optional user)
+  (let ((new-stub (gh-repos-repo-stub "repo" :name new-name)))
+    (gh-api-authenticated-request
+     api (gh-object-reader (oref api repo-cls)) "PATCH"
+     (format "/repos/%s/%s"
+             (or user (gh-api-get-username api))
+             (oref repo-stub :name))
+     (gh-repos-repo-to-obj new-stub))))
+
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api repo-cls)) "GET"
