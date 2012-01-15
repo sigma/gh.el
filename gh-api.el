@@ -110,7 +110,8 @@
    (data :initarg :data :initform "" :type string)))
 
 (defclass gh-api-response ()
-  ((data :initarg :data :initform nil)
+  ((data-received :initarg :data-received :initform nil)
+   (data :initarg :data :initform nil)
    (callbacks :initarg :callbacks :initform nil))
   "Class for API responses")
 
@@ -139,7 +140,8 @@
         (oset resp :data (let ((raw (buffer-substring (point) (point-max))))
                            (if transform
                                (funcall transform (gh-api-json-decode raw))
-                             raw))))
+                             raw)))
+        (oset resp :data-received t))
     (kill-buffer buffer))
   (gh-api-response-run-callbacks resp)
   resp)
@@ -168,11 +170,14 @@
         (if (or (functionp cb) (symbolp cb))
             (funcall cb data)
           (apply (car cb) data (cdr cb)))
-        (object-remove-from-list resp :callbacks cb)))))
+        (object-remove-from-list resp :callbacks cb))))
+  resp)
 
 (defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
   (object-add-to-list resp :callbacks callback t)
-  (gh-api-response-run-callbacks resp))
+  (if (oref resp :data-received)
+    (gh-api-response-run-callbacks resp)
+    resp))
 
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
@@ -207,7 +212,7 @@
                                                (gh-api-form-encode data))
                                           ""))))))
     (cond (has-value ;; got value from cache
-           (gh-api-response "cached" :data value))
+           (gh-api-response "cached" :data-received t :data value))
           (key ;; no value, but cache exists and method is safe
            (let ((resp (gh-api-run-request api req transformer)))
              (gh-api-add-response-callback
