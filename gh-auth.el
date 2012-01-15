@@ -50,18 +50,25 @@
                   (setq gh-auth-password (gh-config "password")))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
-      (setq gh-auth-password pass)
       (when remember
+        (setq gh-auth-password pass)
         (gh-set-config "password" pass)))
     pass))
+
+(declare-function 'gh-oauth-auth-new "gh-oauth")
 
 (defun gh-auth-get-oauth-token ()
   (let ((token (or gh-auth-oauth-token
                    (setq gh-auth-oauth-token (gh-config "token")))))
     (when (not token)
-      (setq token (read-string "GitHub OAuth token: "))
-      (setq gh-auth-oauth-token token)
-      (gh-set-config "token" token))
+      (let* ((api (make-instance 'gh-oauth-api))
+             (tok (and (fboundp 'gh-oauth-auth-new)
+                       (oref (oref (funcall 'gh-oauth-auth-new api
+                                            '(user repo gist)) :data)
+                             :token))))
+        (setq token (or tok (read-string "GitHub OAuth token: ")))
+        (setq gh-auth-oauth-token token)
+        (gh-set-config "token" token)))
     token))
 
 ;;;###autoload
@@ -117,4 +124,6 @@
   req)
 
 (provide 'gh-auth)
+;; to avoid circular dependencies...
+(require 'gh-oauth)
 ;;; gh-auth.el ends here
