@@ -132,7 +132,7 @@
 
 (defmethod gh-repos-org-list ((api gh-repos-api) org)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls))
+   api (gh-object-list-reader (oref api repo-cls)) "GET"
    (format "/orgs/%s/repos" org)))
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
