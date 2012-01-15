@@ -45,13 +45,14 @@
       (gh-set-config "user" user))
     user))
 
-(defun gh-auth-get-password ()
+(defun gh-auth-get-password (remember)
   (let ((pass (or gh-auth-password
                   (setq gh-auth-password (gh-config "password")))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
       (setq gh-auth-password pass)
-      (gh-set-config "password" pass))
+      (when remember
+        (gh-set-config "password" pass)))
     pass))
 
 (defun gh-auth-get-oauth-token ()
@@ -76,13 +77,14 @@
 
 ;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
-  ((password :initarg :password :protection :private :initform nil))
+  ((password :initarg :password :protection :private :initform nil)
+   (remember :allocation :class :initform t))
   "Password-based authenticator")
 
 (defmethod constructor :static ((auth gh-password-authenticator) newname &rest args)
   (let ((obj (call-next-method)))
     (or (oref obj :password)
-        (oset obj :password (gh-auth-get-password)))
+        (oset obj :password (gh-auth-get-password (oref obj remember))))
     obj))
 
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req))
