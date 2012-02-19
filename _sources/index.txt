@@ -10,6 +10,7 @@ gh.el is a low-level client library to interact with the
 `GitHub API <http://developer.github.com/>`.
 
 Main features include:
+
 * synchronous and asynchronous modes
 * flexible authentication
 * allows for multiple parallel sessions
@@ -19,6 +20,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   intro
 
 
 Indices and tables
