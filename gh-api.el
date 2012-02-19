@@ -29,6 +29,7 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'url)
 (require 'json)
 (require 'gh-auth)
 (require 'gh-cache)
