@@ -59,7 +59,7 @@
 
 (defun gh-auth-get-oauth-token ()
   (let ((token (or gh-auth-oauth-token
-                   (setq gh-auth-oauth-token (gh-config "token")))))
+                   (setq gh-auth-oauth-token (gh-config "oauth-token")))))
     (when (not token)
       (let* ((api (make-instance 'gh-oauth-api))
              (tok (and (fboundp 'gh-oauth-auth-new)
@@ -68,7 +68,7 @@
                              :token))))
         (setq token (or tok (read-string "GitHub OAuth token: ")))
         (setq gh-auth-oauth-token token)
-        (gh-set-config "token" token)))
+        (gh-set-config "oauth-token" token)))
     token))
 
 ;;;###autoload
