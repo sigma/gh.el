@@ -29,6 +29,9 @@
 (eval-when-compile
   (require 'cl))
 
+;;;###autoload
+(require 'eieio)
+
 (require 'url)
 (require 'json)
 (require 'gh-auth)

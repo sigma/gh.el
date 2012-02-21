@@ -29,6 +29,7 @@
 (eval-when-compile
   (require 'cl))
 
+;;;###autoload
 (require 'eieio)
 
 (defclass gh-object ()

@@ -25,7 +25,13 @@
 ;;
 
 ;;; Code:
+
+(eval-when-compile
+  (require 'cl))
+
+;;;###autoload
 (require 'eieio)
+
 (require 'gh-common)
 
 (defgroup gh-auth nil

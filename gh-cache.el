@@ -29,7 +29,9 @@
 (eval-when-compile
   (require 'cl))
 
+;;;###autoload
 (require 'eieio)
+
 (require 'pcache)
 
 (defclass gh-cache (pcache-repository)
