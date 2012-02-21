@@ -34,7 +34,7 @@
 (require 'gh-auth)
 (require 'gh-cache)
 
-(require 'logger)
+(require 'logito)
 
 (defgroup gh-api nil
   "Github API."
@@ -52,8 +52,8 @@
    (cache-cls :initform gh-cache :allocation :class))
   "Github API")
 
-(defmethod logger-log ((api gh-api) level string &rest objects)
-  (apply 'logger-log (oref api :log) level string objects))
+(defmethod logito-log ((api gh-api) level tag string &rest objects)
+  (apply 'logito-log (oref api :log) level tag string objects))
 
 (defmethod constructor :static ((api gh-api) newname &rest args)
   (call-next-method))
@@ -160,7 +160,7 @@
       (error
        (if (or (null num) (zerop num))
            (signal (car err) (cdr err))
-         (logger:info "Retrying request %s %s"
+         (logito:info "Retrying request %s %s"
                       (oref req :method) (oref req :url))
          (let ((num (1- num)))
            (gh-api-run-request api req transform resp num)))))))
@@ -238,7 +238,7 @@
         (url-request-data (oref req :data))
         (url-request-extra-headers (oref req :headers))
         (url (oref req :url)))
-    (logger:debug api "Request: %s %s %s"
+    (logito:debug api "Request: %s %s %s"
                   url-request-method
                   url
                   url-request-extra-headers)
