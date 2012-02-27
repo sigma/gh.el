@@ -148,9 +148,7 @@
 
 (defmethod gh-gist-new ((api gh-gist-api) gist-stub)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api gist-cls)) "POST"
-   (format "/users/%s/gists"
-           (gh-api-get-username api))
+   api (gh-object-reader (oref api gist-cls)) "POST" "/gists"
    (gh-gist-gist-to-obj gist-stub)))
 
 (defmethod gh-gist-edit ((api gh-gist-api) gist)
