@@ -36,10 +36,17 @@
 
 (require 'gh-repos)
 
+
+;; (defclass gh-issues-cache (gh-cache)
+;;   ((invalidation-chain :allocation :class
+;;                        :initform '(("^/repos/.*/.*/pulls$" . "\0")
+;;                                    ("^/repos/.*/.*/pulls/.*$" . "\0")))))
+
 (defclass gh-issues-api (gh-api-v3)
-  ((assignee-cls :allocation :class :initform gh-assignee)
-   (ref-cls :allocation :class :initform gh-repos-ref)
-   (user-cls :allocation :class :initform gh-user)
+  (;(cache-cls :allocation :class :initform gh-issues-cache)
+   ;; (assignee-cls :allocation :class :initform gh-assignee)
+   ;; (ref-cls :allocation :class :initform gh-repos-ref)
+   ;; (user-cls :allocation :class :initform gh-user)
    (req-cls :allocation :class :initform gh-issues-request))
   "Github Issues api")
 
@@ -90,6 +97,9 @@
           closed_issues (gh-read data 'closed_issues)
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
+
+(defun issues-get-api (&optional sync)
+  (gh-issues-api "api" :sync sync :cache nil :num-retries 1))
 
 (defmethod gh-issues-list ((api gh-issues-api) user repo)
   (gh-api-authenticated-request
