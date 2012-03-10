@@ -98,7 +98,7 @@
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
 
-(defun issues-get-api (&optional sync)
+(defun gh-issues-api2 (&optional sync)
   (gh-issues-api "api" :sync sync :cache nil :num-retries 1))
 
 (defmethod gh-issues-list ((api gh-issues-api) user repo)
