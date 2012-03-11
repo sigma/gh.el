@@ -47,10 +47,10 @@
    ;; (assignee-cls :allocation :class :initform gh-assignee)
    ;; (ref-cls :allocation :class :initform gh-repos-ref)
    ;; (user-cls :allocation :class :initform gh-user)
-   (req-cls :allocation :class :initform gh-issues-request))
+   (req-cls :allocation :class :initform gh-issue))
   "Github Issues api")
 
-(defclass gh-issues-request (gh-object)
+(defclass gh-issue (gh-object)
   ((url :initarg :url)
    (html-url :initarg :html-url)
    (number :initarg :number)
@@ -72,7 +72,7 @@
    (name :initarg :name)
    (color :initarg :color)))
 
-(defmethod gh-object-read-into ((issue gh-issues-request) data)
+(defmethod gh-object-read-into ((issue gh-issue) data)
   (call-next-method)
   (with-slots (url html-url number state title body
                    user labels assignee milestone open_issues
@@ -105,6 +105,32 @@
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/issues" user repo)))
+
+(defmethod gh-issues-get ((api gh-issues-api) user repo id)
+  (gh-authenticated-request
+   api (gh-object-reader (oref api req-cls)) "GET"
+   (format "/repos/%s/%s/issues/%s" user repo id)))
+
+(defmethod gh-issues-req-to-update ((req gh-issue))
+  `(("title" . ,(oref req title))
+    ("body" . ,(oref req body))
+    ("assignee" . ,(oref (oref req assignee) login) )
+    ("milestone" . ,(oref req milestone) )
+))
+
+(defmethod gh-issues-update ((api gh-issues-api) user repo id req)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api req-cls)) "PATCH"
+   (format "/repos/%s/%s/issues/%s" user repo id)
+   (gh-issues-req-to-update req)))
+
+(defmethod gh-issues-new ((api gh-issues-api) user repo issue)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api req-cls)) "POST"
+   (format "/repos/%s/%s/issues" user repo)
+   (gh-issues-req-to-update issue)))
+
+
 
 (provide 'gh-issues)
 ;;; gh-issues.el ends here
