@@ -20,7 +20,13 @@
 
 ;;; Commentary:
 
-;;
+;; Basic usage:
+
+;; (setf api (gh-issues-api "api" :sync nil :cache nil :num-retries 1))
+;; (setf issues (gh-issues-list api "user" "repo"))
+;; (last (oref issues data)) ; get one issue
+;; (setq mi (make-instance 'gh-issues-issue :body "issue body" :title "issue title" ))
+;; (gh-issues-issue-new api "user" "repo" mi)
 
 ;;; Code:
 
