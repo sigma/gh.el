@@ -110,22 +110,23 @@
 (defmethod gh-issues-issue-req-to-update ((req gh-issues-issue))
   `(("title" . ,(oref req title))
     ("body" . ,(oref req body))
-    ("assignee" . ,(oref (oref req assignee) login) )
-    ("labels" . ,(oref (oref req assignee) labels) )
-    ("state" . ,(oref req state) )
-    ("milestone" . ,(oref req milestone))))
+   ; ("assignee" . ,(oref (oref req assignee) login) )
+   ; ("labels" . ,(oref (oref req assignee) labels) )
+   ; ("state" . ,(oref req state) )
+   ; ("milestone" . ,(oref req milestone))
+    ))
 
 (defmethod gh-issues-issue-update ((api gh-issues-api) user repo id req)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api req-cls)) "PATCH"
    (format "/repos/%s/%s/issues/%s" user repo id)
-   (gh-issues-req-to-update req)))
+   (gh-issues-issue-req-to-update req)))
 
 (defmethod gh-issues-issue-new ((api gh-issues-api) user repo issue)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api req-cls)) "POST"
    (format "/repos/%s/%s/issues" user repo)
-   (gh-issues-req-to-update issue)))
+   (gh-issues-issue-req-to-update issue)))
 
 (provide 'gh-issues)
 ;;; gh-issues.el ends here
