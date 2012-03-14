@@ -43,6 +43,7 @@
                                 (oref (gh-gist-list api "octocat") :data))))))
     (should (equal (length gists) 1))
     (let ((gist (car gists)))
+      (should (object-of-class-p gist 'gh-gist-gist-stub))
       (gh-gist-tests:test-gist gist))))
 
 (ert-deftest gh-gist-tests:regular-get ()
@@ -52,6 +53,7 @@
                                             :output gist-buf))
                               (let ((api (gh-gist-api "api" :sync t)))
                                 (oref (gh-gist-get api "1") :data))))))
+    (should (object-of-class-p gist 'gh-gist-gist))
     (gh-gist-tests:test-gist gist)))
 
 (provide 'gh-gist-tests)
