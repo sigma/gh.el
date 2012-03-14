@@ -14,6 +14,7 @@ MISC    = README
 EMACS    = emacs
 SITEFLAG = --no-site-file
 EFLAGS   =
+BATCH    = $(EMACS) $(EFLAGS) $(SITEFLAG) -batch -q -L .
 
 PREFIX   = /usr/local
 ELISPDIR = $(PREFIX)/share/emacs/site-lisp/$(PKGNAME)
@@ -32,14 +33,12 @@ autoloads: $(AUTODEF)
 $(AUTODEF): $(PKGNAME)-auto.in $(SOURCE)
 	cp $(PKGNAME)-auto.in $(AUTODEF)
 	rm -f $(AUTODEF)c
-	@$(EMACS) -q $(SITEFLAG) -batch -L . \
-		-l $(PKGNAME)-auto \
+	@$(BATCH) -l $(PKGNAME)-auto \
 		-f gh-generate-autoloads \
 		$(shell pwd | sed -e 's|^/cygdrive/\([a-z]\)|\1:|')/$(AUTODEF) .
 
 %.elc: %.el
-	@$(EMACS) -q $(SITEFLAG) $(EFLAGS) -batch -L . \
-		-f batch-byte-compile $<
+	@$(BATCH) -f batch-byte-compile $<
 
 clean:
 	rm -f *~ $(TARGET) $(PKGNAME).info $(PKGNAME).html
@@ -81,3 +80,7 @@ docs: info html
 
 docsclean:
 	rm -f doc/$(PKGNAME).info doc/$(PKGNAME).html
+
+test: lisp
+	@$(BATCH) -l tests/gh-tests.el -l tests/gh-gist-tests.el \
+		-f ert-run-tests-batch-and-exit
