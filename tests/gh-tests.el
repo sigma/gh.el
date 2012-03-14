@@ -69,5 +69,11 @@
            (and (buffer-name buff)
                 (kill-buffer buff)))))))
 
+(defmacro gh-tests-mock-url (recs &rest body)
+  `(mocker-let ((url-retrieve-synchronously
+                 (url)
+                 ,recs))
+     ,@body))
+
 (provide 'gh-tests)
 ;;; gh-tests.el ends here

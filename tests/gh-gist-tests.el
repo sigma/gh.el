@@ -29,22 +29,30 @@
 (require 'gh-tests)
 (require 'gh-gist)
 
-(ert-deftest gh-gist-tests-regular ()
+(defun gh-gist-tests:test-gist (gist)
+  (should (equal (oref gist :id) "1"))
+  (should (oref gist :public))
+  (should (equal (length (oref gist :files)) 1)))
+
+(ert-deftest gh-gist-tests:regular-list ()
   (let ((gists
          (gh-tests-with-traces-buffers ((gists-buf "list_gists_sample.txt"))
-           (mocker-let ((url-retrieve-synchronously
-                         (url)
-                         ((:record-cls mocker-stub-record
-                                       :output gists-buf))))
-             (let ((api (gh-gist-api "api" :sync t)))
-               (oref
-                (gh-gist-list api "octocat")
-                :data))))))
+           (gh-tests-mock-url ((:record-cls mocker-stub-record
+                                            :output gists-buf))
+                              (let ((api (gh-gist-api "api" :sync t)))
+                                (oref (gh-gist-list api "octocat") :data))))))
     (should (equal (length gists) 1))
     (let ((gist (car gists)))
-      (should (equal (oref gist :id) "1"))
-      (should (oref gist :public))
-      (should (equal (length (oref gist :files)) 1)))))
+      (gh-gist-tests:test-gist gist))))
+
+(ert-deftest gh-gist-tests:regular-get ()
+  (let ((gist
+         (gh-tests-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
+           (gh-tests-mock-url ((:record-cls mocker-stub-record
+                                            :output gist-buf))
+                              (let ((api (gh-gist-api "api" :sync t)))
+                                (oref (gh-gist-get api "1") :data))))))
+    (gh-gist-tests:test-gist gist)))
 
 (provide 'gh-gist-tests)
 ;;; gh-gist-tests.el ends here
