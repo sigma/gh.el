@@ -29,7 +29,7 @@
 (require 'gh-tests)
 (require 'gh-gist)
 
-(defun gh-gist-tests:test-gist (gist)
+(defun gh-gist-tests:test-regular-gist (gist)
   (should (equal (oref gist :id) "1"))
   (should (oref gist :public))
   (should (equal (length (oref gist :files)) 1)))
@@ -44,7 +44,7 @@
     (should (equal (length gists) 1))
     (let ((gist (car gists)))
       (should (object-of-class-p gist 'gh-gist-gist-stub))
-      (gh-gist-tests:test-gist gist))))
+      (gh-gist-tests:test-regular-gist gist))))
 
 (ert-deftest gh-gist-tests:regular-get ()
   (let ((gist
@@ -54,7 +54,25 @@
                               (let ((api (gh-gist-api "api" :sync t)))
                                 (oref (gh-gist-get api "1") :data))))))
     (should (object-of-class-p gist 'gh-gist-gist))
-    (gh-gist-tests:test-gist gist)))
+    (gh-gist-tests:test-regular-gist gist)))
+
+(ert-deftest gh-gist-tests:regular-new ()
+  (let* ((gist-stub
+          (make-instance 'gh-gist-gist-stub
+                         :description "description of gist"
+                         :public t
+                         :files (list
+                                 (make-instance 'gh-gist-gist-file
+                                                :filename "ring.erl"
+                                                :content "contents of gist"))))
+         (gist
+          (gh-tests-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
+            (gh-tests-mock-url ((:record-cls mocker-stub-record
+                                             :output gist-buf))
+                               (let ((api (gh-gist-api "api" :sync t)))
+                                 (oref (gh-gist-new api gist-stub) :data))))))
+    (should (object-of-class-p gist 'gh-gist-gist))
+    (gh-gist-tests:test-regular-gist gist)))
 
 (provide 'gh-gist-tests)
 ;;; gh-gist-tests.el ends here
