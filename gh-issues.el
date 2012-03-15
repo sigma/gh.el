@@ -155,13 +155,17 @@
    (format "/repos/%s/%s/issues/%s" user repo id)))
 
 (defmethod gh-issues-issue-req-to-update ((req gh-issues-issue))
-  `(("title" . ,(oref req title))
-    ("body" . ,(oref req body))
-   ; ("assignee" . ,(oref (oref req assignee) login) )
-   ; ("labels" . ,(oref (oref req assignee) labels) )
-   ; ("state" . ,(oref req state) )
-   ; ("milestone" . ,(oref req milestone))
-    ))
+  (let ((assignee (oref req assignee))
+        ;; (labels (oref req labels))
+        (milestone (oref req milestone))
+        (to-update `(("title" . ,(oref req title))
+                     ("state" . ,(oref req state))
+                     ("body" . ,(oref req body)))))
+
+    ;; (when labels (nconc to-update `(("labels" . ,(oref req labels) ))))
+    (when milestone (nconc to-update `(("milestone" . ,(oref milestone number)))))
+    (when assignee (nconc to-update `(("assignee" . ,(oref assignee login) ))))
+    to-update))
 
 (defmethod gh-issues-issue-update ((api gh-issues-api) user repo id req)
   (gh-api-authenticated-request
