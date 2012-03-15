@@ -43,7 +43,8 @@
 (require 'gh-repos)
 
 (defclass gh-issues-api (gh-api-v3)
-  ((req-cls :allocation :class :initform gh-issues-issue))
+  ((req-cls :allocation :class :initform gh-issues-issue)
+   (milestone-cls :allocation :class :initform gh-issues-milestone))
   "Github Issues api")
 
 (defclass gh-issues-issue (gh-object)
@@ -107,21 +108,46 @@
                                      (oref issue :assignee)
                                      (oref issue user-cls))
                                     (gh-read data 'assignee))
-          milestone (gh-read data 'milestone)
+          milestone (gh-object-read (or
+                                     (oref issue :milestone)
+                                     (oref issue milestone-cls))
+                                    (gh-read data 'milestone))
           open_issues (gh-read data 'open_issues)
           closed_issues (gh-read data 'closed_issues)
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
 
 
+(defmethod gh-object-read-into ((milestone gh-issues-milestone) data)
+  (call-next-method)
+  (with-slots (url number state title description creator
+                   open_issues closed_issues
+                   created_at due_on)
+      milestone
+    (setq url (gh-read data 'url)
+          number (gh-read data 'number)
+          state (gh-read data 'state)
+          title (gh-read data 'title)
+          description (gh-read data 'description)
+          creator (gh-object-read (or
+                                 (oref milestone :creator)
+                                 (oref milestone user-cls))
+                                (gh-read data 'creator))
 
+          open_issues (gh-read data 'open_issues)
+          closed_issues (gh-read data 'closed_issues)
+          created_at (gh-read data 'created_at)
+          due_on (gh-read data 'due_on))))
 
-
-
-(defmethod gh-issues-list ((api gh-issues-api) user repo)
+(defmethod gh-issues-issue-list ((api gh-issues-api) user repo)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/issues" user repo)))
+
+(defmethod gh-issues-milestone-list ((api gh-issues-api) user repo)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api milestone-cls)) "GET"
+   (format "/repos/%s/%s/milestones" user repo)))
 
 (defmethod gh-issues-issue-get ((api gh-issues-api) user repo id)
   (gh-authenticated-request
