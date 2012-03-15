@@ -53,14 +53,17 @@
    (state :initarg :state)
    (title :initarg :title)
    (body :initarg :body)
-   (user :initarg :user :initform gh-user)
+   (user :initarg :user :initform nil)
    (labels :initarg :labels :initform nil)
-   (assignee :initarg :assignee :initform gh-user)
-   (milestone :initarg :milestone :initform gh-milestone)
+   (assignee :initarg :assignee :initform nil)
+   (milestone :initarg :milestone :initform nil)
    (open_issues :initarg :open_issues)
    (closed_issues :initarg :closed_issues)
    (created_at :initarg :created_at)
-   (due_on :initarg :due_on))
+   (due_on :initarg :due_on)
+
+   (user-cls :allocation :class :initform gh-user)
+   (milestone-cls :allocation :class :initform gh-issues-milestone))
   "issues request")
 
 (defclass gh-issues-label (gh-object)
@@ -68,17 +71,19 @@
    (name :initarg :name)
    (color :initarg :color)))
 
-(defclass gh-milestone (gh-object)
+(defclass gh-issues-milestone (gh-object)
   ((url :initarg :url)
    (number :initarg :number)
    (state :initarg :state)
    (title :initarg :title)
    (description :initarg :description)
-   (creator :initarg :creator :initform gh-user)
+   (creator :initarg :creator :initform nil)
    (open_issues :initarg :open_issues)
    (closed_issues :initarg :closed_issues)
    (created_at :initarg :created_at)
-   (due_on :initarg :due_on))
+   (due_on :initarg :due_on)
+
+   (user-cls :allocation :class :initform gh-user))
   "github milestone")
 
 (defmethod gh-object-read-into ((issue gh-issues-issue) data)
@@ -94,16 +99,27 @@
           state (gh-read data 'state)
           title (gh-read data 'title)
           body (gh-read data 'body)
-          user (gh-object-read  (oref issue :user) (gh-read data 'user))
+          user (gh-object-read  (or
+                                 (oref issue :user)
+                                 (oref issue user-cls))
+                                (gh-read data 'user))
           labels (gh-read data 'labels)
-          assignee (gh-object-read  (oref issue :assignee) (gh-read data 'assignee))
+          assignee (gh-object-read  (or
+                                     (oref issue :assignee)
+                                     (oref issue user-cls))
+                                    (gh-read data 'assignee))
           milestone (gh-read data 'milestone)
           open_issues (gh-read data 'open_issues)
           closed_issues (gh-read data 'closed_issues)
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
 
-(defmethod gh-issues-issue-list ((api gh-issues-api) user repo)
+
+
+
+
+
+(defmethod gh-issues-list ((api gh-issues-api) user repo)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/issues" user repo)))
