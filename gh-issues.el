@@ -149,6 +149,33 @@
    api (gh-object-list-reader (oref api milestone-cls)) "GET"
    (format "/repos/%s/%s/milestones" user repo)))
 
+(defmethod gh-issues-milestone-get ((api gh-issues-api) user repo id)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api milestone-cls)) "GET"
+   (format "/repos/%s/%s/milestones/%s" user repo id)))
+
+(defmethod gh-issues-milestone-new ((api gh-issues-api) user repo milestone)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api milestone-cls)) "POST"
+   (format "/repos/%s/%s/milestones" user repo)
+   (gh-issues-milestone-req-to-update milestone)))
+
+(defmethod gh-issues-milestone-update ((api gh-issues-api) user repo id milestone)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api milestone-cls)) "PATCH"
+   (format "/repos/%s/%s/milestones/%s" user repo id)
+   (gh-issues-milestone-req-to-update milestone)))
+
+(defmethod gh-issues-milestone-req-to-update ((milestone gh-issues-milestone))
+  (let ((state (oref milestone state)  )
+        (description (oref milestone description))
+        (due_on (oref milestone due_on))
+        (to-update `(("title" . ,(oref milestone title)))))
+    (when state (nconc to-update `(("state" . ,state))))
+    (when description (nconc to-update `(("description" . ,description))))
+    (when due_on (nconc to-update `(("due_on" . ,due_on))))
+    to-update))
+
 (defmethod gh-issues-issue-get ((api gh-issues-api) user repo id)
   (gh-authenticated-request
    api (gh-object-reader (oref api req-cls)) "GET"
