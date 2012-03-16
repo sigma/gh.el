@@ -44,7 +44,9 @@
 
 (defclass gh-issues-api (gh-api-v3)
   ((req-cls :allocation :class :initform gh-issues-issue)
-   (milestone-cls :allocation :class :initform gh-issues-milestone))
+   (milestone-cls :allocation :class :initform gh-issues-milestone)
+   (label-cls :allocation :class :initform gh-issues-label)
+   )
   "Github Issues api")
 
 (defclass gh-issues-issue (gh-object)
@@ -205,6 +207,103 @@
    api (gh-object-reader (oref api req-cls)) "POST"
    (format "/repos/%s/%s/issues" user repo)
    (gh-issues-issue-req-to-update issue)))
+
+;;; labels
+(defclass gh-issues-label (gh-object)
+  ((url :initarg :url)
+   (name :initarg :name)
+   (color :initarg :color)))
+
+(defmethod gh-object-read-into ((label gh-issues-label) data)
+  (call-next-method)
+  (with-slots (url name color)
+      label
+    (setq url (gh-read data 'url)
+          name (gh-read data 'name)
+          color (gh-read data 'color))))
+
+(defmethod gh-issues-label-req-to-update ((label gh-issues-label))
+  `(("name" . ,(oref label name))
+    ("color" . ,(oref label color))))
+
+(defmethod gh-issues-label-get ((api gh-issues-api) user repo name)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api label-cls)) "GET"
+   (format "/repos/%s/%s/labels/%s" user repo name)))
+
+(defmethod gh-issues-label-list ((api gh-issues-api) user repo)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api label-cls)) "GET"
+   (format "/repos/%s/%s/labels" user repo )))
+
+(defmethod gh-issues-label-new ((api gh-issues-api) user repo req)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api label-cls)) "POST"
+   (format "/repos/%s/%s/labels" user repo)
+   (gh-issues-label-req-to-update req)))
+
+(defmethod gh-issues-label-update ((api gh-issues-api) user repo req)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api label-cls)) "POST"
+   (format "/repos/%s/%s/labels/%s" user repo (oref req name))
+   (gh-issues-label-req-to-update req)))
+
+(defmethod gh-issues-label-delete ((api gh-issues-api) user repo name)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api label-cls)) "DELETE"
+   (format "/repos/%s/%s/labels/%s" user repo name)))
+
+
+(defmethod gh-issues-labels-in-issue ((api gh-issues-api) user repo issue-or-issue-id)
+  (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
+   (gh-api-authenticated-request
+    api (gh-object-list-reader (oref api label-cls)) "GET"
+    (format "/repos/%s/%s/issues/%s/labels" user repo issue-id))))
+
+(defmethod gh-issues-labels-add-to-issue ((api gh-issues-api) user repo issue-or-issue-id labels)
+  (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
+    (gh-api-authenticated-request
+     api (gh-object-list-reader (oref api label-cls)) "PUT"
+     (format "/repos/%s/%s/issues/%s/labels" user repo issue-id)
+     (mapcar #'gh-issues--label-name labels))))
+
+(defmethod gh-issues-labels-remove-all-from-issue ((api gh-issues-api) user repo issue-or-issue-id )
+  (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
+    (gh-api-authenticated-request
+     api (lambda (x) x) "DELETE"
+     (format "/repos/%s/%s/issues/%s/labels" user repo issue-id))))
+
+(defmethod gh-issues-labels-in-milestone ((api gh-issues-api) user repo milestone-or-milestone-id)
+  (let ((milestone-id (gh-issues--milestone-id milestone-or-milestone-id)))
+   (gh-api-authenticated-request
+    api (gh-object-list-reader (oref api label-cls)) "GET"
+    (format "/repos/%s/%s/milestones/%s/labels" user repo milestone-id))))
+
+
+;;; helpers
+
+(defun gh-issues--issue-id (issue-or-issue-id)
+  (if (and (eieio-object-p issue-or-issue-id)
+           (eq (class-of issue-or-issue-id)
+               gh-issues-issue))
+      (oref issue-or-issue-id id)
+    issue-or-issue-id))
+
+(defun gh-issues--milestone-id (milestone-or-milestone-id)
+  (if (and (eieio-object-p milestone-or-milestone-id)
+           (eq (class-of milestone-or-milestone-id)
+               gh-issues-milestone))
+      (oref milestone-or-milestone-id id)
+    milestone-or-milestone-id))
+
+(defun gh-issues--label-name (label-or-label-name)
+  (if (and
+       (eieio-object-p label-or-label-name)
+       (eq (class-of label-or-label-name)
+           gh-issues-label))
+      (oref label-or-label-name name)
+    label-or-label-name))
+
 
 (provide 'gh-issues)
 ;;; gh-issues.el ends here
