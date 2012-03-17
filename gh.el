@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'gh-gist)
+(require 'gh-pulls)
 (require 'gh-issues)
 
 (defgroup gh nil
