@@ -1,3 +1,8 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Status: 200 OK
+Content-Length: 1679
+
 {
   "url": "https://api.github.com/gists/1",
   "id": "1",

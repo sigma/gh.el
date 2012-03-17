@@ -30,8 +30,7 @@
 
 (require 'mocker)
 (require 'ert)
-
-(defvar url-http-end-of-headers nil)
+(require 'url-http)
 
 (defun gh-tests-get-traces-root ()
   (let* ((this-file (car
@@ -56,9 +55,13 @@
                      (list sym `(let ((,buf-sym (generate-new-buffer
                                                  ,(concat " " filename))))
                                   (with-current-buffer ,buf-sym
+                                    (insert-file-contents ,file)
                                     (set (make-local-variable
-                                          'url-http-end-of-headers) 0)
-                                    (insert-file-contents ,file))
+                                          'url-http-end-of-headers)
+                                         (search-forward-regexp "^$"))
+                                    (make-local-variable 'url-http-response-version)
+                                    (make-local-variable 'url-http-response-status)
+                                    (url-http-parse-response))
                                   ,buf-sym))))
                  bufs)))
     `(let ,specs
