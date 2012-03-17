@@ -82,5 +82,6 @@ docsclean:
 	rm -f doc/$(PKGNAME).info doc/$(PKGNAME).html
 
 test: lisp
-	@$(BATCH) -l tests/gh-tests.el -l tests/gh-gist-tests.el \
+	@$(BATCH) -l tests/gh-tests.el -l tests/gh-gist-tests.el  \
+		-l tests/gh-issues-tests.el \
 		-f ert-run-tests-batch-and-exit
