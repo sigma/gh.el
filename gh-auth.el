@@ -100,7 +100,8 @@
         (oset obj :password (gh-auth-get-password (oref obj remember))))
     obj))
 
-(defmethod gh-auth-modify-request ((auth gh-authenticator) req))
+(defmethod gh-auth-modify-request ((auth gh-authenticator) req)
+  req)
 
 (defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
   (object-add-to-list req :headers
