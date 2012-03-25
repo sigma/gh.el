@@ -93,7 +93,9 @@
 
 (defmethod constructor :static ((api gh-api-v2) newname &rest args)
   (let ((obj (call-next-method)))
-    (gh-api-set-default-auth obj (funcall gh-api-v2-authenticator "auth"))
+    (gh-api-set-default-auth obj
+                             (or (oref obj :auth)
+                                 (funcall gh-api-v2-authenticator "auth")))
     obj))
 
 ;;;###autoload
@@ -110,7 +112,9 @@
 
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
   (let ((obj (call-next-method)))
-    (gh-api-set-default-auth obj (funcall gh-api-v3-authenticator "auth"))
+    (gh-api-set-default-auth obj
+                             (or (oref obj :auth)
+                                 (funcall gh-api-v3-authenticator "auth")))
     obj))
 
 (defclass gh-api-request ()
