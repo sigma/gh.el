@@ -72,6 +72,10 @@
            (and (buffer-name buff)
                 (kill-buffer buff)))))))
 
+(defun gh-tests-mock-api (cls)
+  (make-instance cls :sync t
+                 :auth (make-instance 'gh-authenticator :username "dummy")))
+
 (defmacro gh-tests-mock-url (recs &rest body)
   `(mocker-let ((url-retrieve-synchronously
                  (url)

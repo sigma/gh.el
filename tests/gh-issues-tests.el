@@ -34,15 +34,15 @@
   (should (equal (oref issue :state) "open")))
 
 (ert-deftest gh-issues-tests:regular-list ()
-  (let ((issues
-         (gh-tests-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
-           (gh-tests-mock-url ((:record-cls mocker-stub-record
-                                            :output gists-buf))
-                              (let ((api (gh-issues-api "api" :sync t)))
-                                (oref
-                                 (gh-issues-issue-list api "octocat"
-                                                       "Hello-World")
-                                 :data))))))
+  (let* ((api (gh-tests-mock-api 'gh-issues-api))
+         (issues
+          (gh-tests-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
+            (gh-tests-mock-url ((:record-cls mocker-stub-record
+                                             :output gists-buf))
+                               (oref
+                                (gh-issues-issue-list api "octocat"
+                                                      "Hello-World")
+                                :data)))))
     (should (equal (length issues) 1))
     (let ((issue (car issues)))
       (should (object-of-class-p issue 'gh-issues-issue))
