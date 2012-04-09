@@ -29,9 +29,14 @@
 (require 'gh-tests)
 (require 'gh-orgs)
 
-(defun gh-orgs-tests:test-regular-org (org)
+(defun gh-orgs-tests:test-regular-org-stub (org)
   (should (equal (oref org :id) 1))
   (should (equal (oref org :login) "github")))
+
+(defun gh-orgs-tests:test-regular-org (org)
+  (gh-orgs-tests:test-regular-org-stub org)
+  (should (equal (oref org :public-gists) 1))
+  (should (equal (oref org :public-repos) 2)))
 
 (ert-deftest gh-orgs-tests:regular-list ()
   (let* ((api (gh-tests-mock-api 'gh-orgs-api))
@@ -43,7 +48,7 @@
     (should (equal (length orgs) 1))
     (let ((org (car orgs)))
       (should (object-of-class-p org 'gh-orgs-org-stub))
-      (gh-orgs-tests:test-regular-org org))))
+      (gh-orgs-tests:test-regular-org-stub org))))
 
 (ert-deftest gh-orgs-tests:regular-get ()
   (let* ((api (gh-tests-mock-api 'gh-orgs-api))
@@ -52,6 +57,22 @@
             (gh-tests-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
                                (oref (gh-orgs-get api "github") :data)))))
+    (should (object-of-class-p org 'gh-orgs-org))
+    (gh-orgs-tests:test-regular-org org)))
+
+(ert-deftest gh-orgs-tests:regular-update ()
+  (let* ((api (gh-tests-mock-api 'gh-orgs-api))
+         (org-stub
+          (make-instance 'gh-orgs-org
+                         :login "github"
+                         :id 1
+                         :url "https://api.github.com/orgs/1"
+                         :avatar-url "https://github.com/images/error/octocat_happy.gif"))
+         (org
+          (gh-tests-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
+            (gh-tests-mock-url ((:record-cls mocker-stub-record
+                                             :output orgs-buf))
+                               (oref (gh-orgs-update api org-stub) :data)))))
     (should (object-of-class-p org 'gh-orgs-org))
     (gh-orgs-tests:test-regular-org org)))
 
