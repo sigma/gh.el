@@ -1,6 +1,6 @@
 ;;; gh-repos.el --- repos module for gh.el
 
-;; Copyright (C) 2011  Free Software Foundation, Inc.
+;; Copyright (C) 2011  Yann Hodique
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords:
