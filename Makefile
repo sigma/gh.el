@@ -83,5 +83,5 @@ docsclean:
 
 test: lisp
 	@$(BATCH) -l tests/gh-tests.el -l tests/gh-gist-tests.el  \
-		-l tests/gh-issues-tests.el \
+		-l tests/gh-issues-tests.el -l tests/gh-orgs-tests.el \
 		-f ert-run-tests-batch-and-exit
