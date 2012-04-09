@@ -30,7 +30,7 @@
 (require 'gh-orgs)
 
 (defun gh-orgs-tests:test-regular-org (org)
-  (should (equal (oref org :id) "1"))
+  (should (equal (oref org :id) 1))
   (should (equal (oref org :login) "github")))
 
 (ert-deftest gh-orgs-tests:regular-list ()
