@@ -78,7 +78,7 @@
                      (substring string 0 (- (length string) 1)))))
         (git (executable-find "git")))
   (funcall strip (shell-command-to-string
-                  (concat git " config --global github." key)))))
+                  (concat git " config github." key)))))
 
 (defun gh-set-config (key value)
   "Sets a GitHub specific value to the global Git config."
