@@ -36,10 +36,12 @@
   ())
 
 (defmethod gh-object-read :static ((obj gh-object) data)
-  (let ((target (if (object-p obj) obj
-                  (make-instance obj))))
-    (gh-object-read-into target data)
-    target))
+  (if data
+      (let ((target (if (object-p obj) obj
+                      (make-instance obj))))
+        (gh-object-read-into target data)
+        target)
+    eieio-unbound))
 
 (defmethod gh-object-reader :static ((obj gh-object))
   (apply-partially 'gh-object-read obj))
