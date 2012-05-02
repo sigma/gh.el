@@ -111,3 +111,7 @@
 
 (provide 'gh-oauth)
 ;;; gh-oauth.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

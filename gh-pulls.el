@@ -164,3 +164,7 @@
 
 (provide 'gh-pulls)
 ;;; gh-pulls.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

@@ -309,3 +309,7 @@
 
 (provide 'gh-issues)
 ;;; gh-issues.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

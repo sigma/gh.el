@@ -36,3 +36,7 @@
 
 (provide 'gh)
 ;;; gh.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

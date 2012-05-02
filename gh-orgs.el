@@ -157,3 +157,7 @@
 
 (provide 'gh-orgs)
 ;;; gh-org.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

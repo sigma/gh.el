@@ -54,3 +54,7 @@
 
 (provide 'gh-cache)
 ;;; gh-cache.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

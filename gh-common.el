@@ -90,3 +90,7 @@
 
 (provide 'gh-common)
 ;;; gh-common.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

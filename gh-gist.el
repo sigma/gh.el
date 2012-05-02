@@ -186,3 +186,7 @@
 
 (provide 'gh-gist)
 ;;; gh-gist.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:

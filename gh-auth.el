@@ -134,3 +134,7 @@
 ;; to avoid circular dependencies...
 (require 'gh-oauth)
 ;;; gh-auth.el ends here
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
