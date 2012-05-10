@@ -90,9 +90,10 @@
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
   (call-next-method)
-  (with-slots (url html-url clone-url git-url ssh-url svn-url
-                   owner language fork forks watchers size open-issues
-                   pushed-at created-at organisation parent source)
+  (with-slots (url html-url clone-url git-url ssh-url svn-url mirror-url
+                   owner language fork forks watchers size master-branch
+                   open-issues pushed-at created-at
+                   organisation parent source)
       repo
     (setq url (gh-read data 'url)
           html-url (gh-read data 'html_url)
@@ -100,6 +101,7 @@
           git-url (gh-read data 'git_url)
           ssh-url (gh-read data 'ssh_url)
           svn-url (gh-read data 'svn_url)
+          mirror-url (gh-read data 'mirror_url)
           owner (gh-object-read (or (oref repo :owner)
                                     (oref repo owner-cls))
                                 (gh-read data 'owner))
@@ -108,6 +110,7 @@
           forks (gh-read data 'forks)
           watchers (gh-read data 'watchers)
           size (gh-read data 'size)
+          master-branch (gh-read data 'master-branch)
           open-issues (gh-read data 'open_issues)
           pushed-at (gh-read data 'pushed_at)
           created-at (gh-read data 'created_at)
