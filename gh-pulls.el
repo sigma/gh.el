@@ -135,7 +135,7 @@
       ("head" . ,(or (oref head :ref) (oref head :sha)))
       ("base" . ,(or (oref base :ref) (oref base :sha))))))
 
-(defmethod gh-pulls-req-to-update ((req gh-pulls-request))
+(defmethod gh-pulls-req-to-update ((req gh-pulls-request-stub))
   `(("title" . ,(oref req :title))
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
