@@ -33,7 +33,7 @@
 (require 'eieio)
 
 (defgroup gh nil
-  "Github support library."
+  "Github API client libraries."
   :group 'applications)
 
 (defclass gh-object ()

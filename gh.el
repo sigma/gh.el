@@ -1,4 +1,4 @@
-;;; gh.el --- main entry point for gh.el library
+;;; gh.el --- Github API client libraries
 
 ;; Copyright (C) 2011  Yann Hodique
 
