@@ -32,6 +32,10 @@
 ;;;###autoload
 (require 'eieio)
 
+(defgroup gh nil
+  "Github support library."
+  :group 'applications)
+
 (defclass gh-object ()
   ())
 
