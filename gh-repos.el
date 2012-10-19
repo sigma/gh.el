@@ -68,6 +68,7 @@
    (svn-url :initarg :svn-url)
    (mirror-url :initarg :mirror-url)
    (owner :initarg :owner :initform nil)
+   (full-name :initarg full-name)
    (language :initarg :language)
    (fork :initarg :fork)
    (forks :initarg :forks)
@@ -87,6 +88,19 @@
    (parent-cls :allocation :class :initform gh-repos-repo)
    (source-cls :allocation :class :initform gh-repos-repo))
   "Class for GitHub repositories")
+
+(defmethod constructor :static ((repo gh-repos-repo) newname &rest args)
+  (let ((obj (call-next-method)))
+    (when (and (not (slot-boundp obj 'name))
+               (not (oref obj owner)))
+      (with-slots (name owner)
+          obj
+        (when (slot-boundp obj 'full-name)
+          (setq newname (oref obj :full-name)))
+        (when (string-match "^\\([^/]+\\)/\\([^/]+\\)$" newname)
+          (setq name (match-string 2 newname)
+                owner (gh-user "owner" :login (match-string 1 newname))))))
+    obj))
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
   (call-next-method)
