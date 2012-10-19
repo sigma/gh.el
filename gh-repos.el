@@ -38,7 +38,8 @@
 
 ;;;###autoload
 (defclass gh-repos-api (gh-api-v3)
-  ((repo-cls :allocation :class :initform gh-repos-repo))
+  ((repo-cls :allocation :class :initform gh-repos-repo)
+   (user-cls :allocation :class :initform gh-user))
   "Repos API")
 
 ;;;###autoload
@@ -273,6 +274,81 @@
            (oref (oref repo :owner) :login)
            (oref repo :name))
    nil (when org `(("org" . ,org)))))
+
+;;; Starring sub-API
+
+(defmethod gh-repos-stargazers ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api user-cls)) "GET"
+   (format "/repos/%s/%s/stargazers"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
+
+(defmethod gh-repos-starred-list ((api gh-repos-api) &optional username)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   (format "/users/%s/starred" (or username (gh-api-get-username api)))))
+
+(defmethod gh-repos-starred-p ((api gh-repos-api) repo)
+  (eq (oref (gh-api-authenticated-request
+             api nil "GET"
+             (format "/user/starred/%s/%s"
+                     (oref (oref repo :owner) :login)
+                     (oref repo :name)))
+            :http-status)
+      204))
+
+(defmethod gh-repos-star ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "PUT"
+   (format "/user/starred/%s/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
+
+(defmethod gh-repos-unstar ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "DELETE"
+   (format "/user/starred/%s/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
+
+;;; Watching sub-API
+
+(defmethod gh-repos-watchers ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api user-cls)) "GET"
+   (format "/repos/%s/%s/subscribers"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
+
+(defmethod gh-repos-watched-list ((api gh-repos-api) &optional username)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   (format "/users/%s/subscriptions"
+           (or username (gh-api-get-username api)))))
+
+(defmethod gh-repos-watched-p ((api gh-repos-api) repo)
+  (eq (oref (gh-api-authenticated-request
+             api nil "GET"
+             (format "/user/subscriptions/%s/%s"
+                     (oref (oref repo :owner) :login)
+                     (oref repo :name)))
+            :http-status)
+      204))
+
+(defmethod gh-repos-watch ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "PUT"
+   (format "/user/subscriptions/%s/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
+
+(defmethod gh-repos-unwatch ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api nil "DELETE"
+   (format "/user/subscriptions/%s/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name))))
 
 (provide 'gh-repos)
 ;;; gh-repos.el ends here
