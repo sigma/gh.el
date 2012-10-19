@@ -68,10 +68,14 @@
    (svn-url :initarg :svn-url)
    (mirror-url :initarg :mirror-url)
    (owner :initarg :owner :initform nil)
+   (id :initarg :id)
+   (full-name :initarg full-name)
    (language :initarg :language)
    (fork :initarg :fork)
    (forks :initarg :forks)
+   (forks-count :initarg forks-count)
    (watchers :initarg :watchers)
+   (watchers-count :initarg watchers-count)
    (size :initarg :size)
    (master-branch :initarg :master-branch)
    (open-issues :initarg :open-issues)
@@ -81,6 +85,9 @@
    (organisation :initarg :organisation :initform nil)
    (parent :initarg :parent)
    (source :initarg :source)
+   (has-issues :initarg :has-issues)
+   (has-wiki :initarg :has-wiki)
+   (has-downloads :initarg :has-downloads)
 
    (owner-cls :allocation :class :initform gh-user)
    (organisation-cls :allocation :class :initform gh-user)
@@ -91,9 +98,10 @@
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
   (call-next-method)
   (with-slots (url html-url clone-url git-url ssh-url svn-url mirror-url
-                   owner language fork forks watchers size master-branch
-                   open-issues pushed-at created-at
-                   organisation parent source)
+                   id owner full-name language fork forks forks-count
+                   watchers watchers-count size master-branch open-issues
+                   pushed-at created-at organisation parent source
+                   has-issues has-wiki has-downloads)
       repo
     (setq url (gh-read data 'url)
           html-url (gh-read data 'html_url)
@@ -102,15 +110,19 @@
           ssh-url (gh-read data 'ssh_url)
           svn-url (gh-read data 'svn_url)
           mirror-url (gh-read data 'mirror_url)
+          id (gh-read data 'id)
           owner (gh-object-read (or (oref repo :owner)
                                     (oref repo owner-cls))
                                 (gh-read data 'owner))
+          full-name (gh-read data 'full_name)
           language (gh-read data 'language)
           fork (gh-read data 'fork)
           forks (gh-read data 'forks)
+          forks-count (gh-read data 'forks_count)
           watchers (gh-read data 'watchers)
+          watchers-count (gh-read data 'watchers_count)
           size (gh-read data 'size)
-          master-branch (gh-read data 'master-branch)
+          master-branch (gh-read data 'master_branch)
           open-issues (gh-read data 'open_issues)
           pushed-at (gh-read data 'pushed_at)
           created-at (gh-read data 'created_at)
@@ -120,7 +132,10 @@
           parent (gh-object-read (oref repo parent-cls)
                                  (gh-read data 'parent))
           source (gh-object-read (oref repo source-cls)
-                                 (gh-read data 'source)))))
+                                 (gh-read data 'source))
+          has-issues (gh-read data 'has_issues)
+          has-wiki (gh-read data 'has_wiki)
+          has-downloads (gh-read data 'has_downloads))))
 
 (defclass gh-repos-ref (gh-object)
   ((label :initarg :label)
