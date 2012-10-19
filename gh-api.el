@@ -126,6 +126,7 @@
 (defclass gh-api-response ()
   ((data-received :initarg :data-received :initform nil)
    (data :initarg :data :initform nil)
+   (http-status :initarg :http-status :initform nil)
    (callbacks :initarg :callbacks :initform nil)
    (-api :initarg :-api :initform nil))
   "Class for API responses")
@@ -152,6 +153,8 @@
   (unwind-protect
       (with-current-buffer buffer
         (logito:debug (oref resp :-api) "Response: \n%s" (buffer-string))
+        (goto-char (point-min))
+        (oset resp :http-status (url-http-parse-response))
         (goto-char (1+ url-http-end-of-headers))
         (let ((raw (buffer-substring (point) (point-max))))
           (oset resp :data
