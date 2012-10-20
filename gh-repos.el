@@ -225,6 +225,13 @@
              (oref repo-stub :name))
      (gh-repos-repo-to-obj new-stub))))
 
+(defmethod gh-repos-repo-delete ((api gh-repos-api) repo-id
+                                 &optional user)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api repo-cls)) "DELETE"
+   (format "/repos/%s/%s"
+           (or user (gh-api-get-username api))
+           repo-id)))
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api repo-cls)) "GET"
