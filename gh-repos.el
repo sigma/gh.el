@@ -232,6 +232,9 @@
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            repo-id)))
+
+;; TODO gh-repos-repo-move
+
 (defmethod gh-repos-repo-contributors ((api gh-repos-api) repo)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api repo-cls)) "GET"
@@ -265,6 +268,13 @@
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
+;;; TODO gh-repos-repo-branch-commits
+;;; TODO Collaborators sub-API
+;;; TODO Comments sub-API
+;;; TODO Commits sub-API
+;;; TODO Contents sub-API
+;;; TODO Downloads sub-API
+
 ;;; Forks sub-API
 
 (defmethod gh-repos-forks-list ((api gh-repos-api) repo)
@@ -281,6 +291,10 @@
            (oref (oref repo :owner) :login)
            (oref repo :name))
    nil (when org `(("org" . ,org)))))
+
+;;; TODO Keys sub-API
+;;; TODO Hooks sub-API
+;;; TODO Merging sub-API
 
 ;;; Starring sub-API
 
@@ -318,6 +332,8 @@
    (format "/user/starred/%s/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
+
+;;; TODO Statuses sub-API
 
 ;;; Watching sub-API
 
