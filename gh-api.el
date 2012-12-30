@@ -32,8 +32,8 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'url)
 (require 'json)
+(require 'gh-url)
 (require 'gh-auth)
 (require 'gh-cache)
 
@@ -117,18 +117,11 @@
                                  (funcall gh-api-v3-authenticator "auth")))
     obj))
 
-(defclass gh-api-request ()
-  ((method :initarg :method :type string)
-   (url :initarg :url :type string)
-   (headers :initarg :headers)
-   (data :initarg :data :initform "" :type string)))
+(defclass gh-api-request (gh-url-request)
+  ())
 
-(defclass gh-api-response ()
-  ((data-received :initarg :data-received :initform nil)
-   (data :initarg :data :initform nil)
-   (callbacks :initarg :callbacks :initform nil)
-   (-api :initarg :-api :initform nil))
-  "Class for API responses")
+(defclass gh-api-response (gh-url-response)
+  ())
 
 (defun gh-api-json-decode (repr)
   (if (or (null repr) (string= repr ""))
@@ -139,62 +132,8 @@
 (defun gh-api-json-encode (json)
   (json-encode-list json))
 
-(defun gh-api-form-encode (form)
-  (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
-             form "&"))
-
-(defun gh-api-params-encode (form)
-  (concat "?" (gh-api-form-encode form)))
-
-(defmethod gh-api-response-init ((resp gh-api-response)
-                                 buffer &optional transform)
-  (declare (special url-http-end-of-headers))
-  (unwind-protect
-      (with-current-buffer buffer
-        (logito:debug (oref resp :-api) "Response: \n%s" (buffer-string))
-        (goto-char (1+ url-http-end-of-headers))
-        (let ((raw (buffer-substring (point) (point-max))))
-          (oset resp :data
-                (if transform
-                    (funcall transform (gh-api-json-decode raw))
-                  raw)))
-        (oset resp :data-received t))
-    (kill-buffer buffer))
-  (gh-api-response-run-callbacks resp)
-  resp)
-
-(defun gh-api-set-response (status retry-data)
-  (destructuring-bind (api req transform resp num) retry-data
-    (condition-case err
-        (gh-api-response-init resp (current-buffer) transform)
-      (error
-       (if (or (null num) (zerop num))
-           (signal (car err) (cdr err))
-         (logito:info api "Retrying request %s %s"
-                      (oref req :method) (oref req :url))
-         (let ((num (1- num)))
-           (gh-api-run-request api req transform resp num)))))))
-
-(defmethod gh-api-response-run-callbacks ((resp gh-api-response))
-  (flet ((gh-api-copy-list (list)
-                           (if (consp list)
-                               (let ((res nil))
-                                 (while (consp list) (push (pop list) res))
-                                 (prog1 (nreverse res) (setcdr res list)))
-                             (car list))))
-    (let ((data (oref resp :data)))
-      (dolist (cb (gh-api-copy-list (oref resp :callbacks)))
-        (if (or (functionp cb) (symbolp cb))
-            (funcall cb data)
-          (apply (car cb) data (cdr cb)))
-        (object-remove-from-list resp :callbacks cb))))
-  resp)
-
-(defmethod gh-api-add-response-callback ((resp gh-api-response) callback)
-  (object-add-to-list resp :callbacks callback t)
-  (if (oref resp :data-received)
-    (gh-api-response-run-callbacks resp)
-    resp))
+(defmethod gh-url-response-set-data ((resp gh-api-response) data)
+  (call-next-method resp (gh-api-json-decode data)))
 
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
@@ -218,54 +157,32 @@
                                 :method method
                                 :url (concat (oref api :base)
                                              (gh-api-expand-resource
-                                              api resource)
-                                             (if params
-                                                 (gh-api-params-encode params)
-                                               ""))
+                                              api resource))
+                                :query params
                                 :headers headers
                                 :data (or (and (eq fmt :json)
                                                (gh-api-json-encode data))
                                           (and (eq fmt :form)
-                                               (gh-api-form-encode data))
+                                               (gh-url-form-encode data))
                                           ""))))))
     (cond (has-value ;; got value from cache
            (gh-api-response "cached" :data-received t :data value))
           (key ;; no value, but cache exists and method is safe
-           (let ((resp (gh-api-run-request api req transformer)))
-             (gh-api-add-response-callback
+           (let ((resp (make-instance 'gh-api-response
+                                      :transform transformer)))
+             (gh-url-run-request req resp)
+             (gh-url-add-response-callback
               resp (list #'(lambda (value cache key)
                              (pcache-put cache key value))
                          cache key))
              resp))
           (cache ;; unsafe method, cache exists
            (pcache-invalidate cache key)
-           (gh-api-run-request api req transformer))
+           (gh-url-run-request req (make-instance 'gh-api-response
+                                                  :transform transformer)))
           (t ;; no cache involved
-           (gh-api-run-request api req transformer)))))
-
-(defmethod gh-api-run-request ((api gh-api) req transformer &optional resp num)
-  (let ((url-request-method (oref req :method))
-        (url-request-data (oref req :data))
-        (url-request-extra-headers (oref req :headers))
-        (url (oref req :url)))
-    (logito:debug api "Request: %s %s %s"
-                  url-request-method
-                  url
-                  url-request-extra-headers)
-    (logito:debug api "Data: %s"
-                  url-request-data)
-    (if (oref api :sync)
-        (let* ((resp (or resp (gh-api-response "sync" :-api api)))
-               (retry-data (list api req transformer resp
-                                 (or num (oref api :num-retries)))))
-          (with-current-buffer (url-retrieve-synchronously url)
-            (gh-api-set-response nil retry-data))
-          resp)
-      (let* ((resp (or resp (gh-api-response "async" :-api api)))
-             (retry-data (list api req transformer resp
-                               (or num (oref api :num-retries)))))
-        (url-retrieve url 'gh-api-set-response (list retry-data))
-        resp))))
+           (gh-url-run-request req (make-instance 'gh-api-response
+                                                  :transform transformer))))))
 
 (provide 'gh-api)
 ;;; gh-api.el ends here
