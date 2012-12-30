@@ -38,7 +38,7 @@
   ((method :initarg :method :type string)
    (url :initarg :url :type string)
    (query :initarg :query :initform nil)
-   (headers :initarg :headers)
+   (headers :initarg :headers :initform nil)
    (data :initarg :data :initform "" :type string)
    (async :initarg :async :initform nil)
    (num-retries :initarg :num-retries :initform 0)
