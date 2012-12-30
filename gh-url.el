@@ -46,6 +46,7 @@
 (defclass gh-url-response ()
   ((data-received :initarg :data-received :initform nil)
    (data :initarg :data :initform nil)
+   (http-status :initarg :http-status :initform nil)
    (callbacks :initarg :callbacks :initform nil)
    (transform :initarg :transform :initform nil)))
 
@@ -83,6 +84,8 @@
   (declare (special url-http-end-of-headers))
   (unwind-protect
       (with-current-buffer buffer
+        (goto-char (point-min))
+        (oset resp :http-status (url-http-parse-response))
         (goto-char (1+ url-http-end-of-headers))
         (let ((raw (buffer-substring (point) (point-max))))
           (gh-url-response-set-data resp raw)))
