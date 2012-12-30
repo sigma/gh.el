@@ -100,7 +100,7 @@
     obj))
 
 (defclass gh-api-request (gh-url-request)
-  ())
+  ((default-response-cls :allocation :class :initform gh-api-response)))
 
 (defclass gh-api-response (gh-url-response)
   ())
