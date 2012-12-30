@@ -48,6 +48,7 @@
 (defclass gh-url-response ()
   ((data-received :initarg :data-received :initform nil)
    (data :initarg :data :initform nil)
+   (headers :initarg :headers :initform nil)
    (http-status :initarg :http-status :initform nil)
    (callbacks :initarg :callbacks :initform nil)
    (transform :initarg :transform :initform nil)))
@@ -81,13 +82,39 @@
     (gh-url-response-run-callbacks resp)
     resp))
 
+;;; code borrowed from nicferrier's web.el
+(defun gh-url-parse-headers (data)
+  (let* ((headers nil)
+         (header-lines (split-string data "\r\n"))
+         (status-line (car header-lines)))
+    (when (string-match
+           "HTTP/\\([0-9.]+\\) \\([0-9]\\{3\\}\\)\\( \\(.*\\)\\)*"
+           status-line)
+      (push (cons 'status-version (match-string 1 status-line)) headers)
+      (push (cons 'status-code (match-string 2 status-line)) headers)
+      (push (cons 'status-string
+                  (or (match-string 4 status-line) ""))
+            headers))
+    (loop for line in (cdr header-lines)
+       if (string-match
+           "^\\([A-Za-z0-9.-]+\\):[ ]*\\(.*\\)"
+           line)
+       do
+         (let ((name (downcase (match-string 1 line)))
+               (value (match-string 2 line)))
+           (push (cons name value) headers)))
+    headers))
+
 (defmethod gh-url-response-init ((resp gh-url-response)
                                  buffer)
   (declare (special url-http-end-of-headers))
   (unwind-protect
       (with-current-buffer buffer
-        (goto-char (point-min))
-        (oset resp :http-status (url-http-parse-response))
+        (let ((headers (gh-url-parse-headers
+                        (buffer-substring
+                         (point-min) (1+ url-http-end-of-headers)))))
+          (oset resp :headers headers)
+          (oset resp :http-status (read (cdr (assoc 'status-code headers)))))
         (goto-char (1+ url-http-end-of-headers))
         (let ((raw (buffer-substring (point) (point-max))))
           (gh-url-response-set-data resp raw)))
