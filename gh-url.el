@@ -32,7 +32,7 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'url)
+(require 'url-http)
 
 (defclass gh-url-request ()
   ((method :initarg :method :type string)
