@@ -117,6 +117,38 @@
 (defmethod gh-url-response-set-data ((resp gh-api-response) data)
   (call-next-method resp (gh-api-json-decode data)))
 
+(defclass gh-api-paged-request (gh-api-request)
+  ((default-response-cls :allocation :class :initform gh-api-paged-response)))
+
+(defclass gh-api-paged-response (gh-api-response)
+  ())
+
+(defun gh-api-paging-links (links-header)
+  (when links-header
+    (let ((links nil)
+          (items (split-string links-header ", ")))
+      (loop for item in items
+            if (string-match
+                "^<\\(.*\\)>; rel=\"\\(.*\\)\""
+                item)
+            do
+            (push (cons (match-string 2 item)
+                        (match-string 1 item))
+                  links))
+      links)))
+
+(defmethod gh-url-response-set-data ((resp gh-api-paged-response) data)
+  (let* ((previous-data (oref resp :data))
+         (links (gh-api-paging-links (cdr (assoc "Link" (oref resp :headers)))))
+         (next (cdr (assoc "next" links))))
+    (call-next-method)
+    (oset resp :data (append previous-data (oref resp :data)))
+    (when next
+      (let ((req (oref resp :-req)))
+        (oset resp :data-received nil)
+        (oset req :url next)
+        (gh-url-run-request req resp)))))
+
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
   (let* ((fmt (oref api :data-format))
@@ -135,18 +167,19 @@
                                ;; already in cache
                (gh-auth-modify-request
                 (oref api :auth)
-                (gh-api-request "request"
-                                :method method
-                                :url (concat (oref api :base)
-                                             (gh-api-expand-resource
-                                              api resource))
-                                :query params
-                                :headers headers
-                                :data (or (and (eq fmt :json)
-                                               (gh-api-json-encode data))
-                                          (and (eq fmt :form)
-                                               (gh-url-form-encode data))
-                                          ""))))))
+                ;; TODO: use gh-api-paged-request only when needed
+                (make-instance 'gh-api-paged-request
+                               :method method
+                               :url (concat (oref api :base)
+                                            (gh-api-expand-resource
+                                             api resource))
+                               :query params
+                               :headers headers
+                               :data (or (and (eq fmt :json)
+                                              (gh-api-json-encode data))
+                                         (and (eq fmt :form)
+                                              (gh-url-form-encode data))
+                                         ""))))))
     (cond (has-value ;; got value from cache
            (gh-api-response "cached" :data-received t :data value))
           (key ;; no value, but cache exists and method is safe
