@@ -66,7 +66,7 @@ elpa: info
 	mkdir -p $(ELPA)/$(SNAPDIR) && chmod 0755 $(ELPA)/$(SNAPDIR)
 	cp $(SOURCE) $(MISC) $(ELPA)/$(SNAPDIR)
 	cp docs/build/texinfo/$(PKGNAME).info $(ELPA)/$(SNAPDIR)
-	sed -r -e "s/%VERSION%/$(VERSION)/g" < $(PKGDEF) \
+	sed -e "s/%VERSION%/$(VERSION)/g" < $(PKGDEF) \
 		> $(ELPA)/$(SNAPDIR)/$(PKGDEF)
 	(cd $(ELPA) && tar cf $(PKGNAME)-$(VERSION).tar $(SNAPDIR))
 
