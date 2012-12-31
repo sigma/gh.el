@@ -51,7 +51,8 @@
    (headers :initarg :headers :initform nil)
    (http-status :initarg :http-status :initform nil)
    (callbacks :initarg :callbacks :initform nil)
-   (transform :initarg :transform :initform nil)))
+   (transform :initarg :transform :initform nil)
+   (-req :initarg :-req :initform nil)))
 
 (defmethod gh-url-response-set-data ((resp gh-url-response) data)
   (let ((transform (oref resp :transform)))
@@ -129,7 +130,9 @@
 (defun gh-url-set-response (status req-resp)
   (destructuring-bind (req resp) req-resp
     (condition-case err
-        (gh-url-response-init resp (current-buffer))
+        (progn
+          (oset resp :-req req)
+          (gh-url-response-init resp (current-buffer)))
       (error
        (let ((num (oref req :num-retries)))
          (if (or (null num) (zerop num))
