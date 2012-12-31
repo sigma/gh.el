@@ -86,7 +86,7 @@
 ;;; code borrowed from nicferrier's web.el
 (defun gh-url-parse-headers (data)
   (let* ((headers nil)
-         (header-lines (split-string data "\r\n"))
+         (header-lines (split-string data "\n"))
          (status-line (car header-lines)))
     (when (string-match
            "HTTP/\\([0-9.]+\\) \\([0-9]\\{3\\}\\)\\( \\(.*\\)\\)*"
@@ -101,7 +101,7 @@
            "^\\([A-Za-z0-9.-]+\\):[ ]*\\(.*\\)"
            line)
        do
-       (let ((name (downcase (match-string 1 line)))
+       (let ((name (match-string 1 line))
              (value (match-string 2 line)))
          (push (cons name value) headers)))
     headers))
