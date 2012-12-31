@@ -150,7 +150,7 @@
     (cond (has-value ;; got value from cache
            (gh-api-response "cached" :data-received t :data value))
           (key ;; no value, but cache exists and method is safe
-           (let ((resp (make-instance 'gh-api-response
+           (let ((resp (make-instance (oref req default-response-cls)
                                       :transform transformer)))
              (gh-url-run-request req resp)
              (gh-url-add-response-callback
@@ -160,11 +160,15 @@
              resp))
           (cache ;; unsafe method, cache exists
            (pcache-invalidate cache key)
-           (gh-url-run-request req (make-instance 'gh-api-response
-                                                  :transform transformer)))
+           (gh-url-run-request req (make-instance
+                                    (oref req default-response-cls)
+                                    :transform transformer)))
           (t ;; no cache involved
-           (gh-url-run-request req (make-instance 'gh-api-response
-                                                  :transform transformer))))))
+           (gh-url-run-request req (make-instance
+                                    (oref req default-response-cls)
+                                    :transform transformer))))))
+
+(defalias 'gh-api-add-response-callback 'gh-url-add-response-callback)
 
 (provide 'gh-api)
 ;;; gh-api.el ends here
