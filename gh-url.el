@@ -100,10 +100,14 @@
            "^\\([A-Za-z0-9.-]+\\):[ ]*\\(.*\\)"
            line)
        do
-         (let ((name (downcase (match-string 1 line)))
-               (value (match-string 2 line)))
-           (push (cons name value) headers)))
+       (let ((name (downcase (match-string 1 line)))
+             (value (match-string 2 line)))
+         (push (cons name value) headers)))
     headers))
+
+(defmethod gh-url-response-finalize ((resp gh-url-response))
+  (when (oref resp :data-received)
+    (gh-url-response-run-callbacks resp)))
 
 (defmethod gh-url-response-init ((resp gh-url-response)
                                  buffer)
@@ -119,7 +123,7 @@
         (let ((raw (buffer-substring (point) (point-max))))
           (gh-url-response-set-data resp raw)))
     (kill-buffer buffer))
-  (gh-url-response-run-callbacks resp)
+  (gh-url-response-finalize resp)
   resp)
 
 (defun gh-url-set-response (status req-resp)
