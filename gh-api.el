@@ -201,7 +201,8 @@
                                     (oref req default-response-cls)
                                     :transform transformer))))))
 
-(defalias 'gh-api-add-response-callback 'gh-url-add-response-callback)
+(define-obsolete-function-alias 'gh-api-add-response-callback
+  'gh-url-add-response-callback "0.6.0")
 
 (provide 'gh-api)
 ;;; gh-api.el ends here
