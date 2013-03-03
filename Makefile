@@ -9,7 +9,7 @@ ALLSOURCE = $(wildcard *.el)
 
 SOURCE  = $(filter-out $(SPECIAL), $(ALLSOURCE))
 TARGET  = $(patsubst %.el,%.elc, $(SOURCE))
-MISC    = README
+MISC    = README.md
 
 EMACS    = emacs
 SITEFLAG = --no-site-file
