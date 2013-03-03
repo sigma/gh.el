@@ -1,5 +1,5 @@
 PKGNAME = gh
-VERSION = 0.6.0
+VERSION = 0.6.1
 SNAPDIR = $(PKGNAME)-$(VERSION)
 
 PKGDEF    = $(PKGNAME)-pkg.el
