@@ -50,6 +50,7 @@
   ((sync :initarg :sync :initform t)
    (cache :initarg :cache :initform nil)
    (base :initarg :base :type string)
+   (profile :initarg :profile :type string)
    (auth :initarg :auth :initform nil)
    (data-format :initarg :data-format)
    (num-retries :initarg :num-retries :initform 0)
@@ -88,8 +89,7 @@
 
 ;;;###autoload
 (defclass gh-api-v3 (gh-api)
-  ((base :initarg :base :initform "https://api.github.com")
-   (data-format :initarg :data-format :initform :json))
+  ((data-format :initarg :data-format :initform :json))
   "Github API v3")
 
 (defcustom gh-api-v3-authenticator 'gh-oauth-authenticator
@@ -102,6 +102,7 @@
   (let ((obj (call-next-method))
         (gh-profile-current-profile (or gh-profile-current-profile
                                         gh-profile-default-profile)))
+    (oset obj :profile (gh-profile-current-profile))
     (oset obj :base (gh-profile-url))
     (gh-api-set-default-auth obj
                              (or (oref obj :auth)
