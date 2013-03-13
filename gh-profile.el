@@ -63,5 +63,11 @@ to here."
                              gh-profile-default-profile)
                          gh-profile-alist)) :url))
 
+(defun gh-profile-completing-read ()
+  (let ((profiles (mapcar #'car gh-profile-alist)))
+    (if (> (length profiles) 1)
+        (completing-read "Github profile: " profiles)
+      (car profiles))))
+
 (provide 'gh-profile)
 ;;; gh-profile.el ends here
