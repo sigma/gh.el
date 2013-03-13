@@ -33,6 +33,8 @@
 (require 'eieio)
 
 (require 'json)
+
+(require 'gh-profile)
 (require 'gh-url)
 (require 'gh-auth)
 (require 'gh-cache)
@@ -97,7 +99,10 @@
   :group 'gh-api)
 
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
-  (let ((obj (call-next-method)))
+  (let ((obj (call-next-method))
+        (gh-profile-current-profile (or gh-profile-current-profile
+                                        gh-profile-default-profile)))
+    (oset obj :base (gh-profile-url))
     (gh-api-set-default-auth obj
                              (or (oref obj :auth)
                                  (funcall gh-api-v3-authenticator "auth")))
