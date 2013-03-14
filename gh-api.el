@@ -45,6 +45,11 @@
   "Github API."
   :group 'gh)
 
+(defcustom gh-api-username-filter 'gh-api-enterprise-username-filter
+  "Filter to apply to usernames to build URL components"
+  :type 'function
+  :group 'gh-api)
+
 ;;;###autoload
 (defclass gh-api ()
   ((sync :initarg :sync :initform t)
@@ -84,8 +89,12 @@
                                    resource)
   resource)
 
+(defun gh-api-enterprise-username-filter (username)
+  (replace-regexp-in-string (regexp-quote ".") "-" username))
+
 (defmethod gh-api-get-username ((api gh-api))
-  (oref (oref api :auth) :username))
+  (let ((username (oref (oref api :auth) :username)))
+    (funcall gh-api-username-filter username)))
 
 ;;;###autoload
 (defclass gh-api-v3 (gh-api)
