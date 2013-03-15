@@ -171,8 +171,12 @@
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
   (let* ((fmt (oref api :data-format))
-         (headers (when (eq fmt :form)
-                    '(("Content-Type" . "application/x-www-form-urlencoded"))))
+         (headers (cond ((eq fmt :form)
+                         '(("Content-Type" .
+                            "application/x-www-form-urlencoded")))
+                        ((eq fmt :json)
+                         '(("Content-Type" .
+                            "application/json")))))
          (cache (oref api :cache))
          (key (and cache
                    (member method (oref cache safe-methods))
