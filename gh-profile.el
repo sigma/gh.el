@@ -29,11 +29,24 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'rx)
+(require 'url-parse)
+
 (defgroup gh-profile nil
   "Github profile."
   :group 'gh)
 
-(defcustom gh-profile-alist '(("github" :url "https://api.github.com"))
+(defun gh-profile-remote-regexp (domain)
+  (eval
+   `(rx bol (or ,(concat  "git@" domain ":")
+                (and (or "git" "ssh" "http" "https") "://"
+                     (* nonl) (? "@") ,domain "/"))
+        (and (group (* nonl)) "/" (group (* nonl))) (? ".git"))))
+
+(defcustom gh-profile-alist `(("github"
+                               :url "https://api.github.com"
+                               :remote-regexp
+                               ,(gh-profile-remote-regexp "github.com")))
   "List of profiles for Github access. List every Github
 Enterprise server and/or Github accounts you have access
 to here."
@@ -41,9 +54,20 @@ to here."
                 :value-type (plist :key-type (choice (const :url)
                                                      (const :username)
                                                      (const :password)
-                                                     (const :token))
+                                                     (const :token)
+                                                     (const :remote-regexp))
                                    :value-type string))
   :group 'gh-profile)
+
+(defun gh-profile-get-remote-regexp (profile)
+  (let* ((profile-plist (cdr (assoc profile gh-profile-alist)))
+         (regexp (plist-get profile-plist :remote-regexp)))
+    (if regexp
+        regexp
+      ;; try to guess remote format (just use the hostname)
+      (let* ((url (url-generic-parse-url (plist-get profile-plist :url)))
+             (host (url-host url)))
+        (gh-profile-remote-regexp host)))))
 
 (defcustom gh-profile-default-profile "github"
   "Default profile. This needs to be a key present in
@@ -68,6 +92,12 @@ to here."
     (if (> (length profiles) 1)
         (completing-read "Github profile: " profiles)
       (car profiles))))
+
+(defun gh-profile-get-remote-profile (remote-url)
+  (loop for (id . props) in gh-profile-alist
+        if (string-match (gh-profile-get-remote-regexp id)
+                         remote-url)
+        return id))
 
 (provide 'gh-profile)
 ;;; gh-profile.el ends here
