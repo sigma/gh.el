@@ -109,8 +109,7 @@
 
 (defmethod constructor :static ((api gh-api-v3) newname &rest args)
   (let ((obj (call-next-method))
-        (gh-profile-current-profile (or gh-profile-current-profile
-                                        gh-profile-default-profile)))
+        (gh-profile-current-profile (gh-profile-current-profile)))
     (oset obj :profile (gh-profile-current-profile))
     (oset obj :base (gh-profile-url))
     (gh-api-set-default-auth obj
