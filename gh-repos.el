@@ -105,8 +105,10 @@
         (when (slot-boundp obj 'full-name)
           (setq newname (oref obj :full-name)))
         (when (string-match "^\\([^/]+\\)/\\([^/]+\\)$" newname)
-          (setq name (match-string 2 newname)
-                owner (gh-user "owner" :login (match-string 1 newname))))))
+          (setq login (match-string 1 newname)
+                name  (match-string 2 newname)
+                owner (gh-user login :login login))
+          (aset obj object-name name))))
     obj))
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
