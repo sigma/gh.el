@@ -290,12 +290,20 @@
 
 ;;; Forks sub-API
 
-(defmethod gh-repos-forks-list ((api gh-repos-api) repo)
-  (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls)) "GET"
-   (format "/repos/%s/%s/forks"
-           (oref (oref repo :owner) :login)
-           (oref repo :name))))
+(defmethod gh-repos-forks-list ((api gh-repos-api) repo &optional recursive)
+  (let ((resp (gh-api-authenticated-request
+               api (gh-object-list-reader (oref api repo-cls)) "GET"
+               (format "/repos/%s/%s/forks"
+                       (oref (oref repo :owner) :login)
+                       (oref repo :name)))))
+    (when recursive
+      (let ((forks (oref resp :data)))
+        (oset resp :data
+              (nconc forks
+                     (mapcan (lambda (f)
+                               (oref (gh-repos-forks-list api f t) data))
+                             forks)))))
+    resp))
 
 (defmethod gh-repos-fork ((api gh-repos-api) repo &optional org)
   (gh-api-authenticated-request
