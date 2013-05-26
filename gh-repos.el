@@ -97,7 +97,9 @@
   "Class for GitHub repositories")
 
 (defmethod constructor :static ((repo gh-repos-repo) newname &rest args)
-  (let ((obj (call-next-method)))
+  (when (consp newname)
+    (setq newname (concat (car newname) "/" (cdr newname))))
+  (let ((obj (apply 'call-next-method gh-repos-repo newname args)))
     (when (and (not (slot-boundp obj 'name))
                (not (oref obj owner)))
       (with-slots (name owner)
