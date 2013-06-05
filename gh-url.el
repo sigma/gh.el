@@ -32,7 +32,7 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'url-http)
+(require 'request)
 
 (defclass gh-url-request ()
   ((method :initarg :method :type string)
@@ -54,14 +54,6 @@
    (transform :initarg :transform :initform nil)
    (-req :initarg :-req :initform nil)))
 
-(defmethod gh-url-response-set-data ((resp gh-url-response) data)
-  (let ((transform (oref resp :transform)))
-    (oset resp :data
-          (if transform
-              (funcall transform data)
-            data))
-    (oset resp :data-received t)))
-
 (defmethod gh-url-response-run-callbacks ((resp gh-url-response))
   (let ((copy-list (lambda (list)
                      (if (consp list)
@@ -80,7 +72,7 @@
 (defmethod gh-url-add-response-callback ((resp gh-url-response) callback)
   (object-add-to-list resp :callbacks callback t)
   (if (oref resp :data-received)
-    (gh-url-response-run-callbacks resp)
+      (gh-url-response-run-callbacks resp)
     resp))
 
 ;;; code borrowed from nicferrier's web.el
@@ -106,67 +98,63 @@
          (push (cons name value) headers)))
     headers))
 
-(defmethod gh-url-response-finalize ((resp gh-url-response))
-  (when (oref resp :data-received)
-    (gh-url-response-run-callbacks resp)))
-
-(defmethod gh-url-response-init ((resp gh-url-response)
-                                 buffer)
-  (declare (special url-http-end-of-headers))
-  (unwind-protect
-      (with-current-buffer buffer
-        (let ((headers (gh-url-parse-headers
-                        (buffer-substring
-                         (point-min) (1+ url-http-end-of-headers)))))
-          (oset resp :headers headers)
-          (oset resp :http-status (read (cdr (assoc 'status-code headers)))))
-        (goto-char (1+ url-http-end-of-headers))
-        (let ((raw (buffer-substring (point) (point-max))))
-          (gh-url-response-set-data resp raw)))
-    (kill-buffer buffer))
-  (gh-url-response-finalize resp)
-  resp)
-
-(defun gh-url-set-response (status req-resp)
-  (set-buffer-multibyte t)
-  (destructuring-bind (req resp) req-resp
-    (condition-case err
-        (progn
-          (oset resp :-req req)
-          (gh-url-response-init resp (current-buffer)))
-      (error
-       (let ((num (oref req :num-retries)))
-         (if (or (null num) (zerop num))
-             (signal (car err) (cdr err))
-           (oset req :num-retries (1- num))
-           (gh-url-run-request req resp)))))))
-
-(defun gh-url-form-encode (form)
-  (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
-             form "&"))
-
-(defun gh-url-params-encode (form)
-  (concat "?" (gh-url-form-encode form)))
+(defun gh-url-next-page (headers)
+  (let ((links-header (cdr (assoc "Link" headers))))
+    (when links-header
+      (loop for item in (split-string links-header ", ")
+            when (string-match "^<\\(.*\\)>; rel=\"next\"" item)
+            return (match-string 1 item)))))
 
 (defmethod gh-url-run-request ((req gh-url-request) &optional resp)
-  (let ((url-request-method (oref req :method))
-        (url-request-data (oref req :data))
-        (url-request-extra-headers (oref req :headers))
-        (url (concat (oref req :url)
-                     (let ((params (oref req :query)))
-                       (if params
-                           (gh-url-params-encode params)
-                         "")))))
-    (if (oref req :async)
-        (let* ((resp (or resp (make-instance (oref req default-response-cls))))
-               (req-resp (list req resp)))
-          (url-retrieve url 'gh-url-set-response (list req-resp))
-          resp)
-      (let* ((resp (or resp (make-instance (oref req default-response-cls))))
-             (req-resp (list req resp)))
-        (with-current-buffer (url-retrieve-synchronously url)
-          (gh-url-set-response nil req-resp))
-        resp))))
+  (unless resp
+    (setq resp (make-instance (oref req default-response-cls))))
+  (oset resp :-req req)
+  (request (oref req :url)
+	   :sync    (not (oref req :async))
+	   :type    (oref req :method)
+	   :headers (oref req :headers)
+	   :params  (oref req :query)
+	   :data    (oref req :data)
+	   :parser  (apply-partially 'gh-request-parse-response resp)
+	   :success (apply-partially 'gh-request-handle-success resp)
+	   :error   (apply-partially 'gh-request-handle-error resp))
+  resp)
+
+(defun gh-request-parse-response (resp)
+  (let ((data (buffer-substring-no-properties (point-min) (point-max)))
+	(transform (oref resp :transform)))
+    (if transform
+	(let ((json-array-type 'list))
+	  (funcall transform data))
+      data)))
+
+(defun* gh-request-handle-success (resp &key response data
+					&allow-other-keys)
+  (oset resp :http-status (request-response-status-code response))
+  (oset resp :headers (gh-url-parse-headers
+		       (request-response--raw-header response)))
+  (let ((prev-data (oref resp :data))
+	(req (oref resp :-req)))
+    (oset resp :data (append prev-data data))
+    (when (gh-api-paged-request-p req)
+      (let ((next-link (gh-url-next-page (oref resp :headers))))
+	(when next-link
+	  (oset req :url next-link)
+	  (gh-url-run-request req resp))))
+    (unless prev-data
+      (oset resp :data-received t)
+      (gh-url-response-run-callbacks resp)))
+  resp)
+
+(defun* gh-request-handle-error (resp &key error-thrown
+				      &allow-other-keys)
+  (let* ((req (oref resp :-req))
+	 (num (oref req :num-retries)))
+    (if (or (null num) (zerop num))
+	(signal (car error-thrown)
+		(cdr error-thrown))
+      (oset req :num-retries (1- num))
+      (gh-url-run-request req resp))))
 
 (provide 'gh-url)
 ;;; gh-url.el ends here
