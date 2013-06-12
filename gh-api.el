@@ -123,42 +123,18 @@
 (defclass gh-api-response (gh-url-response)
   ())
 
-(defun gh-api-json-decode (repr)
-  (if (or (null repr) (string= repr ""))
-      'empty
-    (let ((json-array-type 'list))
-      (json-read-from-string repr))))
-
 (defun gh-api-json-encode (json)
   (json-encode-list json))
 
-(defmethod gh-url-response-set-data ((resp gh-api-response) data)
-  (call-next-method resp (gh-api-json-decode data)))
+(defun gh-url-form-encode (form)
+  (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
+             form "&"))
 
 (defclass gh-api-paged-request (gh-api-request)
   ((default-response-cls :allocation :class :initform gh-api-paged-response)))
 
 (defclass gh-api-paged-response (gh-api-response)
   ())
-
-(defmethod gh-api-paging-links ((resp gh-api-paged-response))
-  (let ((links-header (cdr (assoc "Link" (oref resp :headers)))))
-    (when links-header
-      (loop for item in (split-string links-header ", ")
-            when (string-match "^<\\(.*\\)>; rel=\"\\(.*\\)\"" item)
-            collect (cons (match-string 2 item)
-                          (match-string 1 item))))))
-
-(defmethod gh-url-response-set-data ((resp gh-api-paged-response) data)
-  (let ((previous-data (oref resp :data))
-        (next (cdr (assoc "next" (gh-api-paging-links resp)))))
-    (call-next-method)
-    (oset resp :data (append previous-data (oref resp :data)))
-    (when next
-      (let ((req (oref resp :-req)))
-        (oset resp :data-received nil)
-        (oset req :url next)
-        (gh-url-run-request req resp)))))
 
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params)
