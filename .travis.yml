@@ -20,7 +20,7 @@ before_install:
     fi
   - pip install --use-mirrors virtualenv-emacs
   - virtualenv_install_emacs --with-emacs=`which "$EMACS"` --marmalade
-  - elpa-get eieio pcache logito mocker request
+  - elpa-get eieio pcache logito mocker
   - emacs --version
 script:
   make test
