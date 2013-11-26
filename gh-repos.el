@@ -110,8 +110,8 @@
         (when (string-match "^\\([^/]+\\)/\\([^/]+\\)$" newname)
           (setq login (match-string 1 newname)
                 name  (match-string 2 newname)
-          (aset obj object-name name))))
                 owner (gh-user-stub login :login login))
+          (oset obj object-name name))))
     obj))
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
