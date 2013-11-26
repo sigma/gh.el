@@ -73,7 +73,7 @@
    (history :initarg :history :initform nil)
    (forks :initarg :forks :initform nil)
 
-   (user-cls :allocation :class :initform gh-user))
+   (user-cls :allocation :class :initform gh-user-stub))
   "Gist object")
 
 (defmethod gh-object-read-into ((gist gh-gist-gist) data)

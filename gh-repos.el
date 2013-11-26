@@ -39,7 +39,7 @@
 ;;;###autoload
 (defclass gh-repos-api (gh-api-v3)
   ((repo-cls :allocation :class :initform gh-repos-repo)
-   (user-cls :allocation :class :initform gh-user))
+   (user-cls :allocation :class :initform gh-user-stub))
   "Repos API")
 
 ;;;###autoload
@@ -90,8 +90,8 @@
    (has-wiki :initarg :has-wiki)
    (has-downloads :initarg :has-downloads)
 
-   (owner-cls :allocation :class :initform gh-user)
-   (organisation-cls :allocation :class :initform gh-user)
+   (owner-cls :allocation :class :initform gh-user-stub)
+   (organisation-cls :allocation :class :initform gh-user-stub)
    (parent-cls :allocation :class :initform gh-repos-repo)
    (source-cls :allocation :class :initform gh-repos-repo))
   "Class for GitHub repositories")
@@ -109,8 +109,8 @@
         (when (string-match "^\\([^/]+\\)/\\([^/]+\\)$" newname)
           (setq login (match-string 1 newname)
                 name  (match-string 2 newname)
-                owner (gh-user login :login login))
           (aset obj object-name name))))
+                owner (gh-user-stub login :login login))
     obj))
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
@@ -162,7 +162,7 @@
    (user :initarg :user :initform nil)
    (repo :initarg :repo :initform nil)
 
-   (user-cls :allocation :class :initform gh-user)
+   (user-cls :allocation :class :initform gh-user-stub)
    (repo-cls :allocation :class :initform gh-repos-repo)))
 
 (defmethod gh-object-read-into ((r gh-repos-ref) data)
