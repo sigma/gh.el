@@ -304,10 +304,11 @@
     (when recursive
       (let ((forks (oref resp :data)))
         (oset resp :data
-              (nconc forks
-                     (mapcan (lambda (f)
-                               (oref (gh-repos-forks-list api f t) data))
-                             forks)))))
+              (apply 'nconc forks
+                     (mapcar
+                      (lambda (f)
+                        (oref (gh-repos-forks-list api f t) data))
+                      forks)))))
     resp))
 
 (defmethod gh-repos-fork ((api gh-repos-api) repo &optional org)
