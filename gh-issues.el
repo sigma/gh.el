@@ -64,7 +64,7 @@
    (created_at :initarg :created_at)
    (due_on :initarg :due_on)
 
-   (user-cls :allocation :class :initform gh-user-stub)
+   (user-cls :allocation :class :initform gh-user)
    (milestone-cls :allocation :class :initform gh-issues-milestone))
   "issues request")
 
@@ -85,7 +85,7 @@
    (created_at :initarg :created_at)
    (due_on :initarg :due_on)
 
-   (user-cls :allocation :class :initform gh-user-stub))
+   (user-cls :allocation :class :initform gh-user))
   "github milestone")
 
 (defmethod gh-object-read-into ((issue gh-issues-issue) data)

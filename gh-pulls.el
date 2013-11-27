@@ -100,7 +100,7 @@
    (base :initarg :base :initform nil)
 
    (ref-cls :allocation :class :initform gh-repos-ref)
-   (user-cls :allocation :class :initform gh-user-stub))
+   (user-cls :allocation :class :initform gh-user))
   "Git pull requests API")
 
 (defmethod gh-object-read-into ((req gh-pulls-request) data)

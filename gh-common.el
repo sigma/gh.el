@@ -60,14 +60,14 @@
 
 (defmethod gh-object-read-into ((obj gh-object) data))
 
-(defclass gh-user-stub (gh-object)
+(defclass gh-user (gh-object)
   ((login :initarg :login)
    (id :initarg :id)
    (gravatar-url :initarg :gravatar-url)
    (url :initarg :url))
   "Github user object")
 
-(defmethod gh-object-read-into ((user gh-user-stub) data)
+(defmethod gh-object-read-into ((user gh-user) data)
   (call-next-method)
   (with-slots (login id gravatar-url url)
       user

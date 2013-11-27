@@ -42,7 +42,7 @@
   "Users API")
 
 ;;;###autoload
-(defclass gh-users-user (gh-user-stub)
+(defclass gh-users-user (gh-user)
   ((gravatar-id :initarg :gravatar-id)
    (html-url :initarg :html-url)
    (followers-url :initarg :followers-url)
