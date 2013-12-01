@@ -35,7 +35,8 @@
 (require 'pcache)
 
 (defclass gh-cache (pcache-repository)
-  ((entries :initarg :entries :initform (make-hash-table :test 'equal))
+  ((version-constant :allocation :class :initform "0.7.3")
+   (entries :initarg :entries :initform (make-hash-table :test 'equal))
    (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
    (invalidation-chain :allocation :class :initform nil)))
 
