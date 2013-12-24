@@ -170,15 +170,16 @@
                          '(("Content-Type" .
                             "application/json")))))
          (cache (oref api :cache))
-         (key (and cache
-                   (member method (oref cache safe-methods))
-                   (list resource
+         (key (list resource
                          method
-                         (sha1 (format "%s" transformer)))))
-         (has-value (and key (pcache-has cache key)))
-         (value (and has-value (pcache-get cache key)))
-         (is-outdated (and has-value (gh-cache-outdated-p cache key)))
-         (etag (and is-outdated (gh-cache-etag cache key)))
+                         (sha1 (format "%s" transformer))))
+         (cache-key (and cache
+                         (member method (oref cache safe-methods))
+                         key))
+         (has-value (and cache-key (pcache-has cache cache-key)))
+         (value (and has-value (pcache-get cache cache-key)))
+         (is-outdated (and has-value (gh-cache-outdated-p cache cache-key)))
+         (etag (and is-outdated (gh-cache-etag cache cache-key)))
          (req
           (and (or (not has-value)
                    is-outdated)
@@ -203,12 +204,12 @@
     (cond ((and has-value ;; got value from cache
                 (not is-outdated))
            (gh-api-response "cached" :data-received t :data value))
-          (key ;; no value, but cache exists and method is safe
+          (cache-key ;; no value, but cache exists and method is safe
            (let ((resp (make-instance (oref req default-response-cls)
                                       :transform transformer)))
              (gh-url-run-request req resp)
              (gh-url-add-response-callback
-              resp (make-instance 'gh-api-callback :cache cache :key key
+              resp (make-instance 'gh-api-callback :cache cache :key cache-key
                                   :revive etag))
              resp))
           (cache ;; unsafe method, cache exists
