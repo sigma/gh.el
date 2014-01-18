@@ -1,8 +1,8 @@
 ;;; gh-issue-comments.el --- issue comments api for github
 
-;; Copyright (C) 2012  Raimon Grau
+;; Copyright (C) 2014 Travis Thieman
 
-;; Author: Raimon Grau <raimonster@gmail.com>
+;; Author: Travis Thieman <travis.thieman@gmail.com>
 ;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or modify
