@@ -60,6 +60,10 @@
 
 (defmethod gh-object-read-into ((obj gh-object) data))
 
+(defmethod slot-unbound ((obj gh-object) cls slot-name fn)
+  (if (eq fn 'oref) nil
+      (call-next-method)))
+
 (defclass gh-user (gh-object)
   ((login :initarg :login)
    (id :initarg :id)
