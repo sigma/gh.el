@@ -173,7 +173,10 @@
     (if (oref req :async)
         (let* ((resp (or resp (make-instance (oref req default-response-cls))))
                (req-resp (list req resp)))
-          (url-retrieve url 'gh-url-set-response (list req-resp)))
+          (with-current-buffer
+              (url-retrieve url 'gh-url-set-response (list req-resp))
+            (set (make-local-variable 'url-registered-auth-schemes)
+                 url-registered-auth-schemes)))
       (let* ((resp (or resp (make-instance (oref req default-response-cls))))
              (req-resp (list req resp)))
         (with-current-buffer (url-retrieve-synchronously url)
