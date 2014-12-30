@@ -115,6 +115,10 @@
       (when (and h (string-prefix-p "required;" (cdr h)))
         (let ((otp (read-from-minibuffer "Enter dual-factor auth code: "))
               (req (oref cb :req)))
+          ;; reset resp
+          (oset resp :data nil)
+          (oset resp :data-received nil)
+
           (object-add-to-list req :headers
                               (cons otp-header otp))
           (gh-url-run-request req resp))))))
