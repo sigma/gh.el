@@ -42,6 +42,7 @@
    (data :initarg :data :initform "" :type string)
    (async :initarg :async :initform nil)
    (num-retries :initarg :num-retries :initform 0)
+   (install-callbacks :initarg :install-callbacks :initform nil)
 
    (default-response-cls :allocation :class :initform gh-url-response)))
 
@@ -170,13 +171,15 @@
     (if (oref req :async)
         (let* ((resp (or resp (make-instance (oref req default-response-cls))))
                (req-resp (list req resp)))
-          (url-retrieve url 'gh-url-set-response (list req-resp))
-          resp)
+          (url-retrieve url 'gh-url-set-response (list req-resp)))
       (let* ((resp (or resp (make-instance (oref req default-response-cls))))
              (req-resp (list req resp)))
         (with-current-buffer (url-retrieve-synchronously url)
-          (gh-url-set-response nil req-resp))
-        resp))))
+          (gh-url-set-response nil req-resp)))))
+  (mapc (lambda (cb)
+          (gh-url-add-response-callback resp cb))
+        (oref req :install-callbacks))
+  resp)
 
 (provide 'gh-url)
 ;;; gh-url.el ends here
