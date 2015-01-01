@@ -32,6 +32,8 @@
 ;;;###autoload
 (require 'eieio)
 
+(require 'dash)
+(require 's)
 (require 'gh-profile)
 
 (defgroup gh nil
@@ -106,6 +108,16 @@
     (setq id (gh-read data 'id)
           url (gh-read data 'url)
           html-url (gh-read data 'html-url))))
+
+(defmethod gh-ref-object-base ((obj gh-ref-object))
+  (let ((url (oref obj :url)))
+    (--> (s-split "/" url t)
+      (-slice it 2)
+      (s-join "/" it)
+      (concat "/" it))))
+
+(defmethod gh-ref-object-base (obj)
+  (format "%s" obj))
 
 (defclass gh-user (gh-ref-object)
   ((login :initarg :login)

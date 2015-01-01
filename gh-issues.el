@@ -55,7 +55,7 @@
    (comment-cls :allocation :class :initform gh-issues-comment))
   "Github Issues api")
 
-(defclass gh-issues-issue (gh-ref-object gh-comments-commentable-mixin)
+(defclass gh-issues-issue (gh-ref-object)
   ((number :initarg :number)
    (state :initarg :state)
    (title :initarg :title)
@@ -281,31 +281,23 @@
 ;;; Comments
 
 (defmethod gh-issues-comments-list ((api gh-issues-api) user repo issue-id)
-  (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api comment-cls)) "GET"
-   (format "/repos/%s/%s/issues/%s/comments" user repo issue-id)))
+  (gh-comments-list api (format "/repos/%s/%s/issues/%s" user repo issue-id)))
 
 (defmethod gh-issues-comments-get ((api gh-issues-api) user repo comment-id)
-  (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "GET"
-   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)))
+  (gh-comments-get api (format "/repos/%s/%s/issues" user repo) comment-id))
 
-(defmethod gh-issues-comments-update ((api gh-issues-api) user repo comment-id comment)
-  (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "PATCH"
-   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)
-   (gh-comment-req-to-update comment)))
+(defmethod gh-issues-comments-update ((api gh-issues-api)
+                                      user repo comment-id comment)
+  (gh-comments-update api (format "/repos/%s/%s/issues" user repo)
+                      comment-id (gh-comment-req-to-update comment)))
 
-(defmethod gh-issues-comments-new ((api gh-issues-api) user repo issue-id comment)
-  (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "POST"
-   (format "/repos/%s/%s/issues/%s/comments" user repo issue-id)
-   (gh-comment-req-to-update comment)))
+(defmethod gh-issues-comments-new ((api gh-issues-api)
+                                   user repo issue-id comment)
+  (gh-comments-new api (format "/repos/%s/%s/issues/%s" user repo issue-id)
+                   (gh-comment-req-to-update comment)))
 
 (defmethod gh-issues-comments-delete ((api gh-issues-api) user repo comment-id)
-  (gh-api-authenticated-request
-   api nil "DELETE"
-   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)))
+  (gh-comments-delete api (format "/repos/%s/%s/issues" user repo) comment-id))
 
 ;;; helpers
 
