@@ -97,9 +97,9 @@
       (call-next-method)))
 
 (defclass gh-ref-object (gh-object)
-  ((id :initarg :id :type string)
+  ((id :initarg :id)
    (url :initarg :url :type string)
-   (html-url :initarg :html-url :type string)))
+   (html-url :initarg :html-url)))
 
 (defmethod gh-object-read-into ((user gh-ref-object) data)
   (call-next-method)
