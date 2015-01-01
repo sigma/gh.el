@@ -38,6 +38,37 @@
   "Github API client libraries."
   :group 'applications)
 
+;;; Helper functions
+
+(defun gh-read (obj field)
+  (cdr (assoc field obj)))
+
+(defun gh-namespaced-key (key)
+  (let ((profile (gh-profile-current-profile)))
+    (concat "github."
+            (if (string= profile gh-profile-default-profile)
+                ""
+              (concat profile "."))
+            key)))
+
+(defun gh-config (key)
+  "Returns a GitHub specific value from the global Git config."
+  (let ((strip (lambda (string)
+                 (if (> (length string) 0)
+                     (substring string 0 (- (length string) 1))))))
+    (funcall strip (gh-command-to-string "config" (gh-namespaced-key key)))))
+
+(defun gh-set-config (key value)
+  "Sets a GitHub specific value to the global Git config."
+  (gh-command-to-string "config" "--global" (gh-namespaced-key key) value))
+
+(defun gh-command-to-string (&rest args)
+  (let ((git (executable-find "git")))
+    (with-output-to-string
+      (apply 'process-file git nil standard-output nil args))))
+
+;;; Base classes for common objects
+
 (defclass gh-object ()
   ())
 
@@ -79,32 +110,28 @@
           gravatar-url (gh-read data 'gravatar_url)
           url (gh-read data 'url))))
 
-(defun gh-read (obj field)
-  (cdr (assoc field obj)))
+(defclass gh-comment (gh-object)
+  ((body :initarg :body)
+   (user :initarg :user :initform nil)
+   (created-at :initarg :created_at)
+   (updated-at :initarg :updated_at)
 
-(defun gh-namespaced-key (key)
-  (let ((profile (gh-profile-current-profile)))
-    (concat "github."
-            (if (string= profile gh-profile-default-profile)
-                ""
-              (concat profile "."))
-            key)))
+   (user-cls :allocation :class :initform gh-user))
+  "Github comment object")
 
-(defun gh-config (key)
-  "Returns a GitHub specific value from the global Git config."
-  (let ((strip (lambda (string)
-                 (if (> (length string) 0)
-                     (substring string 0 (- (length string) 1))))))
-    (funcall strip (gh-command-to-string "config" (gh-namespaced-key key)))))
+(defmethod gh-object-read-into ((comment gh-comment) data)
+  (call-next-method)
+  (with-slots (body user created-at updated-at)
+      comment
+    (setq body (gh-read data 'body)
+          user (gh-object-read  (or (oref comment :user)
+                                    (oref comment user-cls))
+                                (gh-read data 'user))
+          created-at (gh-read data 'created_at)
+          updated-at (gh-read data 'updated_at))))
 
-(defun gh-set-config (key value)
-  "Sets a GitHub specific value to the global Git config."
-  (gh-command-to-string "config" "--global" (gh-namespaced-key key) value))
-
-(defun gh-command-to-string (&rest args)
-  (let ((git (executable-find "git")))
-    (with-output-to-string
-      (apply 'process-file git nil standard-output nil args))))
+(defmethod gh-comment-req-to-update ((req gh-comment))
+  `(("body" . ,(oref req :body))))
 
 (provide 'gh-common)
 ;;; gh-common.el ends here

@@ -1,5 +1,7 @@
 ;;; gh-issues.el --- issues api for github
 
+;; Copyright (C) 2014-2015  Yann Hodique
+;; Copyright (C) 2014 Travis Thieman
 ;; Copyright (C) 2012  Raimon Grau
 
 ;; Author: Raimon Grau <raimonster@gmail.com>
@@ -27,6 +29,9 @@
 ;; (last (oref issues data)) ; get one issue
 ;; (setq mi (make-instance 'gh-issues-issue :body "issue body" :title "issue title"))
 ;; (gh-issues-issue-new api "user" "repo" mi)
+;; (setf comments (gh-issues-comments-list api "user" "repo" "issue id"))
+;; (setq my-comment (make-instance 'gh-issues-comment :body "This is great!"))
+;; (gh-issues-comments-new api "user" "repo" "issue id" my-comment)
 
 ;;; Code:
 
@@ -38,17 +43,19 @@
 
 (require 'gh-api)
 (require 'gh-auth)
+(require 'gh-comments)
 (require 'gh-common)
 
 (require 'gh-repos)
 
-(defclass gh-issues-api (gh-api-v3)
+(defclass gh-issues-api (gh-api-v3 gh-comments-api-mixin)
   ((issue-cls :allocation :class :initform gh-issues-issue)
    (milestone-cls :allocation :class :initform gh-issues-milestone)
-   (label-cls :allocation :class :initform gh-issues-label))
+   (label-cls :allocation :class :initform gh-issues-label)
+   (comment-cls :allocation :class :initform gh-issues-comment))
   "Github Issues api")
 
-(defclass gh-issues-issue (gh-object)
+(defclass gh-issues-issue (gh-object gh-comments-commentable-mixin)
   ((url :initarg :url)
    (html-url :initarg :html-url)
    (number :initarg :number)
@@ -135,6 +142,9 @@
           closed_issues (gh-read data 'closed_issues)
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
+
+(defclass gh-issues-comment (gh-comment)
+  ())
 
 (defmethod gh-issues-issue-list ((api gh-issues-api) user repo)
   (gh-api-authenticated-request
@@ -281,6 +291,33 @@
     api (gh-object-list-reader (oref api label-cls)) "GET"
     (format "/repos/%s/%s/milestones/%s/labels" user repo milestone-id))))
 
+;;; Comments
+(defmethod gh-issues-comments-list ((api gh-issues-api) user repo issue-id)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api comment-cls)) "GET"
+   (format "/repos/%s/%s/issues/%s/comments" user repo issue-id)))
+
+(defmethod gh-issues-comments-get ((api gh-issues-api) user repo comment-id)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api comment-cls)) "GET"
+   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)))
+
+(defmethod gh-issues-comments-update ((api gh-issues-api) user repo comment-id comment)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api comment-cls)) "PATCH"
+   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)
+   (gh-comment-req-to-update comment)))
+
+(defmethod gh-issues-comments-new ((api gh-issues-api) user repo issue-id comment)
+  (gh-api-authenticated-request
+   api (gh-object-reader (oref api comment-cls)) "POST"
+   (format "/repos/%s/%s/issues/%s/comments" user repo issue-id)
+   (gh-comment-req-to-update comment)))
+
+(defmethod gh-issues-comments-delete ((api gh-issues-api) user repo comment-id)
+  (gh-api-authenticated-request
+   api nil "DELETE"
+   (format "/repos/%s/%s/issues/comments/%s" user repo comment-id)))
 
 ;;; helpers
 

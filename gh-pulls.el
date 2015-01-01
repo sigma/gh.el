@@ -47,8 +47,31 @@
 (defclass gh-pulls-api (gh-api-v3)
   ((cache-cls :allocation :class :initform gh-pulls-cache)
 
-   (req-cls :allocation :class :initform gh-pulls-request))
+   (req-cls :allocation :class :initform gh-pulls-request)
+   (comment-cls :allocation :class :initform gh-pulls-comment))
   "Git pull requests API")
+
+(defclass gh-pulls-comment (gh-comment)
+  ((path :initarg :path)
+   (diff-hunk :initarg :diff-hunk)
+   (position :initarg :position)
+   (original-position :initarg :original-position)
+   (commit-id :initarg :commit-id)
+   (original-commit-id :initarg :original-commit-id)
+   (in-reply-to :initarg :in-reply-to :initform nil)))
+
+(defmethod gh-object-read-into ((comment gh-pulls-comment) data)
+  (call-next-method)
+  (with-slots (path diff-hunk position
+		   original-position commit-id original-commit-id in-reply-to)
+      comment
+    (setq path (gh-read data 'path)
+	  diff-hunk (gh-read data 'diff_hunk)
+	  position (gh-read data 'position)
+	  original-position (gh-read data 'original_position)
+	  commit-id (gh-read data 'commit_id)
+	  original-commit-id (gh-read data 'original_commit_id)
+	  in-reply-to (gh-read data 'in_reply_to))))
 
 (defclass gh-pulls-request-stub (gh-object)
   ((url :initarg :url)
