@@ -33,6 +33,7 @@
 (require 'eieio)
 
 (require 'gh-common)
+(require 'gh-api)
 
 (defclass gh-comments-commentable-mixin ()
   nil
