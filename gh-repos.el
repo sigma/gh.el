@@ -60,16 +60,13 @@
           private (gh-read data 'private))))
 
 ;;;###autoload
-(defclass gh-repos-repo (gh-repos-repo-stub)
-  ((url :initarg :url)
-   (html-url :initarg :html-url)
-   (clone-url :initarg :clone-url)
+(defclass gh-repos-repo (gh-ref-object gh-repos-repo-stub)
+  ((clone-url :initarg :clone-url)
    (git-url :initarg :git-url)
    (ssh-url :initarg :ssh-url)
    (svn-url :initarg :svn-url)
    (mirror-url :initarg :mirror-url)
    (owner :initarg :owner :initform nil)
-   (id :initarg :id)
    (full-name :initarg full-name)
    (language :initarg :language)
    (fork :initarg :fork)
@@ -116,20 +113,17 @@
 
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
   (call-next-method)
-  (with-slots (url html-url clone-url git-url ssh-url svn-url mirror-url
-                   id owner full-name language fork forks forks-count
-                   watchers watchers-count size master-branch open-issues
-                   pushed-at created-at organisation parent source
-                   has-issues has-wiki has-downloads)
+  (with-slots (clone-url git-url ssh-url svn-url mirror-url
+                         owner full-name language fork forks forks-count
+                         watchers watchers-count size master-branch open-issues
+                         pushed-at created-at organisation parent source
+                         has-issues has-wiki has-downloads)
       repo
-    (setq url (gh-read data 'url)
-          html-url (gh-read data 'html_url)
-          clone-url (gh-read data 'clone_url)
+    (setq clone-url (gh-read data 'clone_url)
           git-url (gh-read data 'git_url)
           ssh-url (gh-read data 'ssh_url)
           svn-url (gh-read data 'svn_url)
           mirror-url (gh-read data 'mirror_url)
-          id (gh-read data 'id)
           owner (gh-object-read (or (oref repo :owner)
                                     (oref repo owner-cls))
                                 (gh-read data 'owner))

@@ -49,10 +49,8 @@
   (let ((gh-api-v3-authenticator 'gh-oauth-password-authenticator))
     (call-next-method)))
 
-(defclass gh-oauth-authorization (gh-object)
-  ((id :initarg :id)
-   (url :initarg :url)
-   (scopes :initarg :scopes)
+(defclass gh-oauth-authorization (gh-ref-object)
+  ((scopes :initarg :scopes)
    (token :initarg :token)
    (app :initarg :app :initform nil)
    (updated-at :initarg :updated-at)

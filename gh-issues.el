@@ -55,10 +55,8 @@
    (comment-cls :allocation :class :initform gh-issues-comment))
   "Github Issues api")
 
-(defclass gh-issues-issue (gh-object gh-comments-commentable-mixin)
-  ((url :initarg :url)
-   (html-url :initarg :html-url)
-   (number :initarg :number)
+(defclass gh-issues-issue (gh-ref-object gh-comments-commentable-mixin)
+  ((number :initarg :number)
    (state :initarg :state)
    (title :initarg :title)
    (body :initarg :body)
@@ -75,35 +73,13 @@
    (milestone-cls :allocation :class :initform gh-issues-milestone))
   "issues request")
 
-(defclass gh-issues-label (gh-object)
-  ((url :initarg :url)
-   (name :initarg :name)
-   (color :initarg :color)))
-
-(defclass gh-issues-milestone (gh-object)
-  ((url :initarg :url)
-   (number :initarg :number)
-   (state :initarg :state)
-   (title :initarg :title)
-   (description :initarg :description)
-   (creator :initarg :creator :initform nil)
-   (open_issues :initarg :open_issues)
-   (closed_issues :initarg :closed_issues)
-   (created_at :initarg :created_at)
-   (due_on :initarg :due_on)
-
-   (user-cls :allocation :class :initform gh-user))
-  "github milestone")
-
 (defmethod gh-object-read-into ((issue gh-issues-issue) data)
   (call-next-method)
-  (with-slots (url html-url number state title body
-                   user labels assignee milestone open_issues
-                   closed_issues created_at due_on)
+  (with-slots (number state title body
+                      user labels assignee milestone open_issues
+                      closed_issues created_at due_on)
       issue
-    (setq url (gh-read data 'url)
-          html-url (gh-read data 'html_url)
-          number (gh-read data 'number)
+    (setq number (gh-read data 'number)
           state (gh-read data 'state)
           title (gh-read data 'title)
           body (gh-read data 'body)
@@ -122,15 +98,42 @@
           created_at (gh-read data 'created_at)
           due_on (gh-read data 'due_on))))
 
+(defclass gh-issues-label (gh-ref-object)
+  ((name :initarg :name)
+   (color :initarg :color)))
+
+(defmethod gh-object-read-into ((label gh-issues-label) data)
+  (call-next-method)
+  (with-slots (url name color)
+      label
+    (setq name (gh-read data 'name)
+          color (gh-read data 'color))))
+
+(defmethod gh-issues-label-req-to-update ((label gh-issues-label))
+  `(("name" . ,(oref label name))
+    ("color" . ,(oref label color))))
+
+(defclass gh-issues-milestone (gh-ref-object)
+  ((number :initarg :number)
+   (state :initarg :state)
+   (title :initarg :title)
+   (description :initarg :description)
+   (creator :initarg :creator :initform nil)
+   (open_issues :initarg :open_issues)
+   (closed_issues :initarg :closed_issues)
+   (created_at :initarg :created_at)
+   (due_on :initarg :due_on)
+
+   (user-cls :allocation :class :initform gh-user))
+  "github milestone")
 
 (defmethod gh-object-read-into ((milestone gh-issues-milestone) data)
   (call-next-method)
-  (with-slots (url number state title description creator
-                   open_issues closed_issues
-                   created_at due_on)
+  (with-slots (number state title description creator
+                      open_issues closed_issues
+                      created_at due_on)
       milestone
-    (setq url (gh-read data 'url)
-          number (gh-read data 'number)
+    (setq number (gh-read data 'number)
           state (gh-read data 'state)
           title (gh-read data 'title)
           description (gh-read data 'description)
@@ -216,23 +219,7 @@
    (format "/repos/%s/%s/issues" user repo)
    (gh-issues-issue-req-to-update issue)))
 
-;;; labels
-(defclass gh-issues-label (gh-object)
-  ((url :initarg :url)
-   (name :initarg :name)
-   (color :initarg :color)))
-
-(defmethod gh-object-read-into ((label gh-issues-label) data)
-  (call-next-method)
-  (with-slots (url name color)
-      label
-    (setq url (gh-read data 'url)
-          name (gh-read data 'name)
-          color (gh-read data 'color))))
-
-(defmethod gh-issues-label-req-to-update ((label gh-issues-label))
-  `(("name" . ,(oref label name))
-    ("color" . ,(oref label color))))
+;;; Labels
 
 (defmethod gh-issues-label-get ((api gh-issues-api) user repo name)
   (gh-api-authenticated-request
@@ -292,6 +279,7 @@
     (format "/repos/%s/%s/milestones/%s/labels" user repo milestone-id))))
 
 ;;; Comments
+
 (defmethod gh-issues-comments-list ((api gh-issues-api) user repo issue-id)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api comment-cls)) "GET"

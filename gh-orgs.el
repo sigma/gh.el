@@ -42,20 +42,18 @@
   "Orgs API")
 
 ;;;###autoload
-(defclass gh-orgs-org-stub (gh-object)
+(defclass gh-orgs-org-stub (gh-ref-object)
   ((login :initarg :login)
-   (id :initarg :id)
-   (url :initarg :url)
-   (avatar-url :initarg :avatar-url)))
+   (avatar-url :initarg :avatar-url)
+   (description :initarg :description)))
 
 (defmethod gh-object-read-into ((stub gh-orgs-org-stub) data)
   (call-next-method)
-  (with-slots (login id url avatar-url)
+  (with-slots (login avatar-url description)
       stub
     (setq login (gh-read data 'login)
-          id (gh-read data 'id)
-          url (gh-read data 'url)
-          avatar-url (gh-read data 'avatar-url))))
+          avatar-url (gh-read data 'avatar-url)
+          description (gh-read data 'description))))
 
 (defclass gh-orgs-plan (gh-object)
   ((name :initarg :name)

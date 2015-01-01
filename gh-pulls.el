@@ -73,10 +73,8 @@
 	  original-commit-id (gh-read data 'original_commit_id)
 	  in-reply-to (gh-read data 'in_reply_to))))
 
-(defclass gh-pulls-request-stub (gh-object)
-  ((url :initarg :url)
-   (html-url :initarg :html-url)
-   (diff-url :initarg :diff-url)
+(defclass gh-pulls-request-stub (gh-ref-object)
+  ((diff-url :initarg :diff-url)
    (patch-url :initarg :patch-url)
    (issue-url :initarg :issue-url)
    (number :initarg :number)
@@ -90,13 +88,11 @@
 
 (defmethod gh-object-read-into ((stub gh-pulls-request-stub) data)
   (call-next-method)
-  (with-slots (url html-url diff-url patch-url issue-url number
+  (with-slots (diff-url patch-url issue-url number
                    state title body created-at updated-at
                    closed-at merged-at)
       stub
-    (setq url (gh-read data 'url)
-          html-url (gh-read data 'html_url)
-          diff-url (gh-read data 'diff_url)
+    (setq diff-url (gh-read data 'diff_url)
           patch-url (gh-read data 'patch_url)
           issue-url (gh-read data 'issue_url)
           number (gh-read data 'number)

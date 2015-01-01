@@ -60,16 +60,13 @@
           description (gh-read data 'description))))
 
 ;;;###autoload
-(defclass gh-gist-gist (gh-gist-gist-stub)
+(defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
   ((date :initarg :date)
    (update :initarg :update)
    (push-url :initarg :push-url)
    (pull-url :initarg :pull-url)
-   (html-url :initarg :html-url)
    (comments :initarg :comments)
    (user :initarg :user :initform nil)
-   (id :initarg :id :type string)
-   (url :initarg :url :type string)
    (history :initarg :history :initform nil)
    (forks :initarg :forks :initform nil)
 
@@ -78,20 +75,17 @@
 
 (defmethod gh-object-read-into ((gist gh-gist-gist) data)
   (call-next-method)
-  (with-slots (date update push-url pull-url html-url comments user
-                    id url history forks)
+  (with-slots (date update push-url pull-url comments user
+                    history forks)
       gist
     (setq date (gh-read data 'created_at)
           update (gh-read data 'updated_at)
           push-url (gh-read data 'git_push_url)
           pull-url (gh-read data 'git_pull_url)
-          html-url (gh-read data 'html_url)
           comments (gh-read data 'comments)
           user (gh-object-read (or (oref gist :user)
                                    (oref gist user-cls))
                                (gh-read data 'user))
-          id (gh-read data 'id)
-          url (gh-read data 'url)
           history (gh-read data 'history)
           forks (gh-read data 'forks))))
 

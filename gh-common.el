@@ -94,23 +94,32 @@
   (if (eq fn 'oref) nil
       (call-next-method)))
 
-(defclass gh-user (gh-object)
+(defclass gh-ref-object (gh-object)
+  ((id :initarg :id :type string)
+   (url :initarg :url :type string)
+   (html-url :initarg :html-url :type string)))
+
+(defmethod gh-object-read-into ((user gh-ref-object) data)
+  (call-next-method)
+  (with-slots (id url html-url)
+      user
+    (setq id (gh-read data 'id)
+          url (gh-read data 'url)
+          html-url (gh-read data 'html-url))))
+
+(defclass gh-user (gh-ref-object)
   ((login :initarg :login)
-   (id :initarg :id)
-   (gravatar-url :initarg :gravatar-url)
-   (url :initarg :url))
+   (gravatar-url :initarg :gravatar-url))
   "Github user object")
 
 (defmethod gh-object-read-into ((user gh-user) data)
   (call-next-method)
-  (with-slots (login id gravatar-url url)
+  (with-slots (login gravatar-url)
       user
     (setq login (gh-read data 'login)
-          id (gh-read data 'id)
-          gravatar-url (gh-read data 'gravatar_url)
-          url (gh-read data 'url))))
+          gravatar-url (gh-read data 'gravatar_url))))
 
-(defclass gh-comment (gh-object)
+(defclass gh-comment (gh-ref-object)
   ((body :initarg :body)
    (user :initarg :user :initform nil)
    (created-at :initarg :created_at)
