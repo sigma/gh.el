@@ -117,7 +117,8 @@
       (concat "/" it))))
 
 (defmethod gh-ref-object-base (obj)
-  (format "%s" obj))
+  (if (stringp obj) obj
+    (error "illegal input for `gh-ref-object-base'")))
 
 (defclass gh-user (gh-ref-object)
   ((login :initarg :login)
