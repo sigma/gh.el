@@ -44,17 +44,19 @@
 
 (require 'gh-issues)
 
-(let ((ver "0.1"))
+(let ((ver "1.0.0"))
   (define-obsolete-function-alias
       'gh-issue-comments-api 'gh-issues-api ver)
   (define-obsolete-function-alias
       'gh-issue-comments-comment 'gh-issues-comment ver)
+
+  (define-obsolete-function-alias
+      'gh-issue-comments-req-to-update 'gh-comment-req-to-update ver)
+
   (define-obsolete-function-alias
       'gh-issue-comments-list 'gh-issues-comments-list ver)
   (define-obsolete-function-alias
       'gh-issue-comments-get 'gh-issues-comments-get ver)
-  (define-obsolete-function-alias
-      'gh-issue-comments-req-to-update 'gh-comment-req-to-update ver)
   (define-obsolete-function-alias
       'gh-issue-comments-update 'gh-issues-comments-update ver)
   (define-obsolete-function-alias

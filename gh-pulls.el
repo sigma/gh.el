@@ -34,6 +34,7 @@
 
 (require 'gh-api)
 (require 'gh-auth)
+(require 'gh-comments)
 (require 'gh-common)
 
 (require 'gh-repos)
@@ -44,7 +45,7 @@
                                    ("^/repos/.*/.*/pulls/.*$" . "\0")))))
 
 ;;;###autoload
-(defclass gh-pulls-api (gh-api-v3)
+(defclass gh-pulls-api (gh-api-v3 gh-comments-api-mixin)
   ((cache-cls :allocation :class :initform gh-pulls-cache)
 
    (req-cls :allocation :class :initform gh-pulls-request)
@@ -72,6 +73,16 @@
 	  commit-id (gh-read data 'commit_id)
 	  original-commit-id (gh-read data 'original_commit_id)
 	  in-reply-to (gh-read data 'in_reply_to))))
+
+(defmethod gh-pulls-comment-req-to-create ((req gh-pulls-comment))
+  (let ((in-reply-to (oref req in-reply-to))
+	(to-update `(("body" . ,(oref req body)))))
+    (if in-reply-to
+	(nconc to-update `(("in_reply_to" . ,in-reply-to)))
+      (nconc to-update `(("commit_id" . ,(oref req commit-id))
+			 ("path" . ,(oref req path))
+			 ("position" . ,(oref req position)))))
+    to-update))
 
 (defclass gh-pulls-request-stub (gh-ref-object)
   ((diff-url :initarg :diff-url)
@@ -180,6 +191,27 @@
    api (gh-object-reader (oref api req-cls)) "PATCH"
    (format "/repos/%s/%s/pulls/%s" user repo id)
    (gh-pulls-req-to-update req)))
+
+;;; Comments
+
+(defmethod gh-pulls-comments-list ((api gh-pulls-api) user repo pull-id)
+  (gh-comments-list api (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
+
+(defmethod gh-pulls-comments-get ((api gh-pulls-api) user repo comment-id)
+  (gh-comments-get api (format "/repos/%s/%s/pulls" user repo) comment-id))
+
+(defmethod gh-pulls-comments-update ((api gh-pulls-api)
+                                      user repo comment-id comment)
+  (gh-comments-update api (format "/repos/%s/%s/pulls" user repo)
+                      comment-id (gh-comment-req-to-update comment)))
+
+(defmethod gh-pulls-comments-new ((api gh-pulls-api)
+                                   user repo pull-id comment)
+  (gh-comments-new api (format "/repos/%s/%s/pulls/%s" user repo pull-id)
+                   (gh-pulls-comment-req-to-create comment)))
+
+(defmethod gh-pulls-comments-delete ((api gh-pulls-api) user repo comment-id)
+  (gh-comments-delete api (format "/repos/%s/%s/pulls" user repo) comment-id))
 
 (provide 'gh-pulls)
 ;;; gh-pulls.el ends here
