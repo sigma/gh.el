@@ -70,7 +70,6 @@
    (user :initarg :user :initform nil)
    (id :initarg :id :type string)
    (url :initarg :url :type string)
-   (history :initarg :history :initform nil)
    (forks :initarg :forks :initform nil)
 
    (user-cls :allocation :class :initform gh-user))
@@ -79,7 +78,7 @@
 (defmethod gh-object-read-into ((gist gh-gist-gist) data)
   (call-next-method)
   (with-slots (date update push-url pull-url html-url comments user
-                    id url history forks)
+                    id url forks)
       gist
     (setq date (gh-read data 'created_at)
           update (gh-read data 'updated_at)
@@ -92,7 +91,6 @@
                                (gh-read data 'user))
           id (gh-read data 'id)
           url (gh-read data 'url)
-          history (gh-read data 'history)
           forks (gh-read data 'forks))))
 
 (defclass gh-gist-gist-file (gh-object)
