@@ -33,6 +33,7 @@
 (require 'eieio)
 
 (require 'dash)
+(require 'marshal)
 (require 's)
 (require 'gh-profile)
 
@@ -71,7 +72,16 @@
 
 ;;; Base classes for common objects
 
-(defclass gh-object ()
+(defun gh-marshal-default-spec (slot)
+  (let ((slot-name (symbol-name slot)))
+    (list (cons 'alist
+                (intern (s-replace "-" "_" slot-name))))))
+
+(defmacro gh-defclass (name superclass slots &rest options-and-doc)
+  `(marshal-defclass ,name ,superclass ,slots ,@options-and-doc
+                     :marshal-default-spec gh-marshal-default-spec))
+
+(gh-defclass gh-object ()
   ())
 
 (defmethod gh-object-read :static ((obj gh-object) data)
@@ -90,24 +100,17 @@
 (defmethod gh-object-list-reader :static ((obj gh-object))
   (apply-partially 'gh-object-list-read obj))
 
-(defmethod gh-object-read-into ((obj gh-object) data))
+(defmethod gh-object-read-into ((obj gh-object) data)
+  (unmarshal obj data 'alist))
 
 (defmethod slot-unbound ((obj gh-object) cls slot-name fn)
   (if (eq fn 'oref) nil
       (call-next-method)))
 
-(defclass gh-ref-object (gh-object)
+(gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
    (url :initarg :url :type string)
    (html-url :initarg :html-url)))
-
-(defmethod gh-object-read-into ((user gh-ref-object) data)
-  (call-next-method)
-  (with-slots (id url html-url)
-      user
-    (setq id (gh-read data 'id)
-          url (gh-read data 'url)
-          html-url (gh-read data 'html-url))))
 
 (defmethod gh-ref-object-base ((obj gh-ref-object))
   (let ((url (oref obj :url)))
@@ -120,37 +123,17 @@
   (if (stringp obj) obj
     (error "illegal input for `gh-ref-object-base'")))
 
-(defclass gh-user (gh-ref-object)
+(gh-defclass gh-user (gh-ref-object)
   ((login :initarg :login)
    (gravatar-url :initarg :gravatar-url))
   "Github user object")
 
-(defmethod gh-object-read-into ((user gh-user) data)
-  (call-next-method)
-  (with-slots (login gravatar-url)
-      user
-    (setq login (gh-read data 'login)
-          gravatar-url (gh-read data 'gravatar_url))))
-
-(defclass gh-comment (gh-ref-object)
+(gh-defclass gh-comment (gh-ref-object)
   ((body :initarg :body)
-   (user :initarg :user :initform nil)
+   (user :initarg :user :initform nil :marshal-type gh-user)
    (created-at :initarg :created_at)
-   (updated-at :initarg :updated_at)
-
-   (user-cls :allocation :class :initform gh-user))
+   (updated-at :initarg :updated_at))
   "Github comment object")
-
-(defmethod gh-object-read-into ((comment gh-comment) data)
-  (call-next-method)
-  (with-slots (body user created-at updated-at)
-      comment
-    (setq body (gh-read data 'body)
-          user (gh-object-read  (or (oref comment :user)
-                                    (oref comment user-cls))
-                                (gh-read data 'user))
-          created-at (gh-read data 'created_at)
-          updated-at (gh-read data 'updated_at))))
 
 (defmethod gh-comment-req-to-update ((req gh-comment))
   `(("body" . ,(oref req :body))))

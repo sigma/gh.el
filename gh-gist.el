@@ -42,68 +42,44 @@
   "Gist API")
 
 ;;;###autoload
-(defclass gh-gist-gist-stub (gh-object)
-  ((files :initarg :files :type list :initform nil)
+(gh-defclass gh-gist-gist-stub (gh-object)
+  ((files :initarg :files :type list :initform nil :marshal-type (list gh-gist-gist-file))
    (public :initarg :public)
-   (description :initarg :description)
-
-   (file-cls :allocation :class :initform gh-gist-gist-file))
+   (description :initarg :description))
   "Class for user-created gist objects")
 
-(defmethod gh-object-read-into ((stub gh-gist-gist-stub) data)
-  (call-next-method)
-  (with-slots (files public description)
-      stub
-    (setq files (gh-object-list-read (oref stub file-cls)
-                                     (gh-read data 'files))
-          public (gh-read data 'public)
-          description (gh-read data 'description))))
+;;;###autoload
+(gh-defclass gh-gist-history-change (gh-object)
+  ((total :initarg :total)
+   (additions :initarg :additions)
+   (deletions :initarg :deletions)))
 
 ;;;###autoload
-(defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
-  ((date :initarg :date)
-   (update :initarg :update)
-   (push-url :initarg :push-url)
-   (pull-url :initarg :pull-url)
-   (comments :initarg :comments)
-   (user :initarg :user :initform nil)
-   (history :initarg :history :initform nil)
-   (forks :initarg :forks :initform nil)
+(gh-defclass gh-gist-history-entry (gh-object)
+  ((user :initarg :user :initform nil :marshal-type gh-user)
+   (version :initarg :version)
+   (committed :initarg :committed :marshal ((alist . committed_at)))
+   (change :initarg :change :marshal ((alist . change_status))
+           :marshal-type gh-gist-history-change)
+   (url :initarg :url)))
 
-   (user-cls :allocation :class :initform gh-user))
+;;;###autoload
+(gh-defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
+  ((date :initarg :date :marshal ((alist . created_at)))
+   (update :initarg :update :marshal ((alist . updated_at)))
+   (push-url :initarg :push-url :marshal ((alist . git_push_url)))
+   (pull-url :initarg :pull-url :marshal ((alist . git_pull_url)))
+   (comments :initarg :comments)
+   (user :initarg :user :initform nil :marshal-type gh-user :marshal ((alist . owner)))
+   (history :initarg :history :initform nil :type list :marshal-type (list gh-gist-history-entry))
+   (forks :initarg :forks :initform nil))
   "Gist object")
 
-(defmethod gh-object-read-into ((gist gh-gist-gist) data)
-  (call-next-method)
-  (with-slots (date update push-url pull-url comments user
-                    history forks)
-      gist
-    (setq date (gh-read data 'created_at)
-          update (gh-read data 'updated_at)
-          push-url (gh-read data 'git_push_url)
-          pull-url (gh-read data 'git_pull_url)
-          comments (gh-read data 'comments)
-          user (gh-object-read (or (oref gist :user)
-                                   (oref gist user-cls))
-                               (gh-read data 'user))
-          history (gh-read data 'history)
-          forks (gh-read data 'forks))))
-
-(defclass gh-gist-gist-file (gh-object)
+(gh-defclass gh-gist-gist-file (gh-object)
   ((filename :initarg :filename)
    (size :initarg :size)
-   (url :initarg :url)
+   (url :initarg :url :marshal ((alist . raw_url)))
    (content :initarg :content)))
-
-(defmethod gh-object-read-into ((file gh-gist-gist-file) data)
-  (call-next-method)
-  (with-slots (filename size url content)
-      file
-    (setq
-     filename (gh-read data 'filename)
-     size (gh-read data 'size)
-     url (gh-read data 'raw_url)
-     content (gh-read data 'content))))
 
 (defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
   `(("description" . ,(oref gist :description))
