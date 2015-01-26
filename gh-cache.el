@@ -36,8 +36,13 @@
 
 (defconst gh-cache-outdated-expiration-delay (* 60 60 24))
 
+(defconst gh-cache-internal-version-constant 3)
+
+(defconst gh-cache-version-constant
+  (format "%s/gh-%s" pcache-version-constant gh-cache-internal-version-constant))
+
 (defclass gh-cache (pcache-repository)
-  ((version-constant :allocation :class :initform "gh-0.2")
+  ((version-constant :allocation :class :initform (eval gh-cache-version-constant))
    (entries :initarg :entries :initform (make-hash-table :test 'equal))
    (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
    (invalidation-chain :allocation :class :initform nil)
