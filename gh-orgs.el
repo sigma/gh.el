@@ -49,11 +49,13 @@
 
 (defmethod gh-object-read-into ((stub gh-orgs-org-stub) data)
   (call-next-method)
-  (with-slots (login avatar-url description)
+  (with-slots (login id url avatar-url description)
       stub
     (setq login (gh-read data 'login)
-          avatar-url (gh-read data 'avatar-url)
-          description (gh-read data 'description))))
+          description (gh-read data 'description)
+          id (gh-read data 'id)
+          url (gh-read data 'url)
+          avatar-url (gh-read data 'avatar_url))))
 
 (defclass gh-orgs-plan (gh-object)
   ((name :initarg :name)
@@ -66,7 +68,7 @@
       plan
     (setq name (gh-read data 'name)
           space (gh-read data 'space)
-          private-repos (gh-read data 'private-repos))))
+          private-repos (gh-read data 'private_repos))))
 
 (defclass gh-orgs-org (gh-orgs-org-stub)
   ((name :initarg :name)
@@ -113,12 +115,12 @@
           html-url (gh-read data 'html_url)
           created-at (gh-read data 'created_at)
           type (gh-read data 'type)
-          total-private-repos (gh-read data 'total-private-repos)
-          owned-private-repos (gh-read data 'owned-private-repos)
-          private-gists (gh-read data 'private-gists)
-          disk-usage (gh-read data 'disk-usage)
+          total-private-repos (gh-read data 'total_private_repos)
+          owned-private-repos (gh-read data 'owned_private_repos)
+          private-gists (gh-read data 'private_gists)
+          disk-usage (gh-read data 'disk_usage)
           collaborators (gh-read data 'collaborators)
-          billing-email (gh-read data 'billing-email)
+          billing-email (gh-read data 'billing_email)
           plan (gh-object-read (or (oref org :plan)
                                    (oref org plan-cls))
                                (gh-read data 'plan)))))
