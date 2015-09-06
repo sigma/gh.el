@@ -66,7 +66,7 @@
 (defmethod logito-log ((api gh-api) level tag string &rest objects)
   (apply 'logito-log (oref api :log) level tag string objects))
 
-(defmethod constructor :static ((api gh-api) newname &rest args)
+(defmethod constructor :static ((api gh-api) &rest args)
   (call-next-method))
 
 (defmethod gh-api-set-default-auth ((api gh-api) auth)
@@ -107,7 +107,7 @@
                  (const :tag "OAuth" gh-oauth-authenticator))
   :group 'gh-api)
 
-(defmethod constructor :static ((api gh-api-v3) newname &rest args)
+(defmethod constructor :static ((api gh-api-v3) &rest args)
   (let ((obj (call-next-method))
         (gh-profile-current-profile (gh-profile-current-profile)))
     (oset obj :profile (gh-profile-current-profile))

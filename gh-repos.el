@@ -93,24 +93,6 @@
    (source-cls :allocation :class :initform gh-repos-repo))
   "Class for GitHub repositories")
 
-(defmethod constructor :static ((repo gh-repos-repo) newname &rest args)
-  (when (consp newname)
-    (setq newname (concat (car newname) "/" (cdr newname))))
-  (let ((obj (apply 'call-next-method gh-repos-repo newname args))
-        login)
-    (when (and (not (slot-boundp obj 'name))
-               (not (oref obj owner)))
-      (with-slots (name owner)
-          obj
-        (when (slot-boundp obj 'full-name)
-          (setq newname (oref obj :full-name)))
-        (when (string-match "^\\([^/]+\\)/\\([^/]+\\)$" newname)
-          (setq login (match-string 1 newname)
-                name  (match-string 2 newname)
-                owner (gh-user login :login login))
-          (oset obj object-name name))))
-    obj))
-
 (defmethod gh-object-read-into ((repo gh-repos-repo) data)
   (call-next-method)
   (with-slots (clone-url git-url ssh-url svn-url mirror-url
