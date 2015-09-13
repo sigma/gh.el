@@ -42,35 +42,17 @@
   "Orgs API")
 
 ;;;###autoload
-(defclass gh-orgs-org-stub (gh-ref-object)
+(gh-defclass gh-orgs-org-stub (gh-ref-object)
   ((login :initarg :login)
    (avatar-url :initarg :avatar-url)
    (description :initarg :description)))
 
-(defmethod gh-object-read-into ((stub gh-orgs-org-stub) data)
-  (call-next-method)
-  (with-slots (login id url avatar-url description)
-      stub
-    (setq login (gh-read data 'login)
-          description (gh-read data 'description)
-          id (gh-read data 'id)
-          url (gh-read data 'url)
-          avatar-url (gh-read data 'avatar_url))))
-
-(defclass gh-orgs-plan (gh-object)
+(gh-defclass gh-orgs-plan (gh-object)
   ((name :initarg :name)
    (space :initarg :space)
    (private-repos :initarg :private-repos)))
 
-(defmethod gh-object-read-into ((plan gh-orgs-plan) data)
-  (call-next-method)
-  (with-slots (name space private-repos)
-      plan
-    (setq name (gh-read data 'name)
-          space (gh-read data 'space)
-          private-repos (gh-read data 'private_repos))))
-
-(defclass gh-orgs-org (gh-orgs-org-stub)
+(gh-defclass gh-orgs-org (gh-orgs-org-stub)
   ((name :initarg :name)
    (company :initarg :company)
    (blog :initarg :blog)
@@ -89,41 +71,8 @@
    (disk-usage :initarg :disk-usage)
    (collaborators :initarg :collaborators)
    (billing-email :initarg :billing-email)
-   (plan :initarg :plan :initform nil)
-
-   (plan-cls :allocation :class :initform gh-orgs-plan))
+   (plan :initarg :plan :initform nil :marshal-type gh-orgs-plan))
   "Class for GitHub organizations")
-
-(defmethod gh-object-read-into ((org gh-orgs-org) data)
-  (call-next-method)
-  (with-slots (name company blog location email
-                    public-repos public-gists followers following
-                    html-url created-at type
-                    total-private-repos owned-private-repos
-                    private-gists disk-usage collaborators
-                    billing-email plan)
-      org
-    (setq name (gh-read data 'name)
-          company (gh-read data 'company)
-          blog (gh-read data 'blog)
-          location (gh-read data 'location)
-          email (gh-read data 'email)
-          public-repos (gh-read data 'public_repos)
-          public-gists (gh-read data 'public_gists)
-          followers (gh-read data 'followers)
-          following (gh-read data 'following)
-          html-url (gh-read data 'html_url)
-          created-at (gh-read data 'created_at)
-          type (gh-read data 'type)
-          total-private-repos (gh-read data 'total_private_repos)
-          owned-private-repos (gh-read data 'owned_private_repos)
-          private-gists (gh-read data 'private_gists)
-          disk-usage (gh-read data 'disk_usage)
-          collaborators (gh-read data 'collaborators)
-          billing-email (gh-read data 'billing_email)
-          plan (gh-object-read (or (oref org :plan)
-                                   (oref org plan-cls))
-                               (gh-read data 'plan)))))
 
 (defmethod gh-orgs-org-to-obj ((org gh-orgs-org))
   `(,@(when (slot-boundp org :billing-email)
