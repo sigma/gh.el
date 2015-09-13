@@ -21,3 +21,5 @@ clean: clean-elpa clean-elc
 print-deps:
 	${EMACS} --version
 	@echo CASK=${CASK}
+
+travis-ci: print-deps test
