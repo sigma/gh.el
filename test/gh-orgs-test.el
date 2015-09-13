@@ -1,4 +1,4 @@
-;;; gh-orgs-tests.el --- tests for gh-orgs.el
+;;; gh-orgs-test.el --- test for gh-orgs.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -26,43 +26,43 @@
 
 ;;; Code:
 
-(require 'gh-tests)
+(require 'gh-test)
 (require 'gh-orgs)
 
-(defun gh-orgs-tests:test-regular-org-stub (org)
+(defun gh-orgs-test:test-regular-org-stub (org)
   (should (equal (oref org :id) 1))
   (should (equal (oref org :login) "github"))
   (should (equal "https://github.com/images/error/octocat_happy.gif" (oref org :avatar-url))))
 
-(defun gh-orgs-tests:test-regular-org (org)
-  (gh-orgs-tests:test-regular-org-stub org)
+(defun gh-orgs-test:test-regular-org (org)
+  (gh-orgs-test:test-regular-org-stub org)
   (should (equal (oref org :public-gists) 1))
   (should (equal (oref org :public-repos) 2)))
 
-(ert-deftest gh-orgs-tests:regular-list ()
-  (let* ((api (gh-tests-mock-api 'gh-orgs-api))
+(ert-deftest gh-orgs-test:regular-list ()
+  (let* ((api (gh-test-mock-api 'gh-orgs-api))
          (orgs
-          (gh-tests-with-traces-buffers ((orgs-buf "list_orgs_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((orgs-buf "list_orgs_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
                                (oref (gh-orgs-list api "dummy") :data)))))
     (should (equal (length orgs) 1))
     (let ((org (car orgs)))
       (should (object-of-class-p org 'gh-orgs-org-stub))
-      (gh-orgs-tests:test-regular-org-stub org))))
+      (gh-orgs-test:test-regular-org-stub org))))
 
-(ert-deftest gh-orgs-tests:regular-get ()
-  (let* ((api (gh-tests-mock-api 'gh-orgs-api))
+(ert-deftest gh-orgs-test:regular-get ()
+  (let* ((api (gh-test-mock-api 'gh-orgs-api))
          (org
-          (gh-tests-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
                                (oref (gh-orgs-get api "github") :data)))))
     (should (object-of-class-p org 'gh-orgs-org))
-    (gh-orgs-tests:test-regular-org org)))
+    (gh-orgs-test:test-regular-org org)))
 
-(ert-deftest gh-orgs-tests:regular-update ()
-  (let* ((api (gh-tests-mock-api 'gh-orgs-api))
+(ert-deftest gh-orgs-test:regular-update ()
+  (let* ((api (gh-test-mock-api 'gh-orgs-api))
          (org-stub
           (make-instance 'gh-orgs-org
                          :login "github"
@@ -70,12 +70,12 @@
                          :url "https://api.github.com/orgs/1"
                          :avatar-url "https://github.com/images/error/octocat_happy.gif"))
          (org
-          (gh-tests-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
                                (oref (gh-orgs-update api org-stub) :data)))))
     (should (object-of-class-p org 'gh-orgs-org))
-    (gh-orgs-tests:test-regular-org org)))
+    (gh-orgs-test:test-regular-org org)))
 
-(provide 'gh-orgs-tests)
-;;; gh-orgs-tests.el ends here
+(provide 'gh-orgs-test)
+;;; gh-orgs-test.el ends here

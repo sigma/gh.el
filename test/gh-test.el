@@ -1,4 +1,4 @@
-;;; gh-tests.el --- tests for gh.el
+;;; gh-test.el --- test for gh.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -32,18 +32,18 @@
 (require 'ert)
 (require 'url-http)
 
-(defun gh-tests-get-traces-root ()
+(defun gh-test-get-traces-root ()
   (let* ((this-file (car
                      (rassoc-if
                       (lambda (items)
-                        (member (cons 'provide 'gh-tests) items))
+                        (member (cons 'provide 'gh-test) items))
                       load-history))))
     (concat (file-name-directory this-file)
             "traces/")))
 
-(defmacro gh-tests-with-traces-buffers (bufs &rest body)
+(defmacro gh-test-with-traces-buffers (bufs &rest body)
   (declare (indent 1) (debug t))
-  (let* ((root (gh-tests-get-traces-root))
+  (let* ((root (gh-test-get-traces-root))
          (syms nil)
          (specs (mapcar
                  (lambda (s)
@@ -72,15 +72,15 @@
            (and (buffer-name buff)
                 (kill-buffer buff)))))))
 
-(defun gh-tests-mock-api (cls)
+(defun gh-test-mock-api (cls)
   (make-instance cls :sync t
                  :auth (make-instance 'gh-authenticator :username "dummy")))
 
-(defmacro gh-tests-mock-url (recs &rest body)
+(defmacro gh-test-mock-url (recs &rest body)
   `(mocker-let ((url-retrieve-synchronously
                  (url)
                  ,recs))
      ,@body))
 
-(provide 'gh-tests)
-;;; gh-tests.el ends here
+(provide 'gh-test)
+;;; gh-test.el ends here

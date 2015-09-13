@@ -44,7 +44,7 @@
 ;;;###autoload
 (gh-defclass gh-gist-gist-stub (gh-object)
   ((files :initarg :files :type list :initform nil :marshal-type (list gh-gist-gist-file))
-   (public :initarg :public)
+   (public :initarg :public :marshal-type bool)
    (description :initarg :description))
   "Class for user-created gist objects")
 
@@ -64,6 +64,12 @@
    (url :initarg :url)))
 
 ;;;###autoload
+(gh-defclass gh-gist-fork-entry (gh-ref-object)
+  ((user :initarg :user :initform nil :marshal-type gh-user)
+   (created :initarg :created :marshal ((alist . created_at)))
+   (updated :initarg :updated :marshal ((alist . updated_at)))))
+
+;;;###autoload
 (gh-defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
   ((date :initarg :date :marshal ((alist . created_at)))
    (update :initarg :update :marshal ((alist . updated_at)))
@@ -72,7 +78,7 @@
    (comments :initarg :comments)
    (user :initarg :user :initform nil :marshal-type gh-user :marshal ((alist . owner)))
    (history :initarg :history :initform nil :type list :marshal-type (list gh-gist-history-entry))
-   (forks :initarg :forks :initform nil))
+   (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry)))
   "Gist object")
 
 (gh-defclass gh-gist-gist-file (gh-object)
