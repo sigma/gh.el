@@ -44,7 +44,7 @@
 ;;;###autoload
 (gh-defclass gh-gist-gist-stub (gh-object)
   ((files :initarg :files :type list :initform nil :marshal-type (list gh-gist-gist-file))
-   (public :initarg :public)
+   (public :initarg :public :marshal-type bool)
    (description :initarg :description))
   "Class for user-created gist objects")
 
