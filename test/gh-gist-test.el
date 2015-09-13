@@ -1,4 +1,4 @@
-;;; gh-gist-tests.el --- tests for gh-gist.el
+;;; gh-gist-test.el --- test for gh-gist.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -26,38 +26,38 @@
 
 ;;; Code:
 
-(require 'gh-tests)
+(require 'gh-test)
 (require 'gh-gist)
 
-(defun gh-gist-tests:test-regular-gist (gist)
-  (should (equal (oref gist :id) "1"))
+(defun gh-gist-test:test-regular-gist (gist)
+  (should (equal (oref gist :id) "aa5a315d61ae9438b18d"))
   (should (oref gist :public))
   (should (equal (length (oref gist :files)) 1)))
 
-(ert-deftest gh-gist-tests:regular-list ()
-  (let* ((api (gh-tests-mock-api 'gh-gist-api))
+(ert-deftest gh-gist-test:regular-list ()
+  (let* ((api (gh-test-mock-api 'gh-gist-api))
          (gists
-          (gh-tests-with-traces-buffers ((gists-buf "list_gists_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((gists-buf "list_gists_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gists-buf))
                                (oref (gh-gist-list api "octocat") :data)))))
     (should (equal (length gists) 1))
     (let ((gist (car gists)))
       (should (object-of-class-p gist 'gh-gist-gist-stub))
-      (gh-gist-tests:test-regular-gist gist))))
+      (gh-gist-test:test-regular-gist gist))))
 
-(ert-deftest gh-gist-tests:regular-get ()
-  (let* ((api (gh-tests-mock-api 'gh-gist-api))
+(ert-deftest gh-gist-test:regular-get ()
+  (let* ((api (gh-test-mock-api 'gh-gist-api))
          (gist
-          (gh-tests-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gist-buf))
                                (oref (gh-gist-get api "1") :data)))))
     (should (object-of-class-p gist 'gh-gist-gist))
-    (gh-gist-tests:test-regular-gist gist)))
+    (gh-gist-test:test-regular-gist gist)))
 
-(ert-deftest gh-gist-tests:regular-new ()
-  (let* ((api (gh-tests-mock-api 'gh-gist-api))
+(ert-deftest gh-gist-test:regular-new ()
+  (let* ((api (gh-test-mock-api 'gh-gist-api))
          (gist-stub
           (make-instance 'gh-gist-gist-stub
                          :description "description of gist"
@@ -67,12 +67,12 @@
                                                 :filename "ring.erl"
                                                 :content "contents of gist"))))
          (gist
-          (gh-tests-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gist-buf))
                                (oref (gh-gist-new api gist-stub) :data)))))
     (should (object-of-class-p gist 'gh-gist-gist))
-    (gh-gist-tests:test-regular-gist gist)))
+    (gh-gist-test:test-regular-gist gist)))
 
-(provide 'gh-gist-tests)
-;;; gh-gist-tests.el ends here
+(provide 'gh-gist-test)
+;;; gh-gist-test.el ends here

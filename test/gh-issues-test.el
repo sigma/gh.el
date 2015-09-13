@@ -1,4 +1,4 @@
-;;; gh-issues-tests.el --- tests fir gh-issues.el
+;;; gh-issues-test.el --- test fir gh-issues.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -26,18 +26,18 @@
 
 ;;; Code:
 
-(require 'gh-tests)
+(require 'gh-test)
 (require 'gh-issues)
 
-(defun gh-issues-tests:test-regular-issue (issue)
+(defun gh-issues-test:test-regular-issue (issue)
   (should (equal (oref issue :number) 1347))
   (should (equal (oref issue :state) "open")))
 
-(ert-deftest gh-issues-tests:regular-list ()
-  (let* ((api (gh-tests-mock-api 'gh-issues-api))
+(ert-deftest gh-issues-test:regular-list ()
+  (let* ((api (gh-test-mock-api 'gh-issues-api))
          (issues
-          (gh-tests-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
-            (gh-tests-mock-url ((:record-cls mocker-stub-record
+          (gh-test-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
+            (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gists-buf))
                                (oref
                                 (gh-issues-issue-list api "octocat"
@@ -46,7 +46,7 @@
     (should (equal (length issues) 1))
     (let ((issue (car issues)))
       (should (object-of-class-p issue 'gh-issues-issue))
-      (gh-issues-tests:test-regular-issue issue))))
+      (gh-issues-test:test-regular-issue issue))))
 
-(provide 'gh-issues-tests)
-;;; gh-issues-tests.el ends here
+(provide 'gh-issues-test)
+;;; gh-issues-test.el ends here
