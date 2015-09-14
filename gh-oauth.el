@@ -49,39 +49,16 @@
   (let ((gh-api-v3-authenticator 'gh-oauth-password-authenticator))
     (call-next-method)))
 
-(defclass gh-oauth-authorization (gh-ref-object)
+(gh-defclass gh-oauth-authorization (gh-ref-object)
   ((scopes :initarg :scopes)
    (token :initarg :token)
-   (app :initarg :app :initform nil)
+   (app :initarg :app :initform nil :marshal-type gh-oauth-app)
    (updated-at :initarg :updated-at)
-   (created-at :initarg :created-at)
+   (created-at :initarg :created-at)))
 
-   (app-cls :allocation :class :initform gh-oauth-app)))
-
-(defmethod gh-object-read-into ((auth gh-oauth-authorization) data)
-  (call-next-method)
-  (with-slots (id url scopes token app updated-at created-at)
-      auth
-    (setq id (gh-read data 'id)
-          url (gh-read data 'url)
-          scopes (gh-read data 'scopes)
-          token (gh-read data 'token)
-          app (gh-object-read (or (oref auth :app)
-                                  (oref auth app-cls))
-                              (gh-read data 'app))
-          updated-at (gh-read data 'updated_at)
-          created-at (gh-read data 'created_at))))
-
-(defclass gh-oauth-app (gh-object)
+(gh-defclass gh-oauth-app (gh-object)
   ((url :initarg :url)
    (name :initarg :name)))
-
-(defmethod gh-object-read-into ((app gh-oauth-app) data)
-  (call-next-method)
-  (with-slots (url name)
-      app
-    (setq url (gh-read data 'url)
-          name (gh-read data 'name))))
 
 (defmethod gh-oauth-auth-list ((api gh-oauth-api))
   (gh-api-authenticated-request
