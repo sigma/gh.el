@@ -28,10 +28,10 @@
 ;; (setf api (gh-pull-comments-api "api" :sync nil :cache nil :num-retries 1))
 ;; (setf comments (gh-pull-comments-list api "user" "repo" "pull request id"))
 ;; (setq my-comment (make-instance 'gh-pull-comments-comment
-;; 				:body "This is great!"
-;; 				:path "README.md"
-;; 				:position 2
-;; 				:commit-id "commit sha"))
+;;        :body "This is great!"
+;;        :path "README.md"
+;;        :position 2
+;;        :commit-id "commit sha"))
 ;; (gh-pull-comments-new api "user" "repo" "pull request id" my-comment)
 
 ;;; Code:
@@ -71,23 +71,23 @@
 (defmethod gh-object-read-into ((comment gh-pull-comments-comment) data)
   (call-next-method)
   (with-slots (url html-url id body user path diff-hunk position
-		   original-position commit-id original-commit-id in-reply-to
-		   created-at updated-at)
+                   original-position commit-id original-commit-id in-reply-to
+                   created-at updated-at)
       comment
     (setq url (gh-read data 'url)
-          html-url (gh-read data 'html-url)
-	  id (gh-read data 'id)
+          html-url (gh-read data 'html_url)
+          id (gh-read data 'id)
           body (gh-read data 'body)
           user (gh-object-read  (or (oref comment :user)
                                     (oref comment user-cls))
                                 (gh-read data 'user))
-	  path (gh-read data 'path)
-	  diff-hunk (gh-read data 'diff_hunk)
-	  position (gh-read data 'position)
-	  original-position (gh-read data 'original_position)
-	  commit-id (gh-read data 'commit_id)
-	  original-commit-id (gh-read data 'original_commit_id)
-	  in-reply-to (gh-read data 'in_reply_to)
+          path (gh-read data 'path)
+          diff-hunk (gh-read data 'diff_hunk)
+          position (gh-read data 'position)
+          original-position (gh-read data 'original_position)
+          commit-id (gh-read data 'commit_id)
+          original-commit-id (gh-read data 'original_commit_id)
+          in-reply-to (gh-read data 'in_reply_to)
           created-at (gh-read data 'created_at)
           updated-at (gh-read data 'updated_at))))
 
@@ -103,12 +103,12 @@
 
 (defmethod gh-pull-comments-req-to-create ((req gh-pull-comments-comment))
   (let ((in-reply-to (oref req in-reply-to))
-	(to-update `(("body" . ,(oref req body)))))
+  (to-update `(("body" . ,(oref req body)))))
     (if in-reply-to
-	(nconc to-update `(("in_reply_to" . ,in-reply-to)))
+  (nconc to-update `(("in_reply_to" . ,in-reply-to)))
       (nconc to-update `(("commit_id" . ,(oref req commit-id))
-			 ("path" . ,(oref req path))
-			 ("position" . ,(oref req position)))))
+       ("path" . ,(oref req path))
+       ("position" . ,(oref req position)))))
     to-update))
 
 (defmethod gh-pull-comments-req-to-update ((req gh-pull-comments-comment))
