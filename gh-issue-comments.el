@@ -51,6 +51,7 @@
 (defclass gh-issue-comments-comment (gh-object)
   ((url :initarg :url)
    (html-url :initarg :html-url)
+   (id :initarg :id)
    (body :initarg :body)
    (user :initarg :user :initform nil)
    (created-at :initarg :created_at)
@@ -61,10 +62,11 @@
 
 (defmethod gh-object-read-into ((comment gh-issue-comments-comment) data)
   (call-next-method)
-  (with-slots (url html-url body user created-at updated-at)
+  (with-slots (url html-url id body user created-at updated-at)
       comment
     (setq url (gh-read data 'url)
-          html-url (gh-read data 'html-url)
+          html-url (gh-read data 'html_url)
+          id (gh-read data 'id)
           body (gh-read data 'body)
           user (gh-object-read  (or (oref comment :user)
                                     (oref comment user-cls))

@@ -50,8 +50,28 @@
    (req-cls :allocation :class :initform gh-pulls-request))
   "Git pull requests API")
 
+
+(defclass gh-pull-commit (gh-object)
+  ((url :initarg :url)
+   ;;author
+   ;;committer
+   (message :initarg :message)
+   ;;tree
+   (comment-count :initarg :comment-count)))
+
+(defmethod gh-object-read-into ((commit gh-pull-commit) data)
+  (call-next-method)
+  (with-slots (url message comment-count)
+      commit
+    (setq
+     url (gh-read data 'url)
+     message (gh-read data 'message)
+     comment-count (gh-read data 'comment_count))))
+
 (defclass gh-pulls-request-stub (gh-object)
   ((url :initarg :url)
+   (sha :initarg :sha)
+   (comments-url :initarg :comments-url)
    (html-url :initarg :html-url)
    (diff-url :initarg :diff-url)
    (patch-url :initarg :patch-url)
@@ -67,11 +87,13 @@
 
 (defmethod gh-object-read-into ((stub gh-pulls-request-stub) data)
   (call-next-method)
-  (with-slots (url html-url diff-url patch-url issue-url number
-                   state title body created-at updated-at
-                   closed-at merged-at)
+  (with-slots (url sha comments-url html-url diff-url patch-url
+                   issue-url number state title body created-at
+                   updated-at closed-at merged-at)
       stub
     (setq url (gh-read data 'url)
+          sha (gh-read data 'sha)
+          comments-url (gh-read data 'comments_url)
           html-url (gh-read data 'html_url)
           diff-url (gh-read data 'diff_url)
           patch-url (gh-read data 'patch_url)
@@ -91,6 +113,7 @@
    (mergeable :initarg :mergeable)
    (merged-by :initarg :merged-by)
    (comments :initarg :comments)
+   (commit :initarg :commit :initform nil)
    (user :initarg :user :initform nil)
    (commits :initarg :commits)
    (additions :initarg :additions)
@@ -99,15 +122,16 @@
    (head :initarg :head :initform nil)
    (base :initarg :base :initform nil)
 
+   (commit-cls :allocation :class :initform gh-pull-commit)
    (ref-cls :allocation :class :initform gh-repos-ref)
    (user-cls :allocation :class :initform gh-user))
   "Git pull requests API")
 
 (defmethod gh-object-read-into ((req gh-pulls-request) data)
   (call-next-method)
-  (with-slots (merged mergeable
-                      merged-by comments user commits additions
-                      deletions changed-files head base)
+  (with-slots (merged mergeable merged-by comments user
+                      commit commits additions deletions
+                      changed-files head base)
       req
     (setq merged (gh-read data 'merged)
           mergeable (gh-read data 'mergeable)
@@ -116,6 +140,9 @@
           user (gh-object-read (or (oref req :user)
                                    (oref req user-cls))
                                (gh-read data 'user))
+          commit (gh-object-read (or (oref req :commit)
+                                   (oref req commit-cls))
+                               (gh-read data 'commit))
           commits (gh-read data 'commits)
           additions (gh-read data 'additions)
           deletions (gh-read data 'deletions)
@@ -144,6 +171,11 @@
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
+
+(defmethod gh-pulls-list-commits ((api gh-pulls-api) user repo id)
+  (gh-api-authenticated-request
+   api (gh-object-list-reader (oref api req-cls)) "GET"
+   (format "/repos/%s/%s/pulls/%s/commits" user repo id)))
 
 (defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
