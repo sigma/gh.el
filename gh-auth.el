@@ -87,6 +87,8 @@
                              :token))))
         (setq token (or tok (read-string "GitHub OAuth token: ")))
         (gh-set-config "oauth-token" token)))
+    (when (string-match "^!.+" token)
+      (setq token (shell-command-to-string (substring token 1))))
     (gh-auth-remember profile :token token)
     token))
 
