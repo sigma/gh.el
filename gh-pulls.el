@@ -63,13 +63,17 @@
    (created-at :initarg :created-at)
    (updated-at :initarg :updated-at)
    (closed-at :initarg :closed-at)
-   (merged-at :initarg :merged-at)))
+   (merged-at :initarg :merged-at)
+   (head :initarg :head :initform nil)
+   (base :initarg :base :initform nil)
+
+   (ref-cls :allocation :class :initform gh-repos-ref)))
 
 (defmethod gh-object-read-into ((stub gh-pulls-request-stub) data)
   (call-next-method)
   (with-slots (url html-url diff-url patch-url issue-url number
                    state title body created-at updated-at
-                   closed-at merged-at)
+                   closed-at merged-at head base)
       stub
     (setq url (gh-read data 'url)
           html-url (gh-read data 'html_url)
@@ -83,7 +87,13 @@
           created-at (gh-read data 'created_at)
           updated-at (gh-read data 'updated_at)
           closed-at (gh-read data 'closed_at)
-          merged-at (gh-read data 'merged_at))))
+          merged-at (gh-read data 'merged_at)
+          head (gh-object-read (or (oref stub :head)
+                                   (oref stub ref-cls))
+                                (gh-read data 'head))
+          base (gh-object-read (or (oref stub :base)
+                                   (oref stub ref-cls))
+                                (gh-read data 'base)))))
 
 ;;;###autoload
 (defclass gh-pulls-request (gh-pulls-request-stub)
