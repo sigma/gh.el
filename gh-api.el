@@ -158,6 +158,7 @@
       (let ((req (oref resp :-req)))
         (oset resp :data-received nil)
         (oset req :url next)
+        (oset req :query nil)
         (gh-url-run-request req resp)))))
 
 (defmethod gh-api-authenticated-request
