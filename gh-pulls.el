@@ -115,7 +115,8 @@
 (defmethod gh-pulls-list ((api gh-pulls-api) user repo)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
-   (format "/repos/%s/%s/pulls" user repo)))
+   (format "/repos/%s/%s/pulls" user repo)
+   nil `(("per_page" . "100"))))
 
 (defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
