@@ -57,6 +57,8 @@
     (when (not user)
       (setq user (read-string "GitHub username: "))
       (gh-set-config "user" user))
+    (when (string-match "^!.+" user)
+      (setq user (shell-command-to-string (substring user 1))))
     (gh-auth-remember profile :username user)
     user))
 
@@ -68,6 +70,8 @@
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
       (gh-set-config "password" pass))
+    (when (string-match "^!.+" pass)
+      (setq pass (shell-command-to-string (substring pass 1))))
     (when remember
       (gh-auth-remember profile :password pass))
     pass))
@@ -87,6 +91,8 @@
                              :token))))
         (setq token (or tok (read-string "GitHub OAuth token: ")))
         (gh-set-config "oauth-token" token)))
+    (when (string-match "^!.+" token)
+      (setq token (shell-command-to-string (substring token 1))))
     (gh-auth-remember profile :token token)
     token))
 
