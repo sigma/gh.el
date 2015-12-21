@@ -96,9 +96,7 @@
    (commits :initarg :commits)
    (additions :initarg :additions)
    (deletions :initarg :deletions)
-   (changed-files :initarg :changed-files)
-   (head :initarg :head :initform nil :marshal-type gh-repos-ref)
-   (base :initarg :base :initform nil :marshal-type gh-repos-ref))
+   (changed-files :initarg :changed-files))
   "Git pull requests API")
 
 (defmethod gh-pulls-req-to-new ((req gh-pulls-request))
