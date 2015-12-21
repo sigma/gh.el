@@ -112,11 +112,12 @@
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
 
-(defmethod gh-pulls-list ((api gh-pulls-api) user repo)
-  (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api req-cls)) "GET"
-   (format "/repos/%s/%s/pulls" user repo)
-   nil `(("per_page" . "100"))))
+(defmethod gh-pulls-list ((api gh-pulls-api) user repo &optional per-page)
+  (let ((query (when per-page `(("per_page" . ,per-page)))))
+    (gh-api-authenticated-request
+     api (gh-object-list-reader (oref api req-cls)) "GET"
+     (format "/repos/%s/%s/pulls" user repo)
+     nil query)))
 
 (defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
