@@ -155,9 +155,13 @@
     (call-next-method)
     (oset resp :data (append previous-data (oref resp :data)))
     (when (and next (not (equal 304 (oref resp :http-status))))
-      (let ((req (oref resp :-req)))
+      (let* ((req (oref resp :-req))
+             (next-parts (s-split "?" next))
+             (next-url (car next-parts))
+             (next-query (nth 1 next-parts)))
         (oset resp :data-received nil)
-        (oset req :url next)
+        (oset req :url next-url)
+        (oset req :query next-query)
         (gh-url-run-request req resp)))))
 
 (defmethod gh-api-authenticated-request

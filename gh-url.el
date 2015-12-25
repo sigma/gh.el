@@ -152,8 +152,10 @@
            (gh-url-run-request req resp)))))))
 
 (defun gh-url-form-encode (form)
-  (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
-             form "&"))
+  (if (stringp form)
+      form
+    (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
+               form "&")))
 
 (defun gh-url-params-encode (form)
   (concat "?" (gh-url-form-encode form)))
