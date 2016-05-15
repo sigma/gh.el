@@ -269,7 +269,41 @@
                          (oref repo :name))))
 
 ;;; TODO gh-repos-repo-branch-commits
-;;; TODO Collaborators sub-API
+
+;;; Collaborators sub-API
+
+(defmethod gh-repos-collaborators-list ((api gh-repos-api) repo)
+  (gh-api-authenticated-request
+   api (ghn-object-list-reader (oref api user-cls)) "GET" (format "/repos/%s/%s/collaborators"
+                         (oref (oref repo :owner) :login)
+                         (oref repo :name))))
+
+(defmethod gh-repos-collaborators-p ((api gh-repos-api) repo user)
+  (eq (oref (gh-api-authenticated-request
+             api nil "GET"
+             (format "/repos/%s/%s/collaborators/%s"
+                     (oref (oref repo :owner) :login)
+                     (oref repo :name)
+                     user))
+            :http-status)
+      204))
+
+(defmethod gh-repos-collaborators-add ((api gh-repos-api) repo user)
+  (gh-api-authenticated-request
+   api nil "PUT"
+   (format "/repos/%s/%s/collaborators/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name)
+           user)))
+
+(defmethod gh-repos-collaborators-delete ((api gh-repos-api) repo user)
+  (gh-api-authenticated-request
+   api nil "DELETE"
+   (format "/repos/%s/%s/collaborators/%s"
+           (oref (oref repo :owner) :login)
+           (oref repo :name)
+           user)))
+
 ;;; TODO Comments sub-API
 ;;; TODO Commits sub-API
 ;;; TODO Contents sub-API
