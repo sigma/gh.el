@@ -29,13 +29,21 @@
   "Users API")
 
 (defmethod gh-search-repos ((search-api gh-search-api) query-string)
+  (unless (and (stringp query-string) (> (length query-string) 1))
+    (error "a non-empty query string must be provided to gh-search-repos."))
   (gh-api-authenticated-request
    search-api
    (apply-partially 'gh-process-repo-search-result search-api)
    "GET" "/search/repositories" nil `((q . ,query-string))))
 
 (defmethod gh-process-repo-search-result ((search-api gh-search-api) data)
-  (gh-object-list-read (oref search-api repo-cls) (cdar data)))
+  (unless (listp data)
+    (setq the-data data)
+    (error "did not recieve a list from the search query"))
+  (let ((items (assoc 'items data)))
+    (unless items
+      (error "search query did not return items"))
+    (gh-object-list-read (oref search-api repo-cls) (cdr items))))
 
 (provide 'gh-search)
 ;;; gh-search.el ends here
