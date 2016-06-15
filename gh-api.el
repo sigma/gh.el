@@ -158,6 +158,12 @@
       (let ((req (oref resp :-req)))
         (oset resp :data-received nil)
         (oset req :url next)
+        ;; Params need to be set to nil because the next uri will
+        ;; already have query params. If params are non-nil this will
+        ;; cause another set of params to be added to the end of the
+        ;; string which will override the params that are set in the
+        ;; next link.
+        (oset req :query nil)
         (gh-url-run-request req resp)))))
 
 (defmethod gh-api-authenticated-request
