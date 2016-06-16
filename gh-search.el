@@ -28,13 +28,14 @@
   ((repo-cls :allocation :class :initform gh-repos-repo))
   "Users API")
 
-(defmethod gh-search-repos ((search-api gh-search-api) query-string)
+(defmethod gh-search-repos ((search-api gh-search-api)
+                            query-string &optional page-limit)
   (unless (and (stringp query-string) (> (length query-string) 1))
     (error "a non-empty query string must be provided to gh-search-repos."))
   (gh-api-authenticated-request
    search-api
    (apply-partially 'gh-process-repo-search-result search-api)
-   "GET" "/search/repositories" nil `((q . ,query-string))))
+   "GET" "/search/repositories" nil `((q . ,query-string)) page-limit))
 
 (defmethod gh-process-repo-search-result ((search-api gh-search-api) data)
   (unless (listp data)
