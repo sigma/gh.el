@@ -22,29 +22,41 @@
 
 ;;; Code:
 
+(require 'gh-users)
 (require 'gh-repos)
 
 (defclass gh-search-api (gh-api-v3)
-  ((repo-cls :allocation :class :initform gh-repos-repo))
-  "Users API")
+  ((repo-cls :allocation :class :initform gh-repos-repo)
+   (user-cls :allocation :class :initform gh-users-user)))
 
-(defmethod gh-search-repos ((search-api gh-search-api)
-                            query-string &optional page-limit)
-  (unless (and (stringp query-string) (> (length query-string) 1))
-    (error "a non-empty query string must be provided to gh-search-repos."))
-  (gh-api-authenticated-request
-   search-api
-   (apply-partially 'gh-process-repo-search-result search-api)
-   "GET" "/search/repositories" nil `((q . ,query-string)) page-limit))
+(defmacro gh-search-method-builder (method-name uri process-result-function)
+  `(defmethod ,method-name ((search-api gh-search-api)
+                               query-string &optional page-limit
+                               &rest additional-arguments)
+     (unless (and (stringp query-string) (> (length query-string) 1))
+       (error "a non-empty query string must be provided to github search"))
+     (gh-api-authenticated-request
+      search-api
+      (apply-partially (quote ,process-result-function) search-api)
+      "GET" ,uri nil
+      `((q . ,query-string) ,@additional-arguments) page-limit)))
 
-(defmethod gh-process-repo-search-result ((search-api gh-search-api) data)
-  (unless (listp data)
-    (setq the-data data)
-    (error "did not recieve a list from the search query"))
-  (let ((items (assoc 'items data)))
-    (unless items
-      (error "search query did not return items"))
-    (gh-object-list-read (oref search-api repo-cls) (cdr items))))
+(defmacro gh-search-process-method-builder (method-name class-symbol)
+  `(defmethod ,method-name ((search-api gh-search-api) data)
+     (unless (listp data)
+       (setq the-data data)
+       (error "Did not recieve a list from the search query"))
+     (let ((items (assoc 'items data)))
+       (unless items
+         (error "Search query did not return items"))
+       (gh-object-list-read (oref search-api ,class-symbol) (cdr items)))))
+
+(gh-search-process-method-builder gh-process-repo-search-result repo-cls)
+(gh-search-process-method-builder gh-process-user-search-result user-cls)
+(gh-search-method-builder gh-search-repos "/search/repositories"
+                          gh-process-repo-search-result)
+(gh-search-method-builder gh-search-users "/search/users"
+                          gh-process-user-search-result)
 
 (provide 'gh-search)
 ;;; gh-search.el ends here
