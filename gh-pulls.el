@@ -82,7 +82,9 @@
    (created-at :initarg :created-at)
    (updated-at :initarg :updated-at)
    (closed-at :initarg :closed-at)
-   (merged-at :initarg :merged-at)))
+   (merged-at :initarg :merged-at)
+   (head :initarg :head :initform nil :marshal-type gh-repos-ref)
+   (base :initarg :base :initform nil :marshal-type gh-repos-ref)))
 
 ;;;###autoload
 (gh-defclass gh-pulls-request (gh-pulls-request-stub)
@@ -94,9 +96,7 @@
    (commits :initarg :commits)
    (additions :initarg :additions)
    (deletions :initarg :deletions)
-   (changed-files :initarg :changed-files)
-   (head :initarg :head :initform nil :marshal-type gh-repos-ref)
-   (base :initarg :base :initform nil :marshal-type gh-repos-ref))
+   (changed-files :initarg :changed-files))
   "Git pull requests API")
 
 (defmethod gh-pulls-req-to-new ((req gh-pulls-request))
