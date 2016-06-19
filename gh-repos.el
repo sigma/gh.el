@@ -77,6 +77,7 @@
    (forks-count :initarg forks-count)
    (watchers :initarg :watchers)
    (watchers-count :initarg watchers-count)
+   (stargazers-count :initarg :stargazers-count)
    (size :initarg :size)
    (master-branch :initarg :master-branch)
    (open-issues :initarg :open-issues)
