@@ -275,7 +275,7 @@
 
 (defmethod gh-repos-collaborators-list ((api gh-repos-api) repo)
   (gh-api-authenticated-request
-   api (ghn-object-list-reader (oref api user-cls)) "GET" (format "/repos/%s/%s/collaborators"
+   api (gh-object-list-reader (oref api user-cls)) "GET" (format "/repos/%s/%s/collaborators"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
