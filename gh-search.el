@@ -44,7 +44,6 @@
 (defmacro gh-search-process-method-builder (method-name class-symbol)
   `(defmethod ,method-name ((search-api gh-search-api) data)
      (unless (listp data)
-       (setq the-data data)
        (error "Did not recieve a list from the search query"))
      (let ((items (assoc 'items data)))
        (unless items
