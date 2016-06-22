@@ -165,13 +165,13 @@
    (gh-issues-milestone-req-to-update milestone)))
 
 (defmethod gh-issues-milestone-req-to-update ((milestone gh-issues-milestone))
-  (let ((state (oref milestone state)  )
-        (description (oref milestone description))
-        (due_on (oref milestone due_on))
-        (to-update `(("title" . ,(oref milestone title)))))
+  (let ((state (oref milestone :state))
+        (description (oref milestone :description))
+        (due-on (oref milestone :due-on))
+        (to-update `(("title" . ,(oref milestone :title)))))
     (when state (nconc to-update `(("state" . ,state))))
     (when description (nconc to-update `(("description" . ,description))))
-    (when due_on (nconc to-update `(("due_on" . ,due_on))))
+    (when due-on (nconc to-update `(("due_on" . ,due-on))))
     to-update))
 
 (defmethod gh-issues-issue-get ((api gh-issues-api) user repo id)
@@ -180,18 +180,18 @@
    (format "/repos/%s/%s/issues/%s" user repo id)))
 
 (defmethod gh-issues-issue-req-to-update ((req gh-issues-issue))
-  (let ((assignee (oref req assignee))
+  (let ((assignee (oref req :assignee))
         ;; (labels (oref req labels))
-        (milestone (oref req milestone))
-        (to-update `(("title" . ,(oref req title))
-                     ("state" . ,(oref req state))
-                     ("body" . ,(oref req body)))))
+        (milestone (oref req :milestone))
+        (to-update `(("title" . ,(oref req :title))
+                     ("state" . ,(oref req :state))
+                     ("body" . ,(oref req :body)))))
 
     ;; (when labels (nconc to-update `(("labels" . ,(oref req labels) ))))
     (when milestone
-      (nconc to-update `(("milestone" . ,(oref milestone number)))))
+      (nconc to-update `(("milestone" . ,(oref milestone :number)))))
     (when assignee
-      (nconc to-update `(("assignee" . ,(oref assignee login) ))))
+      (nconc to-update `(("assignee" . ,(oref assignee :login)))))
     to-update))
 
 (defmethod gh-issues-issue-update ((api gh-issues-api) user repo id req)
@@ -243,7 +243,7 @@
 (defmethod gh-issues-label-update ((api gh-issues-api) user repo req)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api label-cls)) "POST"
-   (format "/repos/%s/%s/labels/%s" user repo (oref req name))
+   (format "/repos/%s/%s/labels/%s" user repo (oref req :name))
    (gh-issues-label-req-to-update req)))
 
 (defmethod gh-issues-label-delete ((api gh-issues-api) user repo name)
@@ -286,17 +286,17 @@
 
 (defun gh-issues--issue-id (issue-or-issue-id)
   (if (eieio-object-p issue-or-issue-id)
-      (oref issue-or-issue-id id)
+      (oref issue-or-issue-id :id)
     issue-or-issue-id))
 
 (defun gh-issues--milestone-id (milestone-or-milestone-id)
   (if (eieio-object-p milestone-or-milestone-id)
-      (oref milestone-or-milestone-id id)
+      (oref milestone-or-milestone-id :id)
     milestone-or-milestone-id))
 
 (defun gh-issues--label-name (label-or-label-name)
   (if (eieio-object-p label-or-label-name)
-      (oref label-or-label-name name)
+      (oref label-or-label-name :name)
     label-or-label-name))
 
 
