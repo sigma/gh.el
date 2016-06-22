@@ -95,11 +95,10 @@
   ((username :initarg :username :initform nil))
   "Abstract authenticator")
 
-(defmethod constructor :static ((auth gh-authenticator) &rest args)
-  (let ((obj (call-next-method)))
-    (or (oref obj :username)
-        (oset obj :username (gh-auth-get-username)))
-    obj))
+(defmethod initialize-instance ((auth gh-authenticator) &rest args)
+  (call-next-method)
+  (or (oref auth :username)
+      (oset auth :username (gh-auth-get-username))))
 
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req)
   req)
@@ -131,11 +130,10 @@
    (2fa-cls :initform gh-auth-2fa-callback :allocation :class))
   "Password-based authenticator")
 
-(defmethod constructor :static ((auth gh-password-authenticator) &rest args)
-  (let ((obj (call-next-method)))
-    (or (oref obj :password)
-        (oset obj :password (gh-auth-get-password (oref obj remember))))
-    obj))
+(defmethod initialize-instance ((auth gh-password-authenticator) &rest args)
+  (call-next-method)
+  (or (oref auth :password)
+      (oset auth :password (gh-auth-get-password (oref auth remember)))))
 
 (defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
   (object-add-to-list req :headers
@@ -154,11 +152,10 @@
   ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")
 
-(defmethod constructor :static ((auth gh-oauth-authenticator) &rest args)
-  (let ((obj (call-next-method)))
-    (or (oref obj :token)
-        (oset obj :token (gh-auth-get-oauth-token)))
-    obj))
+(defmethod initialize-instance :static ((auth gh-oauth-authenticator) &rest args)
+  (call-next-method)
+  (or (oref auth :token)
+      (oset auth :token (gh-auth-get-oauth-token))))
 
 (defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
   (object-add-to-list req :headers
