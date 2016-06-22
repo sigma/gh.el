@@ -217,7 +217,7 @@
                                :page-limit page-limit)))))
     (cond ((and has-value ;; got value from cache
                 (not is-outdated))
-           (gh-api-response "cached" :data-received t :data value))
+           (make-instance 'gh-api-response :data-received t :data value))
           (cache-key ;; no value, but cache exists and method is safe
            (let ((resp (make-instance (oref req default-response-cls)
                                       :transform transformer)))
