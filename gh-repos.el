@@ -218,7 +218,7 @@
 
 (defmethod gh-repos-repo-rename ((api gh-repos-api) repo-stub new-name
                                  &optional user)
-  (let ((new-stub (gh-repos-repo-stub "repo" :name new-name)))
+  (let ((new-stub (make-instance 'gh-repos-repo-stub :name new-name)))
     (gh-api-authenticated-request
      api (gh-object-reader (oref api repo-cls)) "PATCH"
      (format "/repos/%s/%s"
