@@ -62,7 +62,6 @@
    (public-gists :initarg :public-gists)
    (followers :initarg :followers)
    (following :initarg :following)
-   (html-url :initarg :html-url)
    (created-at :initarg :created-at)
    (type :initarg :type)
    (total-private-repos :initarg :total-private-repos)
