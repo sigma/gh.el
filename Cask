@@ -10,7 +10,7 @@
 (depends-on "dash" "2.9.0")
 (depends-on "pcache" "0.3.1")
 (depends-on "logito" "0.1")
-(depends-on "marshal" "0.5.0")
+(depends-on "marshal" "0.6.0")
 
 (development
   (depends-on "ert-runner")
