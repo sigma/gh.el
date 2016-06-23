@@ -80,10 +80,12 @@
     (unless (or (null cache)
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
-      (oset api :cache (funcall (oref api cache-cls)
-                                (format "gh/%s/%s"
-                                        classname
-                                        (gh-api-get-username api)))))))
+      (oset api :cache (make-instance
+                        (oref api cache-cls)
+                        :object-name
+                        (format "gh/%s/%s"
+                                classname
+                                (gh-api-get-username api)))))))
 
 (defmethod gh-api-expand-resource ((api gh-api)
                                    resource)
