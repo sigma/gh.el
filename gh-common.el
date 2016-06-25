@@ -109,7 +109,7 @@
 
 (gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
-   (url :initarg :url :type string)
+   (url :initarg :url)
    (html-url :initarg :html-url)))
 
 (defmethod gh-ref-object-base ((obj gh-ref-object))
