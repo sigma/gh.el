@@ -140,14 +140,14 @@
 (defun gh-url-set-response (status req-resp)
   (set-buffer-multibyte t)
   (destructuring-bind (req resp) req-resp
-    (condition-case err
-        (let ((responses-req (clone req)))
-          (oset resp :-req responses-req)
-          (gh-url-response-init resp (current-buffer)))
-      (error
-       (let ((num (oref req :num-retries)))
-         (if (or (null num) (zerop num))
-             (signal (car err) (cdr err))
+    (let ((responses-req (clone req))
+          (num (oref req :num-retries)))
+      (oset resp :-req responses-req)
+      (if (or (null num) (zerop num))
+          (gh-url-response-init resp (current-buffer))
+        (condition-case err
+            (gh-url-response-init resp (current-buffer))
+          (error
            (oset req :num-retries (1- num))
            (gh-url-run-request req resp)))))))
 
