@@ -64,7 +64,7 @@
   (with-slots (url html-url body user created-at updated-at)
       comment
     (setq url (gh-read data 'url)
-          html-url (gh-read data 'html-url)
+          html-url (gh-read data 'html_url)
           body (gh-read data 'body)
           user (gh-object-read  (or (oref comment :user)
                                     (oref comment user-cls))

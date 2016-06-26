@@ -75,7 +75,7 @@
 		   created-at updated-at)
       comment
     (setq url (gh-read data 'url)
-          html-url (gh-read data 'html-url)
+          html-url (gh-read data 'html_url)
 	  id (gh-read data 'id)
           body (gh-read data 'body)
           user (gh-object-read  (or (oref comment :user)
