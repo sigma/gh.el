@@ -88,9 +88,10 @@
    (content :initarg :content)))
 
 (defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
-  `(("description" . ,(oref gist :description))
-    ("public" . ,(oref gist :public))
-    ("files" . ,(mapcar 'gh-gist-gist-file-to-obj (oref gist :files)))))
+  (let ((files (mapcar #'gh-gist-gist-file-to-obj (oref gist :files))))
+    `(("description" . ,(oref gist :description))
+      ("public" . ,(oref gist :public))
+      ,@(and files (list (cons "files"  files))))))
 
 (defmethod gh-gist-gist-has-files ((gist gh-gist-gist-stub))
   (not (memq nil (mapcar (lambda (f)
