@@ -152,7 +152,7 @@
   ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")
 
-(defmethod initialize-instance :static ((auth gh-oauth-authenticator) &rest args)
+(defmethod initialize-instance ((auth gh-oauth-authenticator) &rest args)
   (call-next-method)
   (or (oref auth :token)
       (oset auth :token (gh-auth-get-oauth-token))))
