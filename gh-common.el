@@ -77,6 +77,7 @@
     (list (cons 'alist
                 (intern (s-replace "-" "_" slot-name))))))
 
+;;;###autoload
 (defmacro gh-defclass (name superclass slots &rest options-and-doc)
   `(marshal-defclass ,name ,superclass ,slots ,@options-and-doc
                      :marshal-default-spec gh-marshal-default-spec))
