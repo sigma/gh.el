@@ -80,6 +80,7 @@
    (has-downloads :initarg :has-downloads))
   "Class for GitHub repositories")
 
+;;;###autoload
 (gh-defclass gh-repos-ref (gh-object)
   ((label :initarg :label)
    (ref :initarg :ref :initform nil)

@@ -103,6 +103,7 @@
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req)
   req)
 
+;;;###autoload
 (defclass gh-auth-2fa-callback (gh-url-callback)
   ((req :initarg :req :initform nil))
   "2-factor callback")

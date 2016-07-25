@@ -41,6 +41,7 @@
   ((auth-cls :allocation :class :initform gh-oauth-authorization))
   "OAuth API")
 
+;;;###autoload
 (defclass gh-oauth-password-authenticator (gh-password-authenticator)
   ((remember :allocation :class :initform nil)))
 
@@ -49,6 +50,7 @@
   (let ((gh-api-v3-authenticator 'gh-oauth-password-authenticator))
     (call-next-method)))
 
+;;;###autoload
 (gh-defclass gh-oauth-authorization (gh-ref-object)
   ((scopes :initarg :scopes)
    (token :initarg :token)
@@ -56,6 +58,7 @@
    (updated-at :initarg :updated-at)
    (created-at :initarg :created-at)))
 
+;;;###autoload
 (gh-defclass gh-oauth-app (gh-object)
   ((url :initarg :url)
    (name :initarg :name)))

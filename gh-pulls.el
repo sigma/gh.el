@@ -39,6 +39,7 @@
 
 (require 'gh-repos)
 
+;;;###autoload
 (defclass gh-pulls-cache (gh-cache)
   ((invalidation-chain :allocation :class
                        :initform '(("^/repos/.*/.*/pulls$" . "\0")
@@ -52,6 +53,7 @@
    (comment-cls :allocation :class :initform gh-pulls-comment))
   "Git pull requests API")
 
+;;;###autoload
 (gh-defclass gh-pulls-comment (gh-comment)
   ((path :initarg :path)
    (diff-hunk :initarg :diff-hunk)
@@ -71,6 +73,7 @@
 			 ("position" . ,(oref req position)))))
     to-update))
 
+;;;###autoload
 (gh-defclass gh-pulls-request-stub (gh-ref-object)
   ((diff-url :initarg :diff-url)
    (patch-url :initarg :patch-url)

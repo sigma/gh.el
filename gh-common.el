@@ -82,6 +82,7 @@
   `(marshal-defclass ,name ,superclass ,slots ,@options-and-doc
                      :marshal-default-spec gh-marshal-default-spec))
 
+;;;###autoload
 (gh-defclass gh-object ()
   ())
 
@@ -108,6 +109,7 @@
   (if (eq fn 'oref) nil
       (call-next-method)))
 
+;;;###autoload
 (gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
    (url :initarg :url)
@@ -124,11 +126,13 @@
   (if (stringp obj) obj
     (error "illegal input for `gh-ref-object-base'")))
 
+;;;###autoload
 (gh-defclass gh-user (gh-ref-object)
   ((login :initarg :login)
    (gravatar-url :initarg :gravatar-url))
   "Github user object")
 
+;;;###autoload
 (gh-defclass gh-comment (gh-ref-object)
   ((body :initarg :body)
    (user :initarg :user :initform nil :marshal-type gh-user)

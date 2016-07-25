@@ -81,6 +81,7 @@
    (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry)))
   "Gist object")
 
+;;;###autoload
 (gh-defclass gh-gist-gist-file (gh-object)
   ((filename :initarg :filename)
    (size :initarg :size)

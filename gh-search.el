@@ -25,6 +25,7 @@
 (require 'gh-users)
 (require 'gh-repos)
 
+;;;###autoload
 (defclass gh-search-api (gh-api-v3)
   ((repo-cls :allocation :class :initform gh-repos-repo)
    (user-cls :allocation :class :initform gh-users-user)))

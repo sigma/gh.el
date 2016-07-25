@@ -47,11 +47,13 @@
    (avatar-url :initarg :avatar-url)
    (description :initarg :description)))
 
+;;;###autoload
 (gh-defclass gh-orgs-plan (gh-object)
   ((name :initarg :name)
    (space :initarg :space)
    (private-repos :initarg :private-repos)))
 
+;;;###autoload
 (gh-defclass gh-orgs-org (gh-orgs-org-stub)
   ((name :initarg :name)
    (company :initarg :company)

@@ -118,9 +118,11 @@
                              (or (oref api :auth)
                                  (funcall gh-api-v3-authenticator "auth")))))
 
+;;;###autoload
 (defclass gh-api-request (gh-url-request)
   ((default-response-cls :allocation :class :initform gh-api-response)))
 
+;;;###autoload
 (defclass gh-api-response (gh-url-response)
   ())
 
@@ -136,10 +138,12 @@
 (defmethod gh-url-response-set-data ((resp gh-api-response) data)
   (call-next-method resp (gh-api-json-decode data)))
 
+;;;###autoload
 (defclass gh-api-paged-request (gh-api-request)
   ((default-response-cls :allocation :class :initform gh-api-paged-response)
    (page-limit :initarg :page-limit :initform -1)))
 
+;;;###autoload
 (defclass gh-api-paged-response (gh-api-response)
   ())
 
@@ -237,6 +241,7 @@
                                     (oref req default-response-cls)
                                     :transform transformer))))))
 
+;;;###autoload
 (defclass gh-api-callback (gh-url-callback)
   ((cache :initarg :cache)
    (key :initarg :key)

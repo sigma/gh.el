@@ -35,6 +35,7 @@
 (require 'gh-common)
 (require 'gh-api)
 
+;;;###autoload
 (defclass gh-comments-api-mixin ()
   ((comment-cls :allocation :class :initform gh-comment))
   :abstract t)
