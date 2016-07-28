@@ -72,6 +72,7 @@
 
 ;;; Base classes for common objects
 
+;;;###autoload
 (defun gh-marshal-default-spec (slot)
   (let ((slot-name (symbol-name slot)))
     (list (cons 'alist
