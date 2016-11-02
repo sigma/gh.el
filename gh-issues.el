@@ -64,6 +64,7 @@
    (body :initarg :body)
    (user :initarg :user :initform nil :marshal-type gh-user)
    (labels :initarg :labels :initform nil :marshal-type (list gh-issues-label))
+   (assignees :initarg :assignee :initform nil :marshal-type (list gh-user))
    (assignee :initarg :assignee :initform nil :marshal-type gh-user)
    (milestone :initarg :milestone :initform nil :marshal-type gh-issues-milestone)
    (comments :initarg :comments :initform 0)
