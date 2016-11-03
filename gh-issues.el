@@ -25,7 +25,7 @@
 ;; Basic usage:
 
 ;; (setf api (gh-issues-api "api" :sync nil :cache nil :num-retries 1))
-;; (setf issues (gh-issues-list api "user" "repo"))
+;; (setf issues (gh-issues-issue-list api "user" "repo"))
 ;; (last (oref issues data)) ; get one issue
 ;; (setq mi (make-instance 'gh-issues-issue :body "issue body" :title "issue title"))
 ;; (gh-issues-issue-new api "user" "repo" mi)
@@ -64,12 +64,12 @@
    (body :initarg :body)
    (user :initarg :user :initform nil :marshal-type gh-user)
    (labels :initarg :labels :initform nil :marshal-type (list gh-issues-label))
-   (assignees :initarg :assignee :initform nil :marshal-type (list gh-user))
+   (assignees :initarg :assignees :initform nil :marshal-type (list gh-user))
    (assignee :initarg :assignee :initform nil :marshal-type gh-user)
    (milestone :initarg :milestone :initform nil :marshal-type gh-issues-milestone)
    (comments :initarg :comments :initform 0)
    (pull-request :initarg :pull-request :marshal-type gh-issues-pull-request)
-   (closed-at :initarg :created-at)
+   (closed-at :initarg :closed-at)
    (created-at :initarg :created-at)
    (updated-at :initarg :updated-at))
   "issues request")
