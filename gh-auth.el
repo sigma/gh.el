@@ -67,7 +67,8 @@
                    (gh-config "password"))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
-      (gh-set-config "password" pass))
+      (when remember
+        (gh-set-config "password" pass)))
     (when remember
       (gh-auth-remember profile :password pass))
     pass))
