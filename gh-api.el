@@ -39,7 +39,7 @@
 (require 'gh-auth)
 (require 'gh-cache)
 
-(require 'logito)
+(require 'logito nil t)
 
 (defgroup gh-api nil
   "Github API."
@@ -64,7 +64,9 @@
   "Github API")
 
 (defmethod logito-log ((api gh-api) level tag string &rest objects)
-  (apply 'logito-log (oref api :log) level tag string objects))
+  (if (require 'logito nil t)
+      (apply 'logito-log (oref api :log) level tag string objects)
+    (error "Cannot open load file `logito' required for logging in `gh'")))
 
 (defmethod initialize-instance ((api gh-api) &rest args)
   (call-next-method))
