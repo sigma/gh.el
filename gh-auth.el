@@ -51,9 +51,9 @@
 
 (defun gh-auth-get-username ()
   (let* ((profile (gh-profile-current-profile))
-         (user (or (plist-get (cdr (assoc profile gh-auth-alist)) :username)
-                   (plist-get (cdr (assoc profile gh-profile-alist)) :username)
-                   (gh-config "user"))))
+         (user (or (gh-config "user")
+                   (plist-get (cdr (assoc profile gh-auth-alist)) :username)
+                   (plist-get (cdr (assoc profile gh-profile-alist)) :username))))
     (when (not user)
       (setq user (read-string "GitHub username: "))
       (gh-set-config "user" user))
@@ -62,9 +62,9 @@
 
 (defun gh-auth-get-password (&optional remember)
   (let* ((profile (gh-profile-current-profile))
-         (pass (or (plist-get (cdr (assoc profile gh-auth-alist)) :password)
-                   (plist-get (cdr (assoc profile gh-profile-alist)) :password)
-                   (gh-config "password"))))
+         (pass (or (gh-config "password")
+                   (plist-get (cdr (assoc profile gh-auth-alist)) :password)
+                   (plist-get (cdr (assoc profile gh-profile-alist)) :password))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
       (when remember
@@ -77,9 +77,9 @@
 
 (defun gh-auth-get-oauth-token ()
   (let* ((profile (gh-profile-current-profile))
-         (token (or (plist-get (cdr (assoc profile gh-auth-alist)) :token)
-                    (plist-get (cdr (assoc profile gh-profile-alist)) :token)
-                    (gh-config "oauth-token"))))
+         (token (or (gh-config "oauth-token")
+                    (plist-get (cdr (assoc profile gh-auth-alist)) :token)
+                    (plist-get (cdr (assoc profile gh-profile-alist)) :token))))
     (when (not token)
       (let* ((api (make-instance 'gh-oauth-api))
              (tok (and (fboundp 'gh-oauth-auth-new)
