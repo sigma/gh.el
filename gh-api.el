@@ -219,7 +219,8 @@
                                          (and (eq fmt :form)
                                               (gh-url-form-encode data))
                                          "")
-                               :page-limit page-limit)))))
+                               :page-limit page-limit
+                               :async (not (oref api sync)))))))
     (cond ((and has-value ;; got value from cache
                 (not is-outdated))
            (make-instance 'gh-api-response :data-received t :data value))
