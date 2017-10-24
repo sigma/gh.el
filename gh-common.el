@@ -122,7 +122,7 @@ Emacs. This makes a difference when running with TRAMP."
 ;;;###autoload
 (gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
-   (url :initarg :url)
+   (url :initarg :url :type string)
    (html-url :initarg :html-url)))
 
 (defmethod gh-ref-object-base ((obj gh-ref-object))
@@ -138,16 +138,16 @@ Emacs. This makes a difference when running with TRAMP."
 
 ;;;###autoload
 (gh-defclass gh-user (gh-ref-object)
-  ((login :initarg :login)
-   (gravatar-url :initarg :gravatar-url))
+  ((login :initarg :login :type string)
+   (avatar-url :initarg :avatar-url))
   "Github user object")
 
 ;;;###autoload
 (gh-defclass gh-comment (gh-ref-object)
-  ((body :initarg :body)
+  ((body :initarg :body :type string)
    (user :initarg :user :initform nil :marshal-type gh-user)
-   (created-at :initarg :created_at)
-   (updated-at :initarg :updated_at))
+   (created-at :initarg :created_at :type string)
+   (updated-at :initarg :updated_at :type string))
   "Github comment object")
 
 (defmethod gh-comment-req-to-update ((req gh-comment))

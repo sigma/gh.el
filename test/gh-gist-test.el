@@ -34,6 +34,18 @@
   (should (oref gist :public))
   (should (equal (length (oref gist :files)) 1)))
 
+(ert-deftest gh-gist-test:complete ()
+  (gh-test:complete-object "get_gist_sample.txt" 'gh-gist-gist '(files)))
+
+(ert-deftest gh-gist-test:partial-owner ()
+  (gh-test:partial-object "get_gist_sample.txt" 'gh-gist-gist 'owner))
+
+(ert-deftest gh-gist-test:partial-forks ()
+  (gh-test:partial-object "get_gist_sample.txt" 'gh-gist-gist 'forks))
+
+(ert-deftest gh-gist-test:partial-history ()
+  (gh-test:partial-object "get_gist_sample.txt" 'gh-gist-gist 'history))
+
 (ert-deftest gh-gist-test:regular-list ()
   (let* ((api (gh-test-mock-api 'gh-gist-api))
          (gists

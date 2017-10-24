@@ -42,9 +42,8 @@
   "Users API")
 
 ;;;###autoload
-(gh-defclass gh-users-user (gh-user)
+(gh-defclass gh-users-short-user (gh-user)
   ((gravatar-id :initarg :gravatar-id)
-   (html-url :initarg :html-url)
    (followers-url :initarg :followers-url)
    (following-url :initarg :following-url)
    (gists-url :initarg :gists-url)
@@ -54,9 +53,12 @@
    (repos-url :initarg :repos-url)
    (events-url :initarg :events-url)
    (received-events-url :initarg :received-events-url)
-   (type :initarg :type)
-   (site-admin :initarg :site-admin)
-   (name :initarg :name)
+   (user-type :initarg :user-type :marshal ((alist . type)) :type string)
+   (site-admin :initarg :site-admin)))
+
+;;;###autoload
+(gh-defclass gh-users-user (gh-users-short-user)
+  ((name :initarg :name)
    (company :initarg :company)
    (blog :initarg :blog)
    (location :initarg :location)

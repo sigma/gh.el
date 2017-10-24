@@ -35,6 +35,7 @@
 (require 'gh-api)
 (require 'gh-auth)
 (require 'gh-common)
+(require 'gh-users)
 
 ;;;###autoload
 (defclass gh-gist-api (gh-api-v3)
@@ -56,7 +57,7 @@
 
 ;;;###autoload
 (gh-defclass gh-gist-history-entry (gh-object)
-  ((user :initarg :user :initform nil :marshal-type gh-user)
+  ((user :initarg :user :initform nil :marshal-type gh-users-short-user)
    (version :initarg :version)
    (committed :initarg :committed :marshal ((alist . committed_at)))
    (change :initarg :change :marshal ((alist . change_status))
@@ -64,10 +65,12 @@
    (url :initarg :url)))
 
 ;;;###autoload
-(gh-defclass gh-gist-fork-entry (gh-ref-object)
-  ((user :initarg :user :initform nil :marshal-type gh-user)
+(gh-defclass gh-gist-fork-entry (gh-object)
+  ((user :initarg :user :initform nil :marshal-type gh-users-short-user)
    (created :initarg :created :marshal ((alist . created_at)))
-   (updated :initarg :updated :marshal ((alist . updated_at)))))
+   (updated :initarg :updated :marshal ((alist . updated_at)))
+   (id :initarg :id)
+   (url :initarg :url)))
 
 ;;;###autoload
 (gh-defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
@@ -76,9 +79,13 @@
    (push-url :initarg :push-url :marshal ((alist . git_push_url)))
    (pull-url :initarg :pull-url :marshal ((alist . git_pull_url)))
    (comments :initarg :comments)
-   (user :initarg :user :initform nil :marshal-type gh-user :marshal ((alist . owner)))
+   (comments-url :initarg :comments-url)
+   (commits-url :initarg :commits-url)
+   (user :initarg :user :initform nil :marshal-type gh-users-short-user :marshal ((alist . owner)))
    (history :initarg :history :initform nil :type list :marshal-type (list gh-gist-history-entry))
-   (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry)))
+   (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry))
+   (forks-url :initarg :forks-url)
+   (unused-user :initarg :unused-user :marshal ((alist . user))))
   "Gist object")
 
 ;;;###autoload
