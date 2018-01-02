@@ -31,11 +31,13 @@
 
 ;;;###autoload
 (require 'eieio)
+(require 'marshal)
 
 (require 'dash)
-(require 'marshal)
 (require 's)
-(require 'gh-profile)
+
+(autoload 'gh-profile-current-profile "gh-profile")
+(autoload 'gh-profile-default-profile "gh-profile")
 
 (defgroup gh nil
   "Github API client libraries."
@@ -55,7 +57,7 @@ Emacs. This makes a difference when running with TRAMP."
 (defun gh-namespaced-key (key)
   (let ((profile (gh-profile-current-profile)))
     (concat "github."
-            (if (string= profile gh-profile-default-profile)
+            (if (string= profile (gh-profile-default-profile))
                 ""
               (concat profile "."))
             key)))

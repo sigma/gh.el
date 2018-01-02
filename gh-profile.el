@@ -75,6 +75,9 @@ to here."
   :type 'string
   :group 'gh-profile)
 
+(defun gh-profile-default-profile ()
+  gh-profile-default-profile)
+
 (defvar gh-profile-current-profile nil)
 (make-variable-buffer-local 'gh-profile-current-profile)
 
