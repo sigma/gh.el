@@ -83,11 +83,10 @@ to here."
 
 (defun gh-profile-current-profile ()
   (or gh-profile-current-profile
-      gh-profile-default-profile))
+      (gh-profile-default-profile)))
 
 (defun gh-profile-url ()
-  (plist-get (cdr (assoc (or gh-profile-current-profile
-                             gh-profile-default-profile)
+  (plist-get (cdr (assoc (gh-profile-current-profile)
                          gh-profile-alist)) :url))
 
 (defun gh-profile-completing-read ()
