@@ -8,7 +8,7 @@ unit-tests: elpa
 
 elpa: Cask *.el
 	mkdir -p elpa
-	${CASK} install 2> elpa/install.log
+	${CASK} install
 
 clean-elpa:
 	rm -rf elpa
