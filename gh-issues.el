@@ -246,12 +246,12 @@
 (defmethod gh-issues-comments-update ((api gh-issues-api)
                                       user repo comment-id comment)
   (gh-comments-update api (format "/repos/%s/%s/issues" user repo)
-                      comment-id (gh-comment-req-to-update comment)))
+                      comment-id comment))
 
 (defmethod gh-issues-comments-new ((api gh-issues-api)
                                    user repo issue-id comment)
   (gh-comments-new api (format "/repos/%s/%s/issues/%s" user repo issue-id)
-                   (gh-comment-req-to-update comment)))
+                   comment))
 
 (defmethod gh-issues-comments-delete ((api gh-issues-api) user repo comment-id)
   (gh-comments-delete api (format "/repos/%s/%s/issues" user repo) comment-id))
