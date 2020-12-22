@@ -29,31 +29,26 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'gh-api)
 (require 'gh-auth)
 (require 'gh-common)
 
-;;;###autoload
 (defclass gh-orgs-api (gh-api-v3)
   ((org-cls :allocation :class :initform gh-orgs-org))
   "Orgs API")
 
-;;;###autoload
 (gh-defclass gh-orgs-org-stub (gh-ref-object)
   ((login :initarg :login)
    (avatar-url :initarg :avatar-url)
    (description :initarg :description)))
 
-;;;###autoload
 (gh-defclass gh-orgs-plan (gh-object)
   ((name :initarg :name)
    (space :initarg :space)
    (private-repos :initarg :private-repos)))
 
-;;;###autoload
 (gh-defclass gh-orgs-org (gh-orgs-org-stub)
   ((name :initarg :name)
    (company :initarg :company)

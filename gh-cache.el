@@ -29,7 +29,6 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'pcache)
@@ -41,7 +40,6 @@
 (defconst gh-cache-version-constant
   (format "%s/gh-%s" pcache-version-constant gh-cache-internal-version-constant))
 
-;;;###autoload
 (defclass gh-cache (pcache-repository)
   ((version-constant :allocation :class)
    (entries :initarg :entries :initform (make-hash-table :test 'equal))
@@ -52,7 +50,6 @@
 
 (oset-default 'gh-cache version-constant gh-cache-version-constant)
 
-;;;###autoload
 (defclass gh-cache-entry (pcache-entry)
   ((etag :initarg :etag :initform nil)
    (outdated :initarg :outdated :initform nil)

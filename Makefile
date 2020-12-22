@@ -1,25 +1,18 @@
 EMACS ?= emacs
-CASK ?= cask
 
-test: unit-tests
+.PHONY: build test clean
 
-unit-tests: elpa
-	${CASK} exec ert-runner
+build:
+	keg build
 
-elpa: Cask *.el
-	mkdir -p elpa
-	${CASK} install
+test:
+	keg exec $(EMACS) --batch \
+	-l test/gh-test.el \
+	-l test/gh-gist-test.el \
+	-l test/gh-issues-test.el \
+	-l test/gh-orgs-test.el \
+	-l test/gh-repos-test.el \
+	-f ert-run-tests-batch-and-exit
 
-clean-elpa:
-	rm -rf elpa
-
-clean-elc:
-	rm -f *.elc test/*.elc
-
-clean: clean-elpa clean-elc
-
-print-deps:
-	${EMACS} --version
-	@echo CASK=${CASK}
-
-travis-ci: print-deps test
+clean:
+	keg clean

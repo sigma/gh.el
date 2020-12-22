@@ -1,2 +1,2 @@
-(define-package "gh" "1.0.0" "A GitHub library for Emacs"
-  '((emacs "24.3") (pcache "0.4.1") (logito "0.1") (marshal "0.6.3")))
+(define-package "gh" "1.0.1" "A GitHub library for Emacs"
+  '((emacs "25.1") (pcache "0.4.2") (logito "0.1") (marshal "0.9.0")))

@@ -29,12 +29,10 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'url-http)
 
-;;;###autoload
 (defclass gh-url-request ()
   ((method :initarg :method :type string)
    (url :initarg :url :type string)
@@ -47,7 +45,6 @@
 
    (default-response-cls :allocation :class :initform gh-url-response)))
 
-;;;###autoload
 (defclass gh-url-response ()
   ((data-received :initarg :data-received :initform nil)
    (data :initarg :data :initform nil)
@@ -65,7 +62,6 @@
             data))
     (oset resp :data-received t)))
 
-;;;###autoload
 (defclass gh-url-callback ()
   nil)
 

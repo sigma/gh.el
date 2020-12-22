@@ -29,20 +29,17 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'gh-api)
 (require 'gh-auth)
 (require 'gh-common)
 
-;;;###autoload
 (defclass gh-repos-api (gh-api-v3)
   ((repo-cls :allocation :class :initform gh-repos-repo)
    (user-cls :allocation :class :initform gh-user))
   "Repos API")
 
-;;;###autoload
 (gh-defclass gh-repos-repo-stub (gh-object)
   ((name :initarg :name)
    (description :initarg :description)
@@ -50,7 +47,6 @@
    (private :initarg :private))
   "Class for user-created repository objects")
 
-;;;###autoload
 (gh-defclass gh-repos-repo (gh-ref-object gh-repos-repo-stub)
   ((clone-url :initarg :clone-url)
    (git-url :initarg :git-url)
@@ -80,7 +76,6 @@
    (has-downloads :initarg :has-downloads))
   "Class for GitHub repositories")
 
-;;;###autoload
 (gh-defclass gh-repos-ref (gh-object)
   ((label :initarg :label)
    (ref :initarg :ref :initform nil)

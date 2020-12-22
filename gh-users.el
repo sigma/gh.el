@@ -29,19 +29,16 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'gh-api)
 (require 'gh-auth)
 (require 'gh-common)
 
-;;;###autoload
 (defclass gh-users-api (gh-api-v3)
   ((users-cls :allocation :class :initform gh-users-user))
   "Users API")
 
-;;;###autoload
 (gh-defclass gh-users-user (gh-user)
   ((gravatar-id :initarg :gravatar-id)
    (html-url :initarg :html-url)
