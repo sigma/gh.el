@@ -29,7 +29,6 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 (require 'marshal)
 
@@ -93,18 +92,15 @@ sanitize API calls that need to handle potentially dirty data."
 
 ;;; Base classes for common objects
 
-;;;###autoload
 (defun gh-marshal-default-spec (slot)
   (let ((slot-name (symbol-name slot)))
     (list (cons 'alist
                 (intern (replace-regexp-in-string "-" "_" slot-name))))))
 
-;;;###autoload
 (defmacro gh-defclass (name superclass slots &rest options-and-doc)
   `(marshal-defclass ,name ,superclass ,slots ,@options-and-doc
                      :marshal-default-spec gh-marshal-default-spec))
 
-;;;###autoload
 (gh-defclass gh-object ()
   ())
 
@@ -131,7 +127,6 @@ sanitize API calls that need to handle potentially dirty data."
   (if (eq fn 'oref) nil
       (call-next-method)))
 
-;;;###autoload
 (gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
    (url :initarg :url)
@@ -148,13 +143,11 @@ sanitize API calls that need to handle potentially dirty data."
   (if (stringp obj) obj
     (error "illegal input for `gh-ref-object-base'")))
 
-;;;###autoload
 (gh-defclass gh-user (gh-ref-object)
   ((login :initarg :login)
    (gravatar-url :initarg :gravatar-url))
   "Github user object")
 
-;;;###autoload
 (gh-defclass gh-comment (gh-ref-object)
   ((body :initarg :body)
    (user :initarg :user :initform nil :marshal-type gh-user)

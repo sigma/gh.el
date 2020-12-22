@@ -29,7 +29,6 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'gh-profile)
@@ -91,7 +90,6 @@
     (gh-auth-remember profile :token token)
     token))
 
-;;;###autoload
 (defclass gh-authenticator ()
   ((username :initarg :username :initform nil))
   "Abstract authenticator")
@@ -104,7 +102,6 @@
 (defmethod gh-auth-modify-request ((auth gh-authenticator) req)
   req)
 
-;;;###autoload
 (defclass gh-auth-2fa-callback (gh-url-callback)
   ((req :initarg :req :initform nil))
   "2-factor callback")
@@ -124,7 +121,6 @@
                               (cons otp-header otp))
           (gh-url-run-request req resp))))))
 
-;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
   ((password :initarg :password :protection :private :initform nil)
    (remember :allocation :class :initform t)
@@ -149,7 +145,6 @@
                       (make-instance (oref auth 2fa-cls) :req req))
   req)
 
-;;;###autoload
 (defclass gh-oauth-authenticator (gh-authenticator)
   ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")

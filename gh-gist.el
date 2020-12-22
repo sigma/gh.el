@@ -29,32 +29,27 @@
 (eval-when-compile
   (require 'cl))
 
-;;;###autoload
 (require 'eieio)
 
 (require 'gh-api)
 (require 'gh-auth)
 (require 'gh-common)
 
-;;;###autoload
 (defclass gh-gist-api (gh-api-v3)
   ((gist-cls :allocation :class :initform gh-gist-gist))
   "Gist API")
 
-;;;###autoload
 (gh-defclass gh-gist-gist-stub (gh-object)
   ((files :initarg :files :type list :initform nil :marshal-type (list gh-gist-gist-file))
    (public :initarg :public :marshal-type bool)
    (description :initarg :description))
   "Class for user-created gist objects")
 
-;;;###autoload
 (gh-defclass gh-gist-history-change (gh-object)
   ((total :initarg :total)
    (additions :initarg :additions)
    (deletions :initarg :deletions)))
 
-;;;###autoload
 (gh-defclass gh-gist-history-entry (gh-object)
   ((user :initarg :user :initform nil :marshal-type gh-user)
    (version :initarg :version)
@@ -63,13 +58,11 @@
            :marshal-type gh-gist-history-change)
    (url :initarg :url)))
 
-;;;###autoload
 (gh-defclass gh-gist-fork-entry (gh-ref-object)
   ((user :initarg :user :initform nil :marshal-type gh-user)
    (created :initarg :created :marshal ((alist . created_at)))
    (updated :initarg :updated :marshal ((alist . updated_at)))))
 
-;;;###autoload
 (gh-defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
   ((date :initarg :date :marshal ((alist . created_at)))
    (update :initarg :update :marshal ((alist . updated_at)))
@@ -81,7 +74,6 @@
    (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry)))
   "Gist object")
 
-;;;###autoload
 (gh-defclass gh-gist-gist-file (gh-object)
   ((filename :initarg :filename)
    (size :initarg :size)
