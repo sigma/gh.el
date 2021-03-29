@@ -4,6 +4,7 @@
 
 ;; Author: Yann Hodique <yhodique@gmail.com>
 ;; Keywords:
+;; Homepage: https://github.com/sigma/gh.el
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
