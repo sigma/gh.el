@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'pcache)
@@ -56,7 +53,7 @@
    ;; (ttl :initarg :ttl :initform 0)
    ))
 
-(defmethod pcache-invalidate :after ((cache gh-cache) key)
+(cl-defmethod pcache-invalidate :after ((cache gh-cache) key)
   (let ((resource (car key)))
     (pcache-map cache #'(lambda (k v)
                           (when (equal (car k) resource)
@@ -69,7 +66,7 @@
                                 (when (equal (car k) nextresource)
                                   (pcache-invalidate cache k)))))))))
 
-(defmethod pcache-get ((cache gh-cache) key &optional default)
+(cl-defmethod pcache-get ((cache gh-cache) key &optional default)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (if (not entry)
@@ -78,13 +75,13 @@
         (oset entry :outdated t))
       (oref entry :value))))
 
-(defmethod pcache-has ((cache pcache-repository) key)
+(cl-defmethod pcache-has ((cache pcache-repository) key)
   (let* ((default (make-symbol ":nil"))
          (table (oref cache :entries))
          (entry (gethash key table default)))
     (not (eq entry default))))
 
-(defmethod pcache-purge-invalid ((cache gh-cache))
+(cl-defmethod pcache-purge-invalid ((cache gh-cache))
   (let ((table (oref cache :entries)))
     (maphash #'(lambda (k e)
                  (unless (gh-cache-expired-p e)
@@ -92,13 +89,13 @@
              table)
     (pcache-save cache)))
 
-(defmethod gh-cache-outdated-p ((cache gh-cache) key)
+(cl-defmethod gh-cache-outdated-p ((cache gh-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
          (oref entry :outdated))))
 
-(defmethod gh-cache-expired-p ((cache gh-cache) key)
+(cl-defmethod gh-cache-expired-p ((cache gh-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and (gh-cache-outdated-p cache key)
@@ -107,7 +104,7 @@
             (< time (+ gh-cache-outdated-expiration-delay
                        (oref entry :timestamp))))))))
 
-(defmethod gh-cache-revive ((cache gh-cache) key)
+(cl-defmethod gh-cache-revive ((cache gh-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
@@ -115,13 +112,13 @@
          (oset entry :timestamp (float-time (current-time)))
          t)))
 
-(defmethod gh-cache-etag ((cache gh-cache) key)
+(cl-defmethod gh-cache-etag ((cache gh-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
          (oref entry :etag))))
 
-(defmethod gh-cache-set-etag ((cache gh-cache) key etag)
+(cl-defmethod gh-cache-set-etag ((cache gh-cache) key etag)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry

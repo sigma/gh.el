@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'gh-api)
@@ -42,10 +39,10 @@
 (defclass gh-oauth-password-authenticator (gh-password-authenticator)
   ((remember :allocation :class :initform nil)))
 
-(defmethod initialize-instance ((api gh-oauth-api) &rest args)
+(cl-defmethod initialize-instance ((api gh-oauth-api) &rest args)
   ;; force password authentication for this API
   (let ((gh-api-v3-authenticator 'gh-oauth-password-authenticator))
-    (call-next-method)))
+    (cl-call-next-method)))
 
 (gh-defclass gh-oauth-authorization (gh-ref-object)
   ((scopes :initarg :scopes)
@@ -58,29 +55,29 @@
   ((url :initarg :url)
    (name :initarg :name)))
 
-(defmethod gh-oauth-auth-list ((api gh-oauth-api))
+(cl-defmethod gh-oauth-auth-list ((api gh-oauth-api))
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api auth-cls)) "GET"
    (format "/authorizations")))
 
-(defmethod gh-oauth-auth-get ((api gh-oauth-api) id)
+(cl-defmethod gh-oauth-auth-get ((api gh-oauth-api) id)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api auth-cls)) "GET"
    (format "/authorizations/%s" id)))
 
-(defmethod gh-oauth-auth-new ((api gh-oauth-api) &optional scopes)
+(cl-defmethod gh-oauth-auth-new ((api gh-oauth-api) &optional scopes)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api auth-cls)) "POST"
    (format "/authorizations") (list (cons 'scopes scopes)
                                     (cons 'note (format "gh.el - %s"
                                                         (system-name))))))
 
-(defmethod gh-oauth-auth-update ((api gh-oauth-api) id &optional scopes)
+(cl-defmethod gh-oauth-auth-update ((api gh-oauth-api) id &optional scopes)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api auth-cls)) "PATCH"
    (format "/authorizations/%s" id) (list (cons 'scopes scopes))))
 
-(defmethod gh-oauth-auth-delete ((api gh-oauth-api) id)
+(cl-defmethod gh-oauth-auth-delete ((api gh-oauth-api) id)
   (gh-api-authenticated-request
    api nil "DELETE" (format "/authorizations/%s" id)))
 

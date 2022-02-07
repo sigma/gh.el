@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'gh-common)
@@ -38,29 +35,29 @@
   ((comment-cls :allocation :class :initform gh-comment))
   :abstract t)
 
-(defmethod gh-comments-list ((api gh-comments-api-mixin) base)
+(cl-defmethod gh-comments-list ((api gh-comments-api-mixin) base)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api comment-cls)) "GET"
    (format "%s/comments" (gh-ref-object-base base))))
 
-(defmethod gh-comments-get ((api gh-comments-api-mixin) base comment-id)
+(cl-defmethod gh-comments-get ((api gh-comments-api-mixin) base comment-id)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api comment-cls)) "GET"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))
 
-(defmethod gh-comments-update ((api gh-comments-api-mixin) base comment-id comment)
+(cl-defmethod gh-comments-update ((api gh-comments-api-mixin) base comment-id comment)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api comment-cls)) "PATCH"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)
    (gh-comment-req-to-update comment)))
 
-(defmethod gh-comments-new ((api gh-comments-api-mixin) base comment)
+(cl-defmethod gh-comments-new ((api gh-comments-api-mixin) base comment)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api comment-cls)) "POST"
    (format "%s/comments" (gh-ref-object-base base))
    (gh-comment-req-to-update comment)))
 
-(defmethod gh-comments-delete ((api gh-comments-api-mixin) base comment-id)
+(cl-defmethod gh-comments-delete ((api gh-comments-api-mixin) base comment-id)
   (gh-api-authenticated-request
    api nil "DELETE"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))

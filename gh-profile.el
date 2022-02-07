@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'rx)
 (require 'url-parse)
 
@@ -96,10 +93,10 @@ to here."
       (car profiles))))
 
 (defun gh-profile-get-remote-profile (remote-url)
-  (loop for (id . props) in gh-profile-alist
-        if (string-match (gh-profile-get-remote-regexp id)
-                         remote-url)
-        return id))
+  (cl-loop for (id . props) in gh-profile-alist
+           if (string-match (gh-profile-get-remote-regexp id)
+                            remote-url)
+           return id))
 
 (provide 'gh-profile)
 ;;; gh-profile.el ends here

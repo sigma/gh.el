@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 (require 'marshal)
 
@@ -104,42 +101,55 @@ sanitize API calls that need to handle potentially dirty data."
 (gh-defclass gh-object ()
   ())
 
-(defmethod gh-object-read :static ((obj gh-object) data)
-  (let ((target (if (object-p obj) obj
-                    (make-instance obj))))
+(cl-defmethod gh-object-read ((cls (subclass gh-object)) data)
+  (let ((target (make-instance cls)))
     (when data
       (gh-object-read-into target data))
     target))
 
-(defmethod gh-object-reader :static ((obj gh-object))
+(cl-defmethod gh-object-read ((obj gh-object) data)
+  (when data
+    (gh-object-read-into obj data))
+  target)
+
+(cl-defmethod gh-object-reader ((obj gh-object))
   (apply-partially 'gh-object-read obj))
 
-(defmethod gh-object-list-read :static ((obj gh-object) data)
+(cl-defmethod gh-object-reader ((cls (subclass gh-object)))
+  (apply-partially 'gh-object-read cls))
+
+(cl-defmethod gh-object-list-read ((obj gh-object) data)
   (mapcar (gh-object-reader obj) data))
 
-(defmethod gh-object-list-reader :static ((obj gh-object))
+(cl-defmethod gh-object-list-read ((cls (subclass gh-object)) data)
+  (mapcar (gh-object-reader cls) data))
+
+(cl-defmethod gh-object-list-reader ((obj gh-object))
   (apply-partially 'gh-object-list-read obj))
 
-(defmethod gh-object-read-into ((obj gh-object) data)
+(cl-defmethod gh-object-list-reader ((cls (subclass gh-object)))
+  (apply-partially 'gh-object-list-read cls))
+
+(cl-defmethod gh-object-read-into ((obj gh-object) data)
   (unmarshal obj data 'alist))
 
-(defmethod slot-unbound ((obj gh-object) cls slot-name fn)
+(cl-defmethod slot-unbound ((obj gh-object) cls slot-name fn)
   (if (eq fn 'oref) nil
-      (call-next-method)))
+      (cl-call-next-method)))
 
 (gh-defclass gh-ref-object (gh-object)
   ((id :initarg :id)
    (url :initarg :url)
    (html-url :initarg :html-url)))
 
-(defmethod gh-ref-object-base ((obj gh-ref-object))
+(cl-defmethod gh-ref-object-base ((obj gh-ref-object))
   (let ((url (oref obj :url)))
     (concat "/"
             (mapconcat #'identity
                        (cddr (split-string url "/" t))
                        "/"))))
 
-(defmethod gh-ref-object-base (obj)
+(cl-defmethod gh-ref-object-base (obj)
   (if (stringp obj) obj
     (error "illegal input for `gh-ref-object-base'")))
 
@@ -155,7 +165,7 @@ sanitize API calls that need to handle potentially dirty data."
    (updated-at :initarg :updated_at))
   "Github comment object")
 
-(defmethod gh-comment-req-to-update ((req gh-comment))
+(cl-defmethod gh-comment-req-to-update ((req gh-comment))
   `(("body" . ,(oref req :body))))
 
 (provide 'gh-common)
