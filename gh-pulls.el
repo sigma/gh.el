@@ -59,7 +59,7 @@
    (original-commit-id :initarg :original-commit-id)
    (in-reply-to :initarg :in-reply-to :initform nil)))
 
-(defmethod gh-pulls-comment-req-to-create ((req gh-pulls-comment))
+(cl-defmethod gh-pulls-comment-req-to-create ((req gh-pulls-comment))
   (let ((in-reply-to (oref req in-reply-to))
 	(to-update `(("body" . ,(oref req body)))))
     (if in-reply-to
@@ -96,7 +96,7 @@
    (changed-files :initarg :changed-files))
   "Git pull requests API")
 
-(defmethod gh-pulls-req-to-new ((req gh-pulls-request))
+(cl-defmethod gh-pulls-req-to-new ((req gh-pulls-request))
   (let ((head (oref req :head))
         (base (oref req :base)))
     `(("title" . ,(oref req :title))
@@ -104,28 +104,28 @@
       ("head" . ,(or (oref head :ref) (oref head :sha)))
       ("base" . ,(or (oref base :ref) (oref base :sha))))))
 
-(defmethod gh-pulls-req-to-update ((req gh-pulls-request-stub))
+(cl-defmethod gh-pulls-req-to-update ((req gh-pulls-request-stub))
   `(("title" . ,(oref req :title))
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
 
-(defmethod gh-pulls-list ((api gh-pulls-api) user repo)
+(cl-defmethod gh-pulls-list ((api gh-pulls-api) user repo)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
 
-(defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
+(cl-defmethod gh-pulls-get ((api gh-pulls-api) user repo id)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api req-cls)) "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
-(defmethod gh-pulls-new ((api gh-pulls-api) user repo req)
+(cl-defmethod gh-pulls-new ((api gh-pulls-api) user repo req)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api req-cls)) "POST"
    (format "/repos/%s/%s/pulls" user repo)
    (gh-pulls-req-to-new req)))
 
-(defmethod gh-pulls-update ((api gh-pulls-api) user repo id req)
+(cl-defmethod gh-pulls-update ((api gh-pulls-api) user repo id req)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api req-cls)) "PATCH"
    (format "/repos/%s/%s/pulls/%s" user repo id)
@@ -133,23 +133,23 @@
 
 ;;; Comments
 
-(defmethod gh-pulls-comments-list ((api gh-pulls-api) user repo pull-id)
+(cl-defmethod gh-pulls-comments-list ((api gh-pulls-api) user repo pull-id)
   (gh-comments-list api (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
 
-(defmethod gh-pulls-comments-get ((api gh-pulls-api) user repo comment-id)
+(cl-defmethod gh-pulls-comments-get ((api gh-pulls-api) user repo comment-id)
   (gh-comments-get api (format "/repos/%s/%s/pulls" user repo) comment-id))
 
-(defmethod gh-pulls-comments-update ((api gh-pulls-api)
+(cl-defmethod gh-pulls-comments-update ((api gh-pulls-api)
                                       user repo comment-id comment)
   (gh-comments-update api (format "/repos/%s/%s/pulls" user repo)
                       comment-id (gh-comment-req-to-update comment)))
 
-(defmethod gh-pulls-comments-new ((api gh-pulls-api)
+(cl-defmethod gh-pulls-comments-new ((api gh-pulls-api)
                                    user repo pull-id comment)
   (gh-comments-new api (format "/repos/%s/%s/pulls/%s" user repo pull-id)
                    (gh-pulls-comment-req-to-create comment)))
 
-(defmethod gh-pulls-comments-delete ((api gh-pulls-api) user repo comment-id)
+(cl-defmethod gh-pulls-comments-delete ((api gh-pulls-api) user repo comment-id)
   (gh-comments-delete api (format "/repos/%s/%s/pulls" user repo) comment-id))
 
 (provide 'gh-pulls)

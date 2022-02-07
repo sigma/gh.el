@@ -80,23 +80,23 @@
    (url :initarg :url :marshal ((alist . raw_url)))
    (content :initarg :content)))
 
-(defmethod constructor :static ((file gh-gist-gist-file) &rest args)
-  (let ((obj (call-next-method)))
+(cl-defmethod make-instance ((cls (subclass gh-gist-gist-file)) &rest args)
+  (let ((obj (cl-call-next-method)))
     (when (oref obj :content)
       (oset obj :content (gh-sanitize-content (oref obj :content))))
     obj))
 
-(defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
+(cl-defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
   (let ((files (mapcar #'gh-gist-gist-file-to-obj (oref gist :files))))
     `(("description" . ,(oref gist :description))
       ("public" . ,(oref gist :public))
       ,@(and files (list (cons "files"  files))))))
 
-(defmethod gh-gist-gist-has-files ((gist gh-gist-gist-stub))
+(cl-defmethod gh-gist-gist-has-files ((gist gh-gist-gist-stub))
   (not (memq nil (mapcar (lambda (f)
                            (oref f :content)) (oref gist :files)))))
 
-(defmethod gh-gist-gist-file-to-obj ((file gh-gist-gist-file))
+(cl-defmethod gh-gist-gist-file-to-obj ((file gh-gist-gist-file))
   (let* ((filename (oref file :filename))
         (content (oref file :content))
         (file (if content
@@ -105,20 +105,20 @@
                 nil)))
     (cons filename file)))
 
-(defmethod gh-gist-list ((api gh-gist-api) &optional username)
+(cl-defmethod gh-gist-list ((api gh-gist-api) &optional username)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api gist-cls)) "GET"
    (format "/users/%s/gists" (or username (gh-api-get-username api)))))
 
-(defmethod gh-gist-list-public ((api gh-gist-api))
+(cl-defmethod gh-gist-list-public ((api gh-gist-api))
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/public"))
 
-(defmethod gh-gist-list-starred ((api gh-gist-api))
+(cl-defmethod gh-gist-list-starred ((api gh-gist-api))
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/starred"))
 
-(defmethod gh-gist-get ((api gh-gist-api) gist-or-id)
+(cl-defmethod gh-gist-get ((api gh-gist-api) gist-or-id)
   (let (id transformer)
     (if (stringp gist-or-id)
         (setq id gist-or-id
@@ -128,39 +128,39 @@
     (gh-api-authenticated-request
      api transformer "GET" (format "/gists/%s" id))))
 
-(defmethod gh-gist-new ((api gh-gist-api) gist-stub)
+(cl-defmethod gh-gist-new ((api gh-gist-api) gist-stub)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api gist-cls)) "POST" "/gists"
    (gh-gist-gist-to-obj gist-stub)))
 
-(defmethod gh-gist-edit ((api gh-gist-api) gist)
+(cl-defmethod gh-gist-edit ((api gh-gist-api) gist)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api gist-cls)) "PATCH"
    (format "/gists/%s"
            (oref gist :id))
    (gh-gist-gist-to-obj gist)))
 
-(defmethod gh-gist-set-star ((api gh-gist-api) gist-or-id star)
+(cl-defmethod gh-gist-set-star ((api gh-gist-api) gist-or-id star)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
      api 'ignore (if star "PUT" "DELETE")
      (format "/gists/%s/star" id))))
 
-(defmethod gh-gist-get-star ((api gh-gist-api) gist-or-id)
+(cl-defmethod gh-gist-get-star ((api gh-gist-api) gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
      api 'ignore "GET" (format "/gists/%s/star" id))))
 
-(defmethod gh-gist-fork ((api gh-gist-api) gist-or-id)
+(cl-defmethod gh-gist-fork ((api gh-gist-api) gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
      api (gh-object-reader (oref api gist-cls)) "POST"
      (format "/gists/%s/forks" id))))
 
-(defmethod gh-gist-delete ((api gh-gist-api) gist-or-id)
+(cl-defmethod gh-gist-delete ((api gh-gist-api) gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
