@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'gh-profile)
@@ -94,19 +91,19 @@
   ((username :initarg :username :initform nil))
   "Abstract authenticator")
 
-(defmethod initialize-instance ((auth gh-authenticator) &rest args)
-  (call-next-method)
+(cl-defmethod initialize-instance ((auth gh-authenticator) &rest args)
+  (cl-call-next-method)
   (or (oref auth :username)
       (oset auth :username (gh-auth-get-username))))
 
-(defmethod gh-auth-modify-request ((auth gh-authenticator) req)
+(cl-defmethod gh-auth-modify-request ((auth gh-authenticator) req)
   req)
 
 (defclass gh-auth-2fa-callback (gh-url-callback)
   ((req :initarg :req :initform nil))
   "2-factor callback")
 
-(defmethod gh-url-callback-run ((cb gh-auth-2fa-callback) resp)
+(cl-defmethod gh-url-callback-run ((cb gh-auth-2fa-callback) resp)
   (when (equal (oref resp :http-status) 401)
     (let* ((otp-header "X-GitHub-OTP")
            (h (assoc otp-header (oref resp :headers))))
@@ -128,12 +125,12 @@
    (2fa-cls :initform gh-auth-2fa-callback :allocation :class))
   "Password-based authenticator")
 
-(defmethod initialize-instance ((auth gh-password-authenticator) &rest args)
-  (call-next-method)
+(cl-defmethod initialize-instance ((auth gh-password-authenticator) &rest args)
+  (cl-call-next-method)
   (or (oref auth :password)
       (oset auth :password (gh-auth-get-password (oref auth remember)))))
 
-(defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
+(cl-defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
   (object-add-to-list req :headers
                       (cons "Authorization"
                             (concat "Basic "
@@ -149,12 +146,12 @@
   ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")
 
-(defmethod initialize-instance ((auth gh-oauth-authenticator) &rest args)
-  (call-next-method)
+(cl-defmethod initialize-instance ((auth gh-oauth-authenticator) &rest args)
+  (cl-call-next-method)
   (or (oref auth :token)
       (oset auth :token (gh-auth-get-oauth-token))))
 
-(defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
+(cl-defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
   (object-add-to-list req :headers
                       (cons "Authorization"
                             (encode-coding-string

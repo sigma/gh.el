@@ -10,13 +10,11 @@ jobs:
       fail-fast: false
       matrix:
         emacs_version:
-          - '25.1'
-          - '25.2'
-          - '25.3'
           - '26.1'
           - '26.2'
           - '26.3'
           - '27.1'
+          - '27.2'
           - 'snapshot'
         include:
           - emacs_version: 'snapshot'
@@ -30,8 +28,8 @@ jobs:
 
     - name: Run tests
       if: matrix.allow_failure != true
-      run: 'make test'
+      run: 'make build test'
 
     - name: Run tests (allow failure)
       if: matrix.allow_failure == true
-      run: 'make test || true'
+      run: 'make build test || true'

@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'gh-api)
@@ -70,7 +67,7 @@
    (plan :initarg :plan :initform nil :marshal-type gh-orgs-plan))
   "Class for GitHub organizations")
 
-(defmethod gh-orgs-org-to-obj ((org gh-orgs-org))
+(cl-defmethod gh-orgs-org-to-obj ((org gh-orgs-org))
   `(,@(when (slot-boundp org :billing-email)
         (list (cons "billing_email" (oref org :billing-email))))
     ,@(when (slot-boundp org :blog)
@@ -84,17 +81,17 @@
     ,@(when (slot-boundp org :name)
         (list (cons "name" (oref org :name))))))
 
-(defmethod gh-orgs-list ((api gh-orgs-api) &optional username)
+(cl-defmethod gh-orgs-list ((api gh-orgs-api) &optional username)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api org-cls)) "GET"
    (format "/users/%s/orgs" (or username (gh-api-get-username api)))))
 
-(defmethod gh-orgs-get ((api gh-orgs-api) org)
+(cl-defmethod gh-orgs-get ((api gh-orgs-api) org)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api org-cls)) "GET"
    (format "/orgs/%s" org)))
 
-(defmethod gh-orgs-update ((api gh-orgs-api) org-obj)
+(cl-defmethod gh-orgs-update ((api gh-orgs-api) org-obj)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api org-cls)) "PATCH"
    (format "/orgs/%s" (oref org-obj :login))

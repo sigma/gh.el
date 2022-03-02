@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'eieio)
 
 (require 'gh-api)
@@ -67,14 +64,14 @@
    (created-at :initarg :created-at)
    (update-at :initarg :update-at)))
 
-(defmethod gh-users-get ((api gh-users-api) &optional username)
+(cl-defmethod gh-users-get ((api gh-users-api) &optional username)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api users-cls)) "GET"
    (if username
        (format "/users/%s" username)
      "/user")))
 
-(defmethod gh-users-list ((api gh-users-api))
+(cl-defmethod gh-users-list ((api gh-users-api))
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api users-cls)) "GET"
    "/users"))

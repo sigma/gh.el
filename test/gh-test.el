@@ -26,8 +26,7 @@
 
 ;;; Code:
 
-(require 'cl)
-
+(require 'cl-lib)
 (require 'mocker)
 (require 'ert)
 (require 'url-http)
@@ -37,7 +36,7 @@
 
 (defun gh-test-get-traces-root ()
   (let* ((this-file (car
-                     (rassoc-if
+                     (cl-rassoc-if
                       (lambda (items)
                         (member (cons 'provide 'gh-test) items))
                       load-history))))
