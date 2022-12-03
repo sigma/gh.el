@@ -1,4 +1,4 @@
-;;; gh-cache.el --- caching for gh.el
+;;; gh-cache.el --- caching for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

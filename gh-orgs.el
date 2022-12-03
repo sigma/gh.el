@@ -1,4 +1,4 @@
-;;; gh-org.el --- orgs module for gh.el
+;;; gh-org.el --- orgs module for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012  Yann Hodique
 

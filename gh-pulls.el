@@ -1,4 +1,4 @@
-;;; gh-pulls.el --- pull requests module for gh.el
+;;; gh-pulls.el --- pull requests module for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

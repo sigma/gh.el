@@ -1,4 +1,4 @@
-;;; gh-common.el --- common objects for gh.el
+;;; gh-common.el --- common objects for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

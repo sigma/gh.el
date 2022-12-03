@@ -1,4 +1,4 @@
-;;; gh-pull-comments.el --- pull request comments api for github
+;;; gh-pull-comments.el --- pull request comments api for github -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Toni Reina
 

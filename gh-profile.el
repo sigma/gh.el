@@ -1,4 +1,4 @@
-;;; gh-profile.el --- profile support for gh.el
+;;; gh-profile.el --- profile support for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013  Yann Hodique
 

@@ -1,4 +1,4 @@
-;;; gh-users.el --- users module for gh.el
+;;; gh-users.el --- users module for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013  Yann Hodique
 
