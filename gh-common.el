@@ -109,8 +109,7 @@ sanitize API calls that need to handle potentially dirty data."
 
 (cl-defmethod gh-object-read ((obj gh-object) data)
   (when data
-    (gh-object-read-into obj data))
-  target)
+    (gh-object-read-into obj data)))
 
 (cl-defmethod gh-object-reader ((obj gh-object))
   (apply-partially 'gh-object-read obj))
