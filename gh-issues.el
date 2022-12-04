@@ -1,4 +1,4 @@
-;;; gh-issues.el --- issues api for github
+;;; gh-issues.el --- issues api for github -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2015  Yann Hodique
 ;; Copyright (C) 2014 Travis Thieman

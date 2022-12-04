@@ -1,4 +1,4 @@
-;;; gh-comments.el --- support for comment-enabled APIs
+;;; gh-comments.el --- support for comment-enabled APIs -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2015  Yann Hodique
 

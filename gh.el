@@ -1,4 +1,4 @@
-;;; gh.el --- Github API client libraries
+;;; gh.el --- Github API client libraries -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

@@ -1,4 +1,4 @@
-;;; gh-search.el --- repository search for gh.el
+;;; gh-search.el --- repository search for gh.el -*- lexical-binding: t; -*-
 ;; Copyright (C) 2016  Ivan Malison
 
 ;; Author: Ivan Malison <IvanMalison@gmail.com>

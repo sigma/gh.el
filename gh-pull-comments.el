@@ -1,4 +1,4 @@
-;;; gh-pull-comments.el --- pull request comments api for github
+;;; gh-pull-comments.el --- pull request comments api for github -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Toni Reina
 
@@ -53,7 +53,7 @@
   (define-obsolete-function-alias
       'gh-pull-comments-req-to-update 'gh-comment-req-to-update ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-req-to-create 'gh-pulls-comment-req-to-create)
+      'gh-pull-comments-req-to-create 'gh-pulls-comment-req-to-create ver)
 
   (define-obsolete-function-alias
       'gh-pull-comments-list 'gh-pulls-comments-list ver)

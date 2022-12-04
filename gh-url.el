@@ -1,4 +1,4 @@
-;;; gh-url.el --- url wrapper for gh.el
+;;; gh-url.el --- url wrapper for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012  Yann Hodique
 

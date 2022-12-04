@@ -1,4 +1,4 @@
-;;; gh-oauth.el --- oauth module for gh.el
+;;; gh-oauth.el --- oauth module for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012  Yann Hodique
 

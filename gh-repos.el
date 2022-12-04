@@ -1,4 +1,4 @@
-;;; gh-repos.el --- repos module for gh.el
+;;; gh-repos.el --- repos module for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

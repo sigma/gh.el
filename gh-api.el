@@ -1,4 +1,4 @@
-;;; gh-api.el --- api definition for gh.el
+;;; gh-api.el --- api definition for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 

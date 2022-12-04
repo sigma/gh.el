@@ -1,4 +1,4 @@
-;;; gh-auth.el --- authentication for gh.el
+;;; gh-auth.el --- authentication for gh.el -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011  Yann Hodique
 
