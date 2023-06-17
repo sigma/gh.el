@@ -84,6 +84,7 @@
                              :token))))
         (setq token (or tok (read-string "GitHub OAuth token: ")))
         (gh-set-config "oauth-token" token)))
+    (when (functionp token) (setq token (funcall token)))
     (gh-auth-remember profile :token token)
     token))
 
