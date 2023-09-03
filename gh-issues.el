@@ -141,13 +141,14 @@
 
 (cl-defmethod gh-issues-issue-req-to-update ((req gh-issues-issue))
   (let ((assignee (oref req :assignee))
-        ;; (labels (oref req labels))
+        (labels (oref req :labels))
         (milestone (oref req :milestone))
         (to-update `(("title" . ,(oref req :title))
                      ("state" . ,(oref req :state))
                      ("body" . ,(oref req :body)))))
 
-    ;; (when labels (nconc to-update `(("labels" . ,(oref req labels) ))))
+    (when labels
+      (nconc to-update `(("labels" . ,(mapcar (lambda (l) (oref l :name)) labels)))))
     (when milestone
       (nconc to-update `(("milestone" . ,(oref milestone :number)))))
     (when assignee
